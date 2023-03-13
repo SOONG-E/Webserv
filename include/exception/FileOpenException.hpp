@@ -6,7 +6,7 @@
 
 class FileOpenException : public ExceptionTemplate {
  public:
-  FileOpenException() : ExceptionTemplate(kErrors[kPrefix] + kErrors[kOpen]) {}
+  FileOpenException() : ExceptionTemplate(kErrors[kOpen]) {}
 };
 
 #endif

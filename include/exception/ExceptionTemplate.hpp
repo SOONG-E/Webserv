@@ -4,9 +4,12 @@
 #include <exception>
 #include <string>
 
+#include "constant.hpp"
+
 class ExceptionTemplate : public exception {
  public:
-  explicit ExceptionTemplate(const std::string& err_msg) : err_msg_(err_msg) {}
+  explicit ExceptionTemplate(const std::string& err_info)
+      : err_msg_(kErrors[kPrefix] + err_info) {}
 
  protected:
   std::string err_msg_;
