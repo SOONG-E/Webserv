@@ -7,11 +7,12 @@ enum ErrorIndex {
   kPrefix,
   kArg,
   kOpen,
+  kToken,
 };
 
-const int kNumOfErrors = 3;
+const int kNumOfErrors = 4;
 
-const std::string kErrors[kNumOfErrors] = {"Error: ", "Invalid argument",
-                                           "File open failed"};
+const std::string kErrors[kNumOfErrors] = {
+    "Error: ", "Invalid argument", "File open failed", "Unexpected token"};
 
 #endif
