@@ -6,7 +6,7 @@ InetSocketAddress::InetSocketAddress(const std::string &port = "80") {
   memset(&hints, 0, sizeof(hints));
 
   hints.ai_family = AF_INET;
-  hints.ai_socktype = SOCK_STREAM;
+  // hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE;
 
   int gai_result = getaddrinfo(NULL, port.c_str(), &hints, &addr_info);
@@ -29,7 +29,7 @@ InetSocketAddress::InetSocketAddress(const std::string &host,
   memset(&hints, 0, sizeof(hints));
 
   hints.ai_family = AF_INET;
-  hints.ai_socktype = SOCK_STREAM;
+  // hints.ai_socktype = SOCK_STREAM;
 
   int gai_result = getaddrinfo(host.c_str(), port.c_str(), &hints, &addr_info);
 
