@@ -47,7 +47,7 @@ std::set<int>::const_iterator SocketChannel::getClientSockets() const {
   return client_sockets.begin();
 }
 
-int SocketChannel::removeClientSockets(int val) {
+int SocketChannel::removeClientSocket(int val) {
   return client_sockets.erase(val);
 }
 

@@ -22,7 +22,7 @@ class SocketChannel {
   void configureNonBlock();
   int getListenSocket() const;
   std::set<int>::const_iterator getClientSockets() const;
-  int removeClientSockets(int val);
+  int removeClientSocket(int val);
 
  private:
   int listen_socket;
