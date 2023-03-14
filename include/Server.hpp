@@ -18,11 +18,20 @@ class Server {
 
   virtual ~Server();
 
+  const std::set<std::string>& getServerNames(void) const;
+
+  void setBodyLimit(const int body_limit);
+
+  void addListen(const std::string& host, const int port);
+  void addServerName(const std::string& name);
+  void addErrorPage(const int code, const std::string& page);
+  void addLocation(const Location& location);
+
  private:
-  std::string listen_;
+  std::map<std::string, int> listens_;
   std::set<std::string> server_names_;
-  std::map<std::string, std::string> error_pages_;
-  std::string body_limit_;
+  std::map<int, std::string> error_pages_;
+  int body_limit_;
   std::vector<Location> locations_;
 };
 
