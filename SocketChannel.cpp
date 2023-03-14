@@ -13,10 +13,6 @@ SocketChannel& SocketChannel::operator=(const SocketChannel& src) {
   listen_socket = src.listen_socket;
 }
 
-void SocketChannel::bind(const InetSocketAddress& addr_info) {
-  bind(addr_info, 128);
-}
-
 void SocketChannel::bind(const InetSocketAddress& addr_info, int backlog) {
   const int enable = 1;
   if (setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &enable,

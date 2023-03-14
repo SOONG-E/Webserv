@@ -16,7 +16,6 @@ class SocketChannel {
 
   SocketChannel& operator=(const SocketChannel& src);
 
-  void bind(const InetSocketAddress& addr_info);
   void bind(const InetSocketAddress& addr_info, int backlog);
   void accept();
   void configureNonBlock();
