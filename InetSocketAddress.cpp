@@ -56,6 +56,8 @@ InetSocketAddress &InetSocketAddress::operator=(const InetSocketAddress &src) {
 
 InetSocketAddress::~InetSocketAddress() {}
 
-sockaddr InetSocketAddress::getAddr() const { return addr; }
+sockaddr &InetSocketAddress::getAddr() { return addr; }
+
+const sockaddr &InetSocketAddress::getAddr() const { return addr; }
 
 socklen_t InetSocketAddress::getAddrLen() const { return addrlen; }

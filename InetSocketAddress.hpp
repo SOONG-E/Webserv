@@ -17,7 +17,8 @@ class InetSocketAddress {
 
   InetSocketAddress &operator=(const InetSocketAddress &src);
 
-  sockaddr getAddr() const;
+  sockaddr &getAddr();
+  const sockaddr &getAddr() const;
   socklen_t getAddrLen() const;
 
  private:
