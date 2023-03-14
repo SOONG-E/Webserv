@@ -1,5 +1,5 @@
-#ifndef SERVER_SOCKET_CHANNEL_HPP
-#define SERVER_SOCKET_CHANNEL_HPP
+#ifndef SOCKET_CHANNEL_HPP
+#define SOCKET_CHANNEL_HPP
 
 #include <fcntl.h>
 #include <sys/socket.h>
