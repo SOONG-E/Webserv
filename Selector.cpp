@@ -12,9 +12,9 @@ Selector::~Selector() {}
 Selector &Selector::operator=(const Selector &src) {
   if (this != &src) {
     max_fd = src.max_fd;
-    memmove(read_fds.fds_bits, src.read_fds.fds_bits,
+    memcpy(read_fds.fds_bits, src.read_fds.fds_bits,
             __DARWIN_howmany(__DARWIN_FD_SETSIZE, __DARWIN_NFDBITS));
-    memmove(write_fds.fds_bits, src.write_fds.fds_bits,
+    memcpy(write_fds.fds_bits, src.write_fds.fds_bits,
             __DARWIN_howmany(__DARWIN_FD_SETSIZE, __DARWIN_NFDBITS));
   }
   return *this;
