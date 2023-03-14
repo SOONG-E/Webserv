@@ -2,12 +2,13 @@
 
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 #include "ConfigException.hpp"
 #include "FileOpenException.hpp"
 #include "constant.hpp"
 
-std::string readFile(const char* filename) {
+std::string ConfigParser::readFile(const char* filename) {
   std::ifstream file(filename);
   if (!file.is_open()) {
     throw FileOpenException();
@@ -18,10 +19,29 @@ std::string readFile(const char* filename) {
   return content.str();
 }
 
-Config ConfigParser::parse(const char* filename) {
+int ConfigParser::stoi(const std::string& str) {
+  std::stringstream ss(str);
+  int num;
+  ss >> num;
+  return num;
+}
+
+ConfigParser::ConfigParser() {}
+
+ConfigParser::ConfigParser(const char* filename) {
   content_ = readFile(filename);
+}
+
+ConfigParser::ConfigParser(const ConfigParser& origin) {}
+
+ConfigParser& ConfigParser::operator=(const ConfigParser& origin) {}
+
+ConfigParser::~ConfigParser() {}
+
+Config ConfigParser::parse(void) {
   while (peek() == "server") {
     parseServerBlock();
+    config_.addServer(buffer_);
   }
   return config_;
 }
@@ -38,8 +58,8 @@ void ConfigParser::parseServerBlock(void) {
       parseErrorPage();
     } else if (peek() == "client_max_body_size") {
       parseClientMaxBodySize();
-    } else if (peek() == "location") {
-      parseLocationBlock();
+      // } else if (peek() == "location") {
+      //   parseLocationBlock();
     } else {
       throw ConfigException(kErrors[kToken]);
     }
@@ -49,29 +69,36 @@ void ConfigParser::parseServerBlock(void) {
 
 void ConfigParser::parseListen(void) {
   expect("listen");
-  listen_ = expect();
+  std::vector<std::string> listen = split(expect(), ":");
+  if (listen.size() == 1) {
+    buffer_.addListen("0.0.0.0", stoi(listen[0]));
+  } else if (listen.size() == 2) {
+    buffer_.addListen(listen[0], stoi(listen[1]));
+  } else {
+    throw ConfigException(kErrors[kToken]);
+  }
   expect(";");
 }
 
 void ConfigParser::parseServerName(void) {
   expect("server_name");
   while (peek() != ";") {
-    server_names_.insert(expect());
+    buffer_.addServerName(expect());
   }
   expect(";");
 }
 
 void ConfigParser::parseErrorPage(void) {
   expect("error_page");
-  std::string code = expect();
+  int code = stoi(expect());
   std::string page = expect();
-  error_pages_.insert(std::make_pair(code, page));
+  buffer_.addErrorPage(code, page);
   expect(";");
 }
 
 void ConfigParser::parseClientBodyLimit(void) {
   expect("client_max_body_size");
-  body_limit_ = expect();
+  buffer_.body_limit_ = stoi(expect());
   expect(";");
 }
 

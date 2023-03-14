@@ -12,9 +12,11 @@ class ConfigParser {
 
   virtual ~ConfigParser();
 
-  Config parse(const char* filename);
+  Config parse(void);
 
  private:
+  std::string readFile(const char* filename);
+  int stoi(const std::string& str);
   void parseServerBlock(void);
   void parseListen(void);
   void parseServerName(void);
