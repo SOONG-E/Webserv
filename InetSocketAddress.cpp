@@ -42,10 +42,6 @@ InetSocketAddress::InetSocketAddress(const InetSocketAddress &src) {
   *this = src;
 }
 
-InetSocketAddress::InetSocketAddress(const sockaddr &addr,
-                                     const socklen_t addrlen)
-    : addr(addr), addrlen(addrlen) {}
-
 InetSocketAddress &InetSocketAddress::operator=(const InetSocketAddress &src) {
   if (this != &src) {
     addr = src.addr;

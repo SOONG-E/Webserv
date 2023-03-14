@@ -12,7 +12,6 @@ class InetSocketAddress {
   InetSocketAddress(const std::string &port);
   InetSocketAddress(const std::string &host, const std::string &port);
   InetSocketAddress(const InetSocketAddress &src);
-  InetSocketAddress(const sockaddr &addr, const socklen_t addrlen);
   ~InetSocketAddress();
 
   InetSocketAddress &operator=(const InetSocketAddress &src);
