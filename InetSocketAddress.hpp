@@ -5,7 +5,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#include <stdexcept>
 #include <string>
 
 class InetSocketAddress {
@@ -13,15 +12,16 @@ class InetSocketAddress {
   InetSocketAddress(const std::string &port);
   InetSocketAddress(const std::string &host, const std::string &port);
   InetSocketAddress(const InetSocketAddress &src);
+  InetSocketAddress(const sockaddr &addr, const socklen_t addrlen);
   ~InetSocketAddress();
 
   InetSocketAddress &operator=(const InetSocketAddress &src);
 
-  sockaddr *getAddr() const;
+  sockaddr getAddr() const;
   socklen_t getAddrLen() const;
 
  private:
-  sockaddr *addr;
+  sockaddr addr;
   socklen_t addrlen;
 };
 
