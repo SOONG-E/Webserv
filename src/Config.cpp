@@ -1,11 +1,18 @@
 #include "Config.hpp"
 
 Config::Config() {}
+
 Config::Config(const Config& origin) {}
+
 Config& Config::operator=(const Config& origin) {}
 
 Config::~Config() {}
 
-void Config::insertServer(const std::string server_name, const Server server) {
-  servers.insert(std::pair<std::string, Server>(server_name, server));
+void Config::addServer(const Server& server) {
+  std::set<std::string>::iterator iter = server.getServerNames().begin();
+  std::set<std::string>::iterator end = server.getServerNames().end();
+  while (iter != end) {
+    servers_.insert(std::make_pair(*iter, server));
+    ++iter;
+  }
 }

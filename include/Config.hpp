@@ -11,10 +11,10 @@ class Config {
 
   virtual ~Config();
 
-  void insertServer(const std::string server_name, const Server server);
+  void addServer(const Server& server);
 
  private:
-  std::map<std::string, Server> servers;
+  std::map<std::string, Server> servers_;
 };
 
 #endif
