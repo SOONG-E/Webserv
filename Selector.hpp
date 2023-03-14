@@ -16,11 +16,9 @@ class Selector {
   Selector& operator=(const Selector& src);
 
   int select();
-  void registerAll(int fd);
-  void registerWrite(int fd);
-  void registerRead(int fd);
-  bool isReadSet(int fd) const;
-  bool isWriteSet(int fd) const;
+  void add(int fd);
+  bool isReadSetting(int fd) const;
+  bool isWriteSetting(int fd) const;
   void clear();
 
  private:

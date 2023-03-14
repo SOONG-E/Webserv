@@ -26,25 +26,15 @@ int Selector::select() {
   return result;
 }
 
-void Selector::registerAll(int fd) {
-  registerRead(fd);
-  registerWrite(fd);
-}
-
-void Selector::registerRead(int fd) {
+void Selector::add(int fd) {
   FD_SET(fd, &read_fds);
-  if (fd > max_fd) max_fd = fd;
-}
-
-void Selector::registerWrite(int fd) {
   FD_SET(fd, &write_fds);
-  if (fd > max_fd) max_fd = fd;
 }
 
-bool Selector::isReadSet(int fd) const {
+bool Selector::isReadSetting(int fd) const {
   return FD_ISSET(fd, &read_fds) ? true : false;
 }
-bool Selector::isWriteSet(int fd) const {
+bool Selector::isWriteSetting(int fd) const {
   return FD_ISSET(fd, &write_fds) ? true : false;
 }
 
