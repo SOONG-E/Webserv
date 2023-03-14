@@ -22,7 +22,7 @@ void SocketChannel::bind(const InetSocketAddress& addr_info, int backlog) {
   if (setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &enable,
                  sizeof(int)) < 0)
     throw SocketBindException(strerror(errno));
-  if (::bind(listen_socket, &addr_info.getAddr(), addr_info.getAddrLen()) == -1)
+  if (::bind(listen_socket, &addr_info.getAddress(), addr_info.getAddressLen()) == -1)
     throw SocketBindException(strerror(errno));
   if (listen(listen_socket, backlog) == -1)
     throw SocketBindException(strerror(errno));
