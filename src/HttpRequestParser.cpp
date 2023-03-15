@@ -1,5 +1,7 @@
 #include "HttpRequestParser.hpp"
 
+#include <exception>
+
 std::vector<std::string> split(const std::string& content,
                                const std::string& separators = " \t\n\v\f\r") {
   std::vector<std::string> substrings;
@@ -11,16 +13,33 @@ std::vector<std::string> split(const std::string& content,
     substrings.push_back(content.substr(start, end - start));
     start = end + 1;
   }
-  substrings.push(content.substr(start));
+  substrings.push_back(content.substr(start));
   return substrings;
+}
+
+void HttpRequestParser::checkRequestLine(
+    const std::vector<std::string>& request_line) {
+  if (request_line.size() < 3) throw std::exception();
+  if (request_line[2] != "HTTP/1.1") throw std::exception();
+}
+
+void HttpRequestParser::handlePost(HttpRequest& http_request,
+                                   std::string request) {
+  std::string crlf = std::string("\r\n\r\n");
+  size_t bodyIdx = request.find(crlf);
+
+  if (bodyIdx == std::string::npos) throw std::exception();
+  std::string body = request.substr(bodyIdx + crlf.length(), request.length());
+  http_request.setBody(body);
 }
 
 HttpRequest HttpRequestParser::parse(const std::string request) {
   HttpRequest http_request;
 
-  std::vector<std::string> headers = split(request, "\n");
+  std::string headerPart = request.substr(0, request.find("\r\n"));
+  std::vector<std::string> headers = split(headerPart, "\n");
   std::vector<std::string> request_line = split(*(headers.begin()));
-  if (request_line.size < 3) throw exception;
+  checkRequestLine(request_line);
   http_request.setMethod(request_line[0]);
   http_request.setUrl(request_line[1]);
 
@@ -30,8 +49,9 @@ HttpRequest HttpRequestParser::parse(const std::string request) {
   for (std::vector<std::string>::iterator header = headers.begin();
        header != headers.end(); ++header) {
     temp = split(*header, ":");
-    if (temp.size < 2) throw exception;
-    key = temp[0];
-    temp.erase(temp.begin);
-    if (temp) temp = split(temp, ",");
+    if (temp.size() < 2) throw std::exception();
+    http_request.addheader(temp[0], temp[1]);
+    temp.erase(temp.begin());
   }
+  handlePost(http_request, request);
+}

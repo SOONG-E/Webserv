@@ -5,8 +5,11 @@
 
 class HttpRequestParser {
  public:
-	static HttpRequest parse(const std::string request);
+  static HttpRequest parse(const std::string request);
+
  private:
+  void checkRequestLine(const std::vector<std::string>& request_line);
+  void handlePost(HttpRequest& http_request, std::string request);
 };
 
 #endif
