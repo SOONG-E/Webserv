@@ -17,6 +17,7 @@ ConfigParser::~ConfigParser() {}
 
 Config ConfigParser::parse(void) {
   while (peek() == "server") {
+    buffer_.init();
     parseServerBlock();
     config_.addServer(buffer_);
   }
@@ -46,14 +47,7 @@ void ConfigParser::parseServerBlock(void) {
 
 void ConfigParser::parseListen(void) {
   expect("listen");
-  std::vector<std::string> listen = split(expect(), ":");
-  if (listen.size() == 1) {
-    buffer_.addListen("0.0.0.0", stoi(listen[0]));
-  } else if (listen.size() == 2) {
-    buffer_.addListen(listen[0], stoi(listen[1]));
-  } else {
-    throw ConfigException(kErrors[kToken]);
-  }
+  buffer_.addListen(expect());
   expect(";");
 }
 
@@ -67,19 +61,35 @@ void ConfigParser::parseServerName(void) {
 
 void ConfigParser::parseErrorPage(void) {
   expect("error_page");
-  int code = stoi(expect());
-  std::string page = expect();
-  buffer_.addErrorPage(code, page);
+  std::vector<std::string> codes;
+  while (peek() != ";") {
+    codes.push_back(expect());
+  }
+  std::string page = codes.back();
+  codes.pop_back();
+  std::vector<std::string>::iterator codes_iter = codes.begin();
+  std::vector<std::string>::iterator codes_end = codes.end();
+  while (begin != end) {
+    buffer_.addErrorPage(stoi(*codes_iter), page);
+    ++codes_iter;
+  }
   expect(";");
 }
 
 void ConfigParser::parseClientBodyLimit(void) {
   expect("client_max_body_size");
-  buffer_.body_limit_ = stoi(expect());
+  buffer_.setBodyLimit(expect());
   expect(";");
 }
 
-void ConfigParser::parseLocationBlock(void) { expect("location"); }
+void ConfigParser::parseLocationBlock(void) {
+  expect("location");
+  expect();
+  expect("{");
+  expect("try_files");
+  expect();
+  expect("}");
+}
 
 std::string ConfigParser::expect(const std::string& expected = "") {
   skipWhitespace();
