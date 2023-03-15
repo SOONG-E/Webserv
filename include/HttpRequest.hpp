@@ -21,13 +21,17 @@ class HttpRequest {
   void addheader(std::string key, std::string value);
   void addheader(std::string key, std::vector<std::string> values);
   std::string getHeader(std::string name);
+  std::string getMethod();
+  std::string getUrl();
+  std::string getHost();
+  std::string getBody();
 
  private:
   std::string method_;
   std::string url_;
   std::string host_;
   std::string body_;
-  std::map<std::string, std::vector<std::string>> header_;
+  std::map<std::string, std::vector<std::string> > header_;
 };
 
 #endif
