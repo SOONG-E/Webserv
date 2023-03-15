@@ -2,29 +2,6 @@
 
 #include <fstream>
 #include <sstream>
-#include <vector>
-
-#include "ConfigException.hpp"
-#include "FileOpenException.hpp"
-#include "constant.hpp"
-
-std::string ConfigParser::readFile(const char* filename) {
-  std::ifstream file(filename);
-  if (!file.is_open()) {
-    throw FileOpenException();
-  }
-  std::ostringstream content;
-  content << file.rdbuf();
-  file.close();
-  return content.str();
-}
-
-int ConfigParser::stoi(const std::string& str) {
-  std::stringstream ss(str);
-  int num;
-  ss >> num;
-  return num;
-}
 
 ConfigParser::ConfigParser() {}
 
