@@ -13,10 +13,13 @@ InetSocketAddress::InetSocketAddress(const std::string &port = "80") {
 
   if (gai_result != 0) throw std::invalid_argument(gai_strerror(gai_result));
 
-  addr = *((sockaddr_in *)addr_info->ai_addr);
+  addr = *(addr_info->ai_addr);
   addr_len = addr_info->ai_addrlen;
 
   freeaddrinfo(addr_info);
+
+  this->ip = "0.0.0.0";
+  this->port = port;
 }
 
 InetSocketAddress::InetSocketAddress(const std::string &ip,
@@ -32,15 +35,14 @@ InetSocketAddress::InetSocketAddress(const std::string &ip,
 
   if (gai_result != 0) throw std::invalid_argument(gai_strerror(gai_result));
 
-  addr = *((sockaddr_in *)addr_info->ai_addr);
+  addr = *(addr_info->ai_addr);
   addr_len = addr_info->ai_addrlen;
 
   freeaddrinfo(addr_info);
-}
 
-InetSocketAddress::InetSocketAddress(const sockaddr_in &addr,
-                                     const socklen_t &addr_len)
-    : addr(addr), addr_len(addr_len) {}
+  this->ip = ip;
+  this->port = port;
+}
 
 InetSocketAddress::InetSocketAddress(const InetSocketAddress &src) {
   *this = src;
@@ -50,18 +52,20 @@ InetSocketAddress &InetSocketAddress::operator=(const InetSocketAddress &src) {
   if (this != &src) {
     addr = src.addr;
     addr_len = src.addr_len;
+    ip = src.ip;
+    port = src.port;
   }
   return *this;
 }
 
 InetSocketAddress::~InetSocketAddress() {}
 
-sockaddr_in &InetSocketAddress::getAddress() { return addr; }
+sockaddr &InetSocketAddress::getAddress() { return addr; }
 
-const sockaddr_in &InetSocketAddress::getAddress() const { return addr; }
+const sockaddr &InetSocketAddress::getAddress() const { return addr; }
 
 socklen_t InetSocketAddress::getAddressLen() const { return addr_len; }
 
-int InetSocketAddress::getIP() const { return ntohl(addr.sin_addr.s_addr); }
+const std::string &InetSocketAddress::getIP() const { return ip; }
 
-int InetSocketAddress::getPort() const { return ntohs(addr.sin_port); }
+const std::string &InetSocketAddress::getPort() const { return port; }
