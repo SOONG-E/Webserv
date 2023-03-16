@@ -18,10 +18,10 @@ ServerHandler &ServerHandler::operator=(const ServerHandler &src) {
 }
 
 void ServerHandler::configureServer(const Config &config) {
-  std::vector<ServerBlock> serv_info = config.getServerBlocks();
+  const std::vector<ServerBlock> &serv_info = config.getServerBlocks();
 
   for (size_t i = 0; i < serv_info.size(); ++i) {
-    std::vector<Listen> listens = serv_info[i].getListens();
+    const std::vector<Listen> &listens = serv_info[i].getListens();
     for (size_t i = 0; i < listens.size(); ++i) {
       if (_server_blocks.find(listens[i].raw) == _server_blocks.end()) {
         std::vector<ServerBlock> in(1, serv_info[i]);
