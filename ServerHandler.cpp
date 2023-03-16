@@ -8,7 +8,7 @@ ServerHandler::~ServerHandler() {}
 
 ServerHandler &ServerHandler::operator=(const ServerHandler &src) {
   if (this != &src) {
-    _server_configs = src._server_configs;
+    _server_blocks = src._server_blocks;
     _server_sockets = src._server_sockets;
     _clients = src._clients;
     _server_selector = src._server_selector;
@@ -18,25 +18,25 @@ ServerHandler &ServerHandler::operator=(const ServerHandler &src) {
 }
 
 void ServerHandler::configureServer(const Config &config) {
-  std::vector<ServerConfig> serv_info = config.getServerConfigs();
+  std::vector<ServerBlock> serv_info = config.getServerBlocks();
 
   for (size_t i = 0; i < serv_info.size(); ++i) {
     std::set<std::string> listens = serv_info[i].getListen().listen;
     for (std::set<std::string>::const_iterator it = listens.begin();
          it != listens.end(); ++it) {
-      if (_server_configs.find(*it) == _server_configs.end()) {
-        std::vector<ServerConfig> in(1, serv_info[i]);
-        _server_configs[*it] = in;
+      if (_server_blocks.find(*it) == _server_blocks.end()) {
+        std::vector<ServerBlock> in(1, serv_info[i]);
+        _server_blocks[*it] = in;
       } else {
-        _server_configs[*it].push_back(serv_info[i]);
+        _server_blocks[*it].push_back(serv_info[i]);
       }
     }
   }
 }
 
 void ServerHandler::createServerSockets() {
-  for (server_config_type::const_iterator it = _server_configs.begin();
-       it != _server_configs.end(); ++it) {
+  for (server_config_type::const_iterator it = _server_blocks.begin();
+       it != _server_blocks.end(); ++it) {
     size_t pos = it->first.find(':');
     std::string ip = it->first.substr(0, pos);
     std::string port = it->first.substr(pos + 1);

@@ -23,12 +23,12 @@ class ServerHandler {
   void respondToClients();
 
  private:
-  typedef std::map<std::string, std::vector<ServerConfig> > server_config_type;
+  typedef std::map<std::string, std::vector<ServerBlock> > server_blocks_type;
   typedef std::vector<ServerSocket> server_sockets_type;
   typedef std::list<Client> clients_type;
   typedef Selector selector_type;
 
-  server_config_type _server_configs;
+  server_blocks_type _server_blocks;
   server_sockets_type _server_sockets;
   clients_type _clients;
   selector_type _server_selector;
