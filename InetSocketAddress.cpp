@@ -1,7 +1,7 @@
 #include "InetSocketAddress.hpp"
 
 InetSocketAddress::InetSocketAddress(const std::string &ip,
-                                     const std::string &port = "80") {
+                                     const std::string &port) {
   struct addrinfo hints, *addr_info;
 
   memset(&hints, 0, sizeof(hints));
