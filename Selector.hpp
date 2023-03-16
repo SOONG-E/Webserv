@@ -16,15 +16,16 @@ class Selector {
   Selector& operator=(const Selector& src);
 
   int select();
-  void add(int fd);
-  bool isReadSetting(int fd) const;
-  bool isWriteSetting(int fd) const;
-  void clear();
+  void registerSocket(int fd);
+  void clear(int fd);
+  bool isSetRead(int fd) const;
+  bool isSetWrite(int fd) const;
 
  private:
-  int max_fd;
-  fd_set read_fds;
-  fd_set write_fds;
+  int _max_fd;
+  fd_set _fds;
+  fd_set _read_fds;
+  fd_set _write_fds;
 
   // exception
  public:
