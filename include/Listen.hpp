@@ -7,7 +7,7 @@
 
 struct Listen {
   explicit Listen(const std::string& token)
-      : raw(token), host(kDefaults[kHost]), port(kDefaults[kPort]) {
+      : host(kDefaults[kHost]), port(kDefaults[kPort]) {
     std::vector<std::string> splitted = split(token, ":");
     if (splitted.size() == 1) {
       if (isNumber(splitted[0])) {
@@ -21,11 +21,12 @@ struct Listen {
     } else {
       throw ConfigException(kErrors[kToken]);
     }
+    socket_key = host + ":" + port;
   }
 
-  std::string raw;
   std::string host;
   std::string port;
+  std::string socket_key;
 };
 
 #endif

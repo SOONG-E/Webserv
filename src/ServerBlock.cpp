@@ -34,8 +34,8 @@ void ServerBlock::setBodyLimit(const std::string& body_limit) {
   body_limit_ = body_limit;
 }
 
-void ServerBlock::addListen(const std::string& raw) {
-  listens_.push_back(Listen(raw));
+void ServerBlock::addListen(const std::string& socket_key) {
+  listens_.push_back(Listen(socket_key));
 }
 
 void ServerBlock::addServerName(const std::string& name) {
@@ -65,7 +65,7 @@ std::set<std::string> ServerBlock::keys(void) const {
     for (std::set<std::string>::const_iterator names_iter =
              server_names_.begin();
          names_iter != server_names_.end(); ++names_iter) {
-      keys.insert(listens_[i].raw + ":" + *names_iter);
+      keys.insert(listens_[i].socket_key + ":" + *names_iter);
     }
   }
   return keys;
@@ -74,8 +74,7 @@ std::set<std::string> ServerBlock::keys(void) const {
 void ServerBlock::print(const int index) const {
   std::cout << "[ server block " << index << " ]\n";
   for (std::size_t i = 0; i < listens_.size(); ++i) {
-    std::cout << "listen: " << listens_[i].host << ":" << listens_[i].port
-              << "\n";
+    std::cout << "listen: " << listens_[i].socket_key << "\n";
   }
   std::cout << "server name: ";
   for (std::set<std::string>::const_iterator it = server_names_.begin();

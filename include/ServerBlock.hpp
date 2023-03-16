@@ -18,7 +18,7 @@ class ServerBlock {
 
   const std::vector<Listen>& getListens(void) const;
 
-  void addListen(const std::string& raw);
+  void addListen(const std::string& socket_key);
   void addServerName(const std::string& name);
   void addErrorPage(const std::string& code, const std::string& page);
   void setBodyLimit(const std::string& body_limit);
