@@ -16,7 +16,7 @@ Config& Config::operator=(const Config& origin) {
 
 Config::~Config() {}
 
-std::vector<ServerBlock>& Config::getServerBlocks(void) {
+const std::vector<ServerBlock>& Config::getServerBlocks(void) const {
   return server_blocks_;
 }
 

@@ -10,7 +10,7 @@ class Config {
   Config& operator=(const Config& origin);
   virtual ~Config();
 
-  std::vector<ServerBlock>& getServerBlocks(void);
+  const std::vector<ServerBlock>& getServerBlocks(void) const;
 
   void addServerBlock(const ServerBlock& server_block);
 

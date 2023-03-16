@@ -11,7 +11,7 @@ class ConfigParser {
   virtual ~ConfigParser();
 
   Config parse(void);
-  void print(void);
+  void print(void) const;
 
  private:
   void parseServerBlock(void);

@@ -16,7 +16,7 @@ class ServerBlock {
   ServerBlock& operator=(const ServerBlock& origin);
   virtual ~ServerBlock();
 
-  std::vector<Listen>& getListens(void);
+  const std::vector<Listen>& getListens(void) const;
 
   void addListen(const std::string& raw);
   void addServerName(const std::string& name);
