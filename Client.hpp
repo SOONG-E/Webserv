@@ -14,11 +14,11 @@ class Client {
   Client& operator=(const Client& src);
 
   int getSocket() const;
-  const std::string& getKey() const;
+  const std::string& getSocketKey() const;
 
  private:
   int _socket;
-  std::string _server_blocks_key;
+  std::string _socket_key;
 };
 
 #endif
