@@ -31,7 +31,7 @@ ConfigParser& ConfigParser::operator=(const ConfigParser& origin) {
 
 ConfigParser::~ConfigParser() {}
 
-Config ConfigParser::parse(void) {
+const Config& ConfigParser::parse(void) {
   while (peek() == "server") {
     server_block_.reset();
     parseServerBlock();

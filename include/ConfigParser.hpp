@@ -10,7 +10,7 @@ class ConfigParser {
   ConfigParser& operator=(const ConfigParser& origin);
   virtual ~ConfigParser();
 
-  Config parse(void);
+  const Config& parse(void);
   void print(void) const;
 
  private:
