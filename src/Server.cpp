@@ -47,7 +47,8 @@ std::set<std::string> Server::keys(void) const {
 void Server::print(const int index) const {
   std::cout << "[ server block " << index << " ]\n";
   for (int i = 0; i < listens_.size(); ++i) {
-    std::cout << "listen: " << listens_[i]->raw << "\n";
+    std::cout << "listen: " << listens_[i]->host << ":" << listens_[i]->port
+              << "\n";
   }
   std::cout << "server name: ";
   for (std::set<std::string>::const_iterator it = server_names_.begin();

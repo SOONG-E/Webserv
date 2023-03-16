@@ -9,7 +9,7 @@
 
 ConfigParser::ConfigParser() {}
 
-ConfigParser::ConfigParser(const char* filename) {
+ConfigParser::ConfigParser(const char* filename) : pos_(0) {
   content_ = readFile(filename);
 }
 
@@ -107,6 +107,14 @@ void ConfigParser::parseLocationBlock(void) {
     if (token == "}") break;
     if (token == "limit_except") {
       parseLimitExcept();
+    } else if (token == "return") {
+      parseReturn();
+    } else if (token == "root") {
+      parseAutoindex();
+    } else if (token == "index") {
+      parseIndex();
+    } else {
+      throw ConfigException(kErrors[kToken]);
     }
   }
   expect("}");
@@ -122,6 +130,33 @@ void ConfigParser::parseLimitExcept(void) {
   expect("all");
   expect(";");
   expect("}");
+}
+
+void ConfigParser::parseReturn(void) {
+  expect("return");
+  location_->return_code = expect();
+  location_->return_url = expect();
+  expect(";");
+}
+
+void ConfigParser::parseRoot(void) {
+  expect("root");
+  location_->root = expect();
+  expect(";");
+}
+
+void ConfigParser::parseAutoindex(void) {
+  expect("autoindex");
+  location_->autoindex = expect();
+  expect(";");
+}
+
+void ConfigParser::parseIndex(void) {
+  expect("index");
+  while (peek() != ";") {
+    location_->index.insert(expect());
+  }
+  expect(";");
 }
 
 std::string ConfigParser::expect(const std::string& expected) {

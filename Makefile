@@ -1,7 +1,7 @@
 NAME = webserv
 
 CXX = c++
-CXXFLAGS = -std=c++98 -MMD -MP --save-temps
+CXXFLAGS = -std=c++98 -MMD -MP# --save-temps
 # CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -MMD -MP
 
 SRCDIR = src

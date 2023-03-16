@@ -23,6 +23,10 @@ class ConfigParser {
 
   void parseLocationBlock(void);
   void parseLimitExcept(void);
+  void parseReturn(void);
+  void parseRoot(void);
+  void parseAutoindex(void);
+  void parseIndex(void);
 
   std::string expect(const std::string& expected = "");
   std::string peek(void);
