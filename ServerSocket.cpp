@@ -10,6 +10,7 @@ ServerSocket& ServerSocket::operator=(const ServerSocket& src) {
   _socket = src._socket;
   _ip = src._ip;
   _port = src._port;
+  return *this;
 }
 
 void ServerSocket::open() {

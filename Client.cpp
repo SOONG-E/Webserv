@@ -12,6 +12,7 @@ Client::~Client() {}
 Client& Client::operator=(const Client& src) {
   _socket = src._socket;
   _server_blocks_key = src._server_blocks_key;
+  return *this;
 }
 
 int Client::getSocket() const { return _socket; }
