@@ -25,7 +25,7 @@ class ServerHandler {
  private:
   typedef std::map<std::string, std::vector<ServerBlock> > server_blocks_type;
   typedef std::vector<ServerSocket> server_sockets_type;
-  typedef std::list<Client> clients_type;
+  typedef std::map<int, Client> clients_type;
   typedef Selector selector_type;
 
   server_blocks_type _server_blocks;

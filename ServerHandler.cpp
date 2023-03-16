@@ -21,21 +21,20 @@ void ServerHandler::configureServer(const Config &config) {
   std::vector<ServerBlock> serv_info = config.getServerBlocks();
 
   for (size_t i = 0; i < serv_info.size(); ++i) {
-    std::set<std::string> listens = serv_info[i].getListen().listen;
-    for (std::set<std::string>::const_iterator it = listens.begin();
-         it != listens.end(); ++it) {
-      if (_server_blocks.find(*it) == _server_blocks.end()) {
+    std::vector<Listen> listens = serv_info[i].getListens();
+    for (size_t i = 0; i < listens.size(); ++i) {
+      if (_server_blocks.find(listens[i].raw) == _server_blocks.end()) {
         std::vector<ServerBlock> in(1, serv_info[i]);
-        _server_blocks[*it] = in;
+        _server_blocks[listens[i].raw] = in;
       } else {
-        _server_blocks[*it].push_back(serv_info[i]);
+        _server_blocks[listens[i].raw].push_back(serv_info[i]);
       }
     }
   }
 }
 
 void ServerHandler::createServerSockets() {
-  for (server_config_type::const_iterator it = _server_blocks.begin();
+  for (server_blocks_type::const_iterator it = _server_blocks.begin();
        it != _server_blocks.end(); ++it) {
     size_t pos = it->first.find(':');
     std::string ip = it->first.substr(0, pos);
@@ -56,7 +55,7 @@ void ServerHandler::acceptConnections() {
       if (_server_selector.isSetRead(_server_sockets[i].getSocket())) {
         Client new_client = _server_sockets[i].accept();
         _client_selector.registerSocket(new_client.getSocket());
-        _clients.push_back(new_client);
+        _clients.insert(std::make_pair(new_client.getSocket(), new_client));
       }
     }
   }
@@ -67,7 +66,8 @@ void ServerHandler::respondToClients() {
     for (clients_type::iterator it = _clients.begin(); it != _clients.end();
          ++it) {
       if (_client_selector.isSetRead(
-              (*it).getSocket()))  // 해당 클라이언트 소켓에 이벤트가 발생했으면
+              it->second
+                  .getSocket()))  // 해당 클라이언트 소켓에 이벤트가 발생했으면
       {
         // 읽고 반환값0이면 연결 해제하고 읽은게 있으면 파싱하고 응답하는데
         // 짤려서 들어오면 한번 더 읽어야함.
