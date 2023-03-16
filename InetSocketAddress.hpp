@@ -9,7 +9,6 @@
 
 class InetSocketAddress {
  public:
-  InetSocketAddress(const std::string &port = "80");
   InetSocketAddress(const std::string &host, const std::string &port);
   InetSocketAddress(const InetSocketAddress &src);
   ~InetSocketAddress();
@@ -23,10 +22,10 @@ class InetSocketAddress {
   const std::string &getPort() const;
 
  private:
-  sockaddr addr;
-  socklen_t addr_len;
-  std::string ip;
-  std::string port;
+  sockaddr _address;
+  socklen_t _address_len;
+  std::string _ip;
+  std::string _port;
 };
 
 #endif

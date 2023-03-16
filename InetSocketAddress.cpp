@@ -1,27 +1,5 @@
 #include "InetSocketAddress.hpp"
 
-InetSocketAddress::InetSocketAddress(const std::string &port = "80") {
-  struct addrinfo hints, *addr_info;
-
-  memset(&hints, 0, sizeof(hints));
-
-  hints.ai_family = AF_INET;
-  hints.ai_socktype = SOCK_STREAM;
-  hints.ai_flags = AI_PASSIVE;
-
-  int gai_result = getaddrinfo(NULL, port.c_str(), &hints, &addr_info);
-
-  if (gai_result != 0) throw std::invalid_argument(gai_strerror(gai_result));
-
-  addr = *(addr_info->ai_addr);
-  addr_len = addr_info->ai_addrlen;
-
-  freeaddrinfo(addr_info);
-
-  this->ip = "0.0.0.0";
-  this->port = port;
-}
-
 InetSocketAddress::InetSocketAddress(const std::string &ip,
                                      const std::string &port = "80") {
   struct addrinfo hints, *addr_info;
@@ -35,13 +13,13 @@ InetSocketAddress::InetSocketAddress(const std::string &ip,
 
   if (gai_result != 0) throw std::invalid_argument(gai_strerror(gai_result));
 
-  addr = *(addr_info->ai_addr);
-  addr_len = addr_info->ai_addrlen;
+  _address = *(addr_info->ai_addr);
+  _address_len = addr_info->ai_addrlen;
 
   freeaddrinfo(addr_info);
 
-  this->ip = ip;
-  this->port = port;
+  _ip = ip;
+  _port = port;
 }
 
 InetSocketAddress::InetSocketAddress(const InetSocketAddress &src) {
@@ -50,22 +28,22 @@ InetSocketAddress::InetSocketAddress(const InetSocketAddress &src) {
 
 InetSocketAddress &InetSocketAddress::operator=(const InetSocketAddress &src) {
   if (this != &src) {
-    addr = src.addr;
-    addr_len = src.addr_len;
-    ip = src.ip;
-    port = src.port;
+    _address = src._address;
+    _address_len = src._address_len;
+    _ip = src._ip;
+    _port = src._port;
   }
   return *this;
 }
 
 InetSocketAddress::~InetSocketAddress() {}
 
-sockaddr &InetSocketAddress::getAddress() { return addr; }
+sockaddr &InetSocketAddress::getAddress() { return _address; }
 
-const sockaddr &InetSocketAddress::getAddress() const { return addr; }
+const sockaddr &InetSocketAddress::getAddress() const { return _address; }
 
-socklen_t InetSocketAddress::getAddressLen() const { return addr_len; }
+socklen_t InetSocketAddress::getAddressLen() const { return _address_len; }
 
-const std::string &InetSocketAddress::getIP() const { return ip; }
+const std::string &InetSocketAddress::getIP() const { return _ip; }
 
-const std::string &InetSocketAddress::getPort() const { return port; }
+const std::string &InetSocketAddress::getPort() const { return _port; }
