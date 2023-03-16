@@ -18,7 +18,7 @@ class Client {
 
  private:
   int _socket;
-  std::string _server_info_key;
+  std::string _server_configs_key;
 };
 
 #endif
