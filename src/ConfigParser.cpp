@@ -7,15 +7,25 @@
 #include "exception.hpp"
 #include "utility.hpp"
 
-ConfigParser::ConfigParser() {}
-
 ConfigParser::ConfigParser(const char* filename) : pos_(0) {
   content_ = readFile(filename);
 }
 
-ConfigParser::ConfigParser(const ConfigParser& origin) {}
+ConfigParser::ConfigParser(const ConfigParser& origin)
+    : config_(origin.config_),
+      server_block_(origin.server_block_),
+      location_block_(origin.location_block_),
+      content_(origin.content_),
+      pos_(origin.pos_) {}
 
 ConfigParser& ConfigParser::operator=(const ConfigParser& origin) {
+  if (this != &origin) {
+    config_ = origin.config_;
+    server_block_ = origin.server_block_;
+    location_block_ = origin.location_block_;
+    content_ = origin.content_;
+    pos_ = origin.pos_;
+  }
   return *this;
 }
 

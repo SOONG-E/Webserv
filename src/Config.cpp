@@ -2,9 +2,17 @@
 
 Config::Config() {}
 
-Config::Config(const Config& origin) {}
+Config::Config(const Config& origin)
+    : server_blocks_(origin.server_blocks_),
+      servers_table_(origin.servers_table_) {}
 
-Config& Config::operator=(const Config& origin) { return *this; }
+Config& Config::operator=(const Config& origin) {
+  if (this != &origin) {
+    server_blocks_ = origin.server_blocks_;
+    servers_table_ = origin.servers_table_;
+  }
+  return *this;
+}
 
 Config::~Config() {}
 

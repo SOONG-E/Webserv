@@ -5,7 +5,6 @@
 
 class ConfigParser {
  public:
-  ConfigParser();
   explicit ConfigParser(const char* filename);
   ConfigParser(const ConfigParser& origin);
   ConfigParser& operator=(const ConfigParser& origin);

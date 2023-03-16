@@ -6,20 +6,34 @@
 
 ServerBlock::ServerBlock() : body_limit_(kDefaults[kClientMaxBodySize]) {}
 
-ServerBlock::ServerBlock(const ServerBlock& origin) {}
+ServerBlock::ServerBlock(const ServerBlock& origin)
+    : listens_(origin.listens_),
+      server_names_(origin.server_names_),
+      error_pages_(origin.error_pages_),
+      body_limit_(origin.body_limit_),
+      location_blocks_(origin.location_blocks_) {}
 
-ServerBlock& ServerBlock::operator=(const ServerBlock& origin) { return *this; }
+ServerBlock& ServerBlock::operator=(const ServerBlock& origin) {
+  if (this != &origin) {
+    listens_ = origin.listens_;
+    server_names_ = origin.server_names_;
+    error_pages_ = origin.error_pages_;
+    body_limit_ = origin.body_limit_;
+    location_blocks_ = origin.location_blocks_;
+  }
+  return *this;
+}
 
 ServerBlock::~ServerBlock() {}
 
-std::vector<Listen*>& ServerBlock::getListens(void) { return listens_; }
+std::vector<Listen>& ServerBlock::getListens(void) { return listens_; }
 
 void ServerBlock::setBodyLimit(const std::string& body_limit) {
   body_limit_ = body_limit;
 }
 
 void ServerBlock::addListen(const std::string& raw) {
-  listens_.push_back(new Listen(raw));
+  listens_.push_back(Listen(raw));
 }
 
 void ServerBlock::addServerName(const std::string& name) {
@@ -31,7 +45,7 @@ void ServerBlock::addErrorPage(const std::string& code,
   error_pages_.insert(std::make_pair(code, page));
 }
 
-void ServerBlock::addLocationBlock(LocationBlock* location_block) {
+void ServerBlock::addLocationBlock(const LocationBlock& location_block) {
   location_blocks_.push_back(location_block);
 }
 
@@ -41,7 +55,7 @@ std::set<std::string> ServerBlock::keys(void) const {
     for (std::set<std::string>::const_iterator names_iter =
              server_names_.begin();
          names_iter != server_names_.end(); ++names_iter) {
-      keys.insert(listens_[i]->raw + ":" + *names_iter);
+      keys.insert(listens_[i].raw + ":" + *names_iter);
     }
   }
   return keys;
@@ -50,7 +64,7 @@ std::set<std::string> ServerBlock::keys(void) const {
 void ServerBlock::print(const int index) const {
   std::cout << "[ server block " << index << " ]\n";
   for (int i = 0; i < listens_.size(); ++i) {
-    std::cout << "listen: " << listens_[i]->host << ":" << listens_[i]->port
+    std::cout << "listen: " << listens_[i].host << ":" << listens_[i].port
               << "\n";
   }
   std::cout << "server name: ";
