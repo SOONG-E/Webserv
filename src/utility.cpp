@@ -1,6 +1,10 @@
 #include "utility.hpp"
 
+#include <fstream>
+#include <sstream>
+
 #include "constant.hpp"
+#include "exception.hpp"
 
 std::string readFile(const char* filename) {
   std::ifstream file(filename);
@@ -14,12 +18,12 @@ std::string readFile(const char* filename) {
 }
 
 std::vector<std::string> split(const std::string& content,
-                               const std::string& separators) {
+                               const std::string& delim) {
   std::vector<std::string> substrings;
   std::size_t start = 0;
   std::size_t end;
   while (true) {
-    end = content.find_first_of(separators);
+    end = content.find_first_of(delim, start);
     if (end == std::string::npos) break;
     substrings.push_back(content.substr(start, end - start));
     start = end + 1;

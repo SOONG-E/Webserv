@@ -1,8 +1,8 @@
-#include "webserv.hpp"
+// #include "webserv.hpp"
 
-#include <fstream>
 #include <iostream>
 
+#include "ConfigParser.hpp"
 #include "constant.hpp"
 
 int main(int argc, char* argv[]) {
@@ -11,9 +11,11 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   try {
-    ConfigParser.parse(argv[1]);
+    ConfigParser conf(argv[1]);
+    conf.parse();
+    conf.print();
   } catch (const std::exception& e) {
-    std::cerr << e.what() << '\n';
+    std::cerr << e.what() << "\n";
     return 1;
   }
 

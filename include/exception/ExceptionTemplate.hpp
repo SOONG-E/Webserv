@@ -1,19 +1,15 @@
 #ifndef EXCEPTION_TEMPLATE_HPP_
 #define EXCEPTION_TEMPLATE_HPP_
 
-#include <exception>
+#include <stdexcept>
 #include <string>
 
 #include "constant.hpp"
 
-class ExceptionTemplate : public exception {
+class ExceptionTemplate : public std::runtime_error {
  public:
   explicit ExceptionTemplate(const std::string& err_info)
-      : err_msg_(kErrors[kPrefix] + err_info) {}
-
- protected:
-  std::string err_msg_;
-  virtual const char* what() const throw() { return err_msg_.c_str(); }
+      : std::runtime_error(kErrors[kPrefix] + err_info) {}
 };
 
 #endif

@@ -12,6 +12,7 @@ class ConfigParser {
   virtual ~ConfigParser();
 
   Config parse(void);
+  void print(void);
 
  private:
   void parseServerBlock(void);
@@ -19,13 +20,17 @@ class ConfigParser {
   void parseServerName(void);
   void parseErrorPage(void);
   void parseClientMaxBodySize(void);
+
   void parseLocationBlock(void);
-  std::string expect(const std::string& expected);
+  void parseLimitExcept(void);
+
+  std::string expect(const std::string& expected = "");
   std::string peek(void);
   void skipWhitespace(void);
 
   Config config_;
-  Server buffer_;
+  Server* server_;
+  Location* location_;
   std::string content_;
   std::size_t pos_;
 };

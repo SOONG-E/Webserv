@@ -3,6 +3,10 @@
 #include <fstream>
 #include <sstream>
 
+#include "constant.hpp"
+#include "exception.hpp"
+#include "utility.hpp"
+
 ConfigParser::ConfigParser() {}
 
 ConfigParser::ConfigParser(const char* filename) {
@@ -11,33 +15,48 @@ ConfigParser::ConfigParser(const char* filename) {
 
 ConfigParser::ConfigParser(const ConfigParser& origin) {}
 
-ConfigParser& ConfigParser::operator=(const ConfigParser& origin) {}
+ConfigParser& ConfigParser::operator=(const ConfigParser& origin) {
+  return *this;
+}
 
 ConfigParser::~ConfigParser() {}
 
 Config ConfigParser::parse(void) {
   while (peek() == "server") {
-    buffer_.init();
+    server_ = new Server;
     parseServerBlock();
-    config_.addServer(buffer_);
+    config_.addServer(server_);
+  }
+  if (expect() != "") {
+    throw ConfigException(kErrors[kToken]);
   }
   return config_;
+}
+
+void ConfigParser::print(void) {
+  for (int i = 0; i < config_.getServers().size(); ++i) {
+    config_.getServers()[i]->print(i);
+  }
 }
 
 void ConfigParser::parseServerBlock(void) {
   expect("server");
   expect("{");
-  while (peek() != "}") {
-    if (peek() == "listen") {
+  while (true) {
+    std::string token = peek();
+    if (token == "}") break;
+    if (token == "listen") {
       parseListen();
-    } else if (peek() == "server_name") {
+    } else if (token == "server_name") {
       parseServerName();
-    } else if (peek() == "error_page") {
+    } else if (token == "error_page") {
       parseErrorPage();
-    } else if (peek() == "client_max_body_size") {
+    } else if (token == "client_max_body_size") {
       parseClientMaxBodySize();
-      // } else if (peek() == "location") {
-      //   parseLocationBlock();
+    } else if (token == "location") {
+      location_ = new Location;
+      parseLocationBlock();
+      server_->addLocation(location_);
     } else {
       throw ConfigException(kErrors[kToken]);
     }
@@ -47,14 +66,14 @@ void ConfigParser::parseServerBlock(void) {
 
 void ConfigParser::parseListen(void) {
   expect("listen");
-  buffer_.addListen(expect());
+  server_->addListen(expect());
   expect(";");
 }
 
 void ConfigParser::parseServerName(void) {
   expect("server_name");
   while (peek() != ";") {
-    buffer_.addServerName(expect());
+    server_->addServerName(expect());
   }
   expect(";");
 }
@@ -67,31 +86,45 @@ void ConfigParser::parseErrorPage(void) {
   }
   std::string page = codes.back();
   codes.pop_back();
-  std::vector<std::string>::iterator codes_iter = codes.begin();
-  std::vector<std::string>::iterator codes_end = codes.end();
-  while (begin != end) {
-    buffer_.addErrorPage(stoi(*codes_iter), page);
-    ++codes_iter;
+  for (std::size_t i = 0; i < codes.size(); ++i) {
+    server_->addErrorPage(codes[i], page);
   }
   expect(";");
 }
 
-void ConfigParser::parseClientBodyLimit(void) {
+void ConfigParser::parseClientMaxBodySize(void) {
   expect("client_max_body_size");
-  buffer_.setBodyLimit(expect());
+  server_->setBodyLimit(expect());
   expect(";");
 }
 
 void ConfigParser::parseLocationBlock(void) {
   expect("location");
-  expect();
+  location_->uri = expect();
   expect("{");
-  expect("try_files");
-  expect();
+  while (true) {
+    std::string token = peek();
+    if (token == "}") break;
+    if (token == "limit_except") {
+      parseLimitExcept();
+    }
+  }
   expect("}");
 }
 
-std::string ConfigParser::expect(const std::string& expected = "") {
+void ConfigParser::parseLimitExcept(void) {
+  expect("limit_except");
+  while (peek() != "{") {
+    location_->allowed_methods.insert(expect());
+  }
+  expect("{");
+  expect("deny");
+  expect("all");
+  expect(";");
+  expect("}");
+}
+
+std::string ConfigParser::expect(const std::string& expected) {
   skipWhitespace();
   if (expected != "") {
     if (content_.substr(pos_, expected.size()) != expected) {
@@ -100,10 +133,10 @@ std::string ConfigParser::expect(const std::string& expected = "") {
     pos_ += expected.size();
     return expected;
   }
-  std::string token;
-  while (pos_ < content_.size() && !std::isspace(content_[pos_]) &&
-         content_[pos_] != ';' && content_[pos_] != '{' &&
-         content_[pos_] != '}') {
+  std::string token = "";
+  std::string delim = ";{}";
+  while (pos_ < content_.size() && !std::isspace(content_[pos_])) {
+    if (token != "" && delim.find(content_[pos_]) != std::string::npos) break;
     token += content_[pos_];
     pos_ += 1;
   }

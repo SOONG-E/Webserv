@@ -4,19 +4,17 @@ Config::Config() {}
 
 Config::Config(const Config& origin) {}
 
-Config& Config::operator=(const Config& origin) {}
+Config& Config::operator=(const Config& origin) { return *this; }
 
 Config::~Config() {}
 
-const std::vector<Server>& Config::getServers(void) const { return servers_; }
+std::vector<Server*>& Config::getServers(void) { return servers_; }
 
-void Config::addServer(const Server& server) {
+void Config::addServer(Server* server) {
   servers_.push_back(server);
-  std::set<std::string> keys = server.keys();
-  std::set<std::string>::iterator keys_iter = keys.begin();
-  std::set<std::string>::iterator keys_end = keys.end();
-  while (keys_iter != keys_end) {
+  std::set<std::string> keys = server->keys();
+  for (std::set<std::string>::const_iterator keys_iter = keys.begin();
+       keys_iter != keys.end(); ++keys_iter) {
     servers_table_.insert(std::make_pair(*keys_iter, server));
-    ++keys_iter;
   }
 }
