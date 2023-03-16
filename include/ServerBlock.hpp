@@ -16,23 +16,23 @@ class ServerBlock {
   ServerBlock& operator=(const ServerBlock& origin);
   virtual ~ServerBlock();
 
-  std::vector<Listen*>& getListens(void);
+  std::vector<Listen>& getListens(void);
 
   void addListen(const std::string& raw);
   void addServerName(const std::string& name);
   void addErrorPage(const std::string& code, const std::string& page);
   void setBodyLimit(const std::string& body_limit);
-  void addLocationBlock(LocationBlock* location_block);
+  void addLocationBlock(const LocationBlock& location_block);
 
   std::set<std::string> keys(void) const;
   void print(const int index) const;
 
  private:
-  std::vector<Listen*> listens_;
+  std::vector<Listen> listens_;
   std::set<std::string> server_names_;
   std::map<std::string, std::string> error_pages_;
   std::string body_limit_;
-  std::vector<LocationBlock*> location_blocks_;
+  std::vector<LocationBlock> location_blocks_;
 };
 
 #endif

@@ -33,8 +33,8 @@ class ConfigParser {
   void skipWhitespace(void);
 
   Config config_;
-  ServerBlock* server_block_;
-  LocationBlock* location_block_;
+  ServerBlock server_block_;
+  LocationBlock location_block_;
   std::string content_;
   std::size_t pos_;
 };

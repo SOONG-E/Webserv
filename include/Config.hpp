@@ -10,13 +10,13 @@ class Config {
   Config& operator=(const Config& origin);
   virtual ~Config();
 
-  std::vector<ServerBlock*>& getServerBlocks(void);
+  std::vector<ServerBlock>& getServerBlocks(void);
 
-  void addServerBlock(ServerBlock* server_block);
+  void addServerBlock(const ServerBlock& server_block);
 
  private:
-  std::vector<ServerBlock*> server_blocks_;
-  std::map<std::string, ServerBlock*> servers_table_;
+  std::vector<ServerBlock> server_blocks_;
+  std::map<std::string, ServerBlock> servers_table_;
 };
 
 #endif
