@@ -33,7 +33,7 @@ void ServerHandler::configureServer(const Config &config) {
   }
 }
 
-void ServerHandler::createServerSockets() {
+void ServerHandler::createServer() {
   for (server_blocks_type::const_iterator it = _server_blocks.begin();
        it != _server_blocks.end(); ++it) {
     size_t pos = it->first.find(':');
