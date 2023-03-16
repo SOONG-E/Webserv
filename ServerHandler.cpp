@@ -23,11 +23,11 @@ void ServerHandler::configureServer(const Config &config) {
   for (size_t i = 0; i < serv_info.size(); ++i) {
     const std::vector<Listen> &listens = serv_info[i].getListens();
     for (size_t i = 0; i < listens.size(); ++i) {
-      if (_server_blocks.find(listens[i].raw) == _server_blocks.end()) {
+      if (_server_blocks.find(listens[i].socket_key) == _server_blocks.end()) {
         std::vector<ServerBlock> in(1, serv_info[i]);
-        _server_blocks[listens[i].raw] = in;
+        _server_blocks[listens[i].socket_key] = in;
       } else {
-        _server_blocks[listens[i].raw].push_back(serv_info[i]);
+        _server_blocks[listens[i].socket_key].push_back(serv_info[i]);
       }
     }
   }
