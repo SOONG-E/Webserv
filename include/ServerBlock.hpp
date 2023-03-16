@@ -24,6 +24,7 @@ class ServerBlock {
   void setBodyLimit(const std::string& body_limit);
   void addLocationBlock(const LocationBlock& location_block);
 
+  void reset(void);
   std::set<std::string> keys(void) const;
   void print(const int index) const;
 

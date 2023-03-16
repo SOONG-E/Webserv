@@ -33,6 +33,7 @@ ConfigParser::~ConfigParser() {}
 
 Config ConfigParser::parse(void) {
   while (peek() == "server") {
+    server_block_.reset();
     parseServerBlock();
     config_.addServerBlock(server_block_);
   }
@@ -44,7 +45,7 @@ Config ConfigParser::parse(void) {
 
 void ConfigParser::print(void) const {
   for (std::size_t i = 0; i < config_.getServerBlocks().size(); ++i) {
-    config_.getServerBlocks()[i].print(i);
+    config_.getServerBlocks()[i].print(i + 1);
   }
 }
 

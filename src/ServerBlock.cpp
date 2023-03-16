@@ -51,6 +51,14 @@ void ServerBlock::addLocationBlock(const LocationBlock& location_block) {
   location_blocks_.push_back(location_block);
 }
 
+void ServerBlock::reset(void) {
+  listens_.clear();
+  server_names_.clear();
+  error_pages_.clear();
+  body_limit_ = kDefaults[kClientMaxBodySize];
+  location_blocks_.clear();
+}
+
 std::set<std::string> ServerBlock::keys(void) const {
   std::set<std::string> keys;
   for (std::size_t i = 0; i < listens_.size(); ++i) {
