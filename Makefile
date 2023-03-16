@@ -8,7 +8,7 @@ SRCDIR = src
 INCDIR = include
 TMPDIR = tmp
 
-SRC = Config.cpp ConfigParser.cpp Server.cpp utility.cpp webserv.cpp
+SRC = Config.cpp ConfigParser.cpp ServerBlock.cpp utility.cpp webserv.cpp
 
 SRCS = $(SRC)
 OBJS = $(addprefix $(TMPDIR)/,$(SRC:.cpp=.o))

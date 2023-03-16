@@ -1,10 +1,10 @@
-#ifndef LOCATION_HPP_
-#define LOCATION_HPP_
+#ifndef LOCATION_BLOCK_HPP_
+#define LOCATION_BLOCK_HPP_
 
 #include <set>
 #include <string>
 
-struct Location {
+struct LocationBlock {
   std::string uri;
   std::set<std::string> allowed_methods;
   std::string return_code;

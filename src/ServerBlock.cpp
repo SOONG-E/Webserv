@@ -1,38 +1,41 @@
-#include "Server.hpp"
+#include "ServerBlock.hpp"
 
 #include <iostream>
 
 #include "constant.hpp"
 
-Server::Server() : body_limit_(kDefaults[kClientMaxBodySize]) {}
+ServerBlock::ServerBlock() : body_limit_(kDefaults[kClientMaxBodySize]) {}
 
-Server::Server(const Server& origin) {}
+ServerBlock::ServerBlock(const ServerBlock& origin) {}
 
-Server& Server::operator=(const Server& origin) { return *this; }
+ServerBlock& ServerBlock::operator=(const ServerBlock& origin) { return *this; }
 
-Server::~Server() {}
+ServerBlock::~ServerBlock() {}
 
-std::vector<Listen*>& Server::getListens(void) { return listens_; }
+std::vector<Listen*>& ServerBlock::getListens(void) { return listens_; }
 
-void Server::setBodyLimit(const std::string& body_limit) {
+void ServerBlock::setBodyLimit(const std::string& body_limit) {
   body_limit_ = body_limit;
 }
 
-void Server::addListen(const std::string& raw) {
+void ServerBlock::addListen(const std::string& raw) {
   listens_.push_back(new Listen(raw));
 }
 
-void Server::addServerName(const std::string& name) {
+void ServerBlock::addServerName(const std::string& name) {
   server_names_.insert(name);
 }
 
-void Server::addErrorPage(const std::string& code, const std::string& page) {
+void ServerBlock::addErrorPage(const std::string& code,
+                               const std::string& page) {
   error_pages_.insert(std::make_pair(code, page));
 }
 
-void Server::addLocation(Location* location) { locations_.push_back(location); }
+void ServerBlock::addLocationBlock(LocationBlock* location_block) {
+  location_blocks_.push_back(location_block);
+}
 
-std::set<std::string> Server::keys(void) const {
+std::set<std::string> ServerBlock::keys(void) const {
   std::set<std::string> keys;
   for (int i = 0; i < listens_.size(); ++i) {
     for (std::set<std::string>::const_iterator names_iter =
@@ -44,7 +47,7 @@ std::set<std::string> Server::keys(void) const {
   return keys;
 }
 
-void Server::print(const int index) const {
+void ServerBlock::print(const int index) const {
   std::cout << "[ server block " << index << " ]\n";
   for (int i = 0; i < listens_.size(); ++i) {
     std::cout << "listen: " << listens_[i]->host << ":" << listens_[i]->port

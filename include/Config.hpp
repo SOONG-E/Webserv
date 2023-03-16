@@ -1,7 +1,7 @@
 #ifndef CONFIG_HPP_
 #define CONFIG_HPP_
 
-#include "Server.hpp"
+#include "ServerBlock.hpp"
 
 class Config {
  public:
@@ -10,13 +10,13 @@ class Config {
   Config& operator=(const Config& origin);
   virtual ~Config();
 
-  std::vector<Server*>& getServers(void);
+  std::vector<ServerBlock*>& getServerBlocks(void);
 
-  void addServer(Server* server);
+  void addServerBlock(ServerBlock* server_block);
 
  private:
-  std::vector<Server*> servers_;
-  std::map<std::string, Server*> servers_table_;
+  std::vector<ServerBlock*> server_blocks_;
+  std::map<std::string, ServerBlock*> servers_table_;
 };
 
 #endif
