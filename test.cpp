@@ -1,9 +1,11 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <string>
 
 #include "./include/HttpRequest.hpp"
 #include "./include/HttpRequestParser.hpp"
@@ -51,7 +53,11 @@ int main(int argc, char *argv[]) {
   }
 
   cout << buffer << endl;
+  std::string request(buffer);
 
+  HttpRequest hr = HttpRequestParser::parse(request);
+
+  std::cout << hr.getHost() << std::endl;
   // // Send response to client
   // const char* response = "Hello from server";
   // int bytes_sent = send(client_socket, response, strlen(response), 0);
@@ -60,9 +66,9 @@ int main(int argc, char *argv[]) {
   //     exit(EXIT_FAILURE);
   // }
 
-  // // Close the sockets
-  // close(client_socket);
-  // close(server_socket);
+  // Close the sockets
+  close(server_socket);
+  close(client_socket);
 
   return 0;
 }

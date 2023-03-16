@@ -7,8 +7,10 @@ HttpRequest HttpRequest::operator=(const HttpRequest &origin) { return *this; }
 
 void HttpRequest::setMethod(std::string method) {
   for (int i = 0; i < methods->size(); ++i) {
-    if (methods[i] == method) method_ = method;
-    return;
+    if (methods[i] == method) {
+      method_ = method;
+      return;
+    }
   }
   throw std::exception();
 }
