@@ -6,7 +6,7 @@
 
 std::string readFile(const char* filename);
 std::vector<std::string> split(const std::string& content,
-                               const std::string& separators);
+                               const std::string& delim);
 int stoi(const std::string& str);
 
 #endif
