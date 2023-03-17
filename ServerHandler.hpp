@@ -18,7 +18,7 @@ class ServerHandler {
   ServerHandler &operator=(const ServerHandler &src);
 
   void configureServer(const Config &config);
-  void createServer();
+  void createServers();
   void acceptConnections();
   void respondToClients();
 
