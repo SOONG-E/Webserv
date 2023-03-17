@@ -3,20 +3,29 @@
 #include <iostream>
 
 #include "ConfigParser.hpp"
+#include "ServerHandler.hpp"
 #include "constant.hpp"
 
 int main(int argc, char* argv[]) {
   if (argc != 2) {
-    std::cout << kErrors[kPrefix] << kErrors[kArg] << '\n';
-    return 1;
+    std::cerr << kErrors[kPrefix] << kErrors[kArg] << '\n';
+    return EXIT_FAILURE;
   }
   try {
     ConfigParser conf(argv[1]);
-    conf.parse();
-    conf.print();
+    ServerHandler handler;
+
+    const Config& config = conf.parse();
+    handler.configureServer(config);
+    handler.createServers();
+    while (1) {
+      handler.acceptConnections();
+      handler.respondToClients();
+    }
+
   } catch (const std::exception& e) {
     std::cerr << e.what() << "\n";
-    return 1;
+    return EXIT_FAILURE;
   }
-  return 0;
+  return EXIT_SUCCESS;
 }
