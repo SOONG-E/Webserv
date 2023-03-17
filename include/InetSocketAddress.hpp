@@ -11,6 +11,7 @@
 
 class InetSocketAddress {
  public:
+  InetSocketAddress();
   InetSocketAddress(const std::string &host, const std::string &port);
   InetSocketAddress(const sockaddr &address, const socklen_t address_len);
   InetSocketAddress(const InetSocketAddress &src);

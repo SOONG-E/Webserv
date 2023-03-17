@@ -1,5 +1,9 @@
 #include "InetSocketAddress.hpp"
 
+InetSocketAddress::InetSocketAddress() : _address_len(0) {
+  memset(&_address, 0, sizeof(_address));
+}
+
 InetSocketAddress::InetSocketAddress(const std::string &ip,
                                      const std::string &port) {
   struct addrinfo hints, *addr_info;
@@ -9,15 +13,17 @@ InetSocketAddress::InetSocketAddress(const std::string &ip,
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
 
-  int gai_result = getaddrinfo(ip.c_str(), port.c_str(), &hints, &addr_info);
+  int result = getaddrinfo(ip.c_str(), port.c_str(), &hints, &addr_info);
 
-  if (gai_result != 0) throw std::invalid_argument(gai_strerror(gai_result));
+  if (result != 0) throw std::invalid_argument(gai_strerror(result));
 
   _address = *(addr_info->ai_addr);
   _address_len = addr_info->ai_addrlen;
 
   _ip = ip;
   _port = port;
+
+  freeaddrinfo(addr_info);
 }
 
 InetSocketAddress::InetSocketAddress(const sockaddr &address,
