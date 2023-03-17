@@ -54,6 +54,7 @@ void ServerHandler::acceptConnections() {
     for (size_t i = 0; i < _server_sockets.size(); ++i) {
       if (_server_selector.isSetRead(_server_sockets[i].getSocket())) {
         Client new_client = _server_sockets[i].accept();
+
         _client_selector.registerSocket(new_client.getSocket());
         _clients.insert(std::make_pair(new_client.getSocket(), new_client));
       }
@@ -65,12 +66,10 @@ void ServerHandler::respondToClients() {
   if (_client_selector.select() > 0) {
     for (clients_type::iterator it = _clients.begin(); it != _clients.end();
          ++it) {
-      if (_client_selector.isSetRead(
-              it->second
-                  .getSocket()))  // 해당 클라이언트 소켓에 이벤트가 발생했으면
-      {
-        // 읽고 반환값0이면 연결 해제하고 읽은게 있으면 파싱하고 응답하는데
-        // 짤려서 들어오면 한번 더 읽어야함.
+      int client_socket = it->second.getSocket();
+      if (_client_selector.isSetRead(client_socket)) {
+      }
+      if (_client_selector.isSetWrite(client_socket)) {
       }
     }
   }
