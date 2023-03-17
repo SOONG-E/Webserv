@@ -1,6 +1,7 @@
 # Others
 .vscode
 .DS_Store
+webserv.conf
 
 # Prerequisites
 *.d
@@ -34,3 +35,4 @@
 *.exe
 *.out
 *.app
+webserv
