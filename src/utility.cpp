@@ -1,7 +1,6 @@
 #include "utility.hpp"
 
 #include <fstream>
-#include <sstream>
 
 #include "constant.hpp"
 #include "exception.hpp"
@@ -36,12 +35,19 @@ std::vector<std::string> split(const std::string& content,
   return substrings;
 }
 
-int stoi(const std::string& str) {
-  std::istringstream iss(str);
-  int num;
+std::size_t stoi(const std::string& value) {
+  std::istringstream iss(value);
+  std::size_t num;
   iss >> num;
   if (iss.fail()) {
-    throw ConfigException(kErrors[kToken]);
+    // throw;
   }
   return num;
+}
+
+std::size_t hexToInt(const std::string& value) {
+  std::size_t out;
+  std::istringstream iss(value);
+  iss >> std::hex >> out;
+  return out;
 }
