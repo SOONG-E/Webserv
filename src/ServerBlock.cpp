@@ -2,6 +2,7 @@
 
 #include <cerrno>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 
 #include "ByteUnits.hpp"
@@ -39,7 +40,7 @@ void ServerBlock::setBodyLimit(const std::string& raw) {
   char* unit;
   body_limit_ = std::strtoul(raw.c_str(), &unit, 10);
   if (errno == ERANGE) {
-    throw ConfigException(strerror(errno));
+    throw ConfigException(std::strerror(errno));
   }
   if (*unit == '\0') return;
   try {
