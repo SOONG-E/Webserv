@@ -2,6 +2,7 @@
 #define HTTP_REQUEST_PARSER_HPP_
 
 #include "HttpRequest.hpp"
+#include "utility.hpp"
 
 class HttpRequestParser {
  public:

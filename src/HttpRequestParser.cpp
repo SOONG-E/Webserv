@@ -12,21 +12,6 @@ std::string trim(std::string str) {
   return (str.substr(start, end + 1));
 }
 
-std::vector<std::string> split(const std::string& content,
-                               const std::string& separators = " \t\n\v\f\r") {
-  std::vector<std::string> substrings;
-  std::size_t start = 0;
-  std::size_t end;
-  while (true) {
-    end = content.find_first_of(separators, start);
-    if (end == std::string::npos) break;
-    substrings.push_back(content.substr(start, end - start));
-    start = end + 1;
-  }
-  substrings.push_back(content.substr(start));
-  return substrings;
-}
-
 std::vector<std::string> HttpRequestParser::splitByCRLF(
     const std::string& content) {
   std::vector<std::string> substrings;
