@@ -7,9 +7,12 @@
 
 #include <string>
 
+#include "utility.hpp"
+
 class InetSocketAddress {
  public:
   InetSocketAddress(const std::string &host, const std::string &port);
+  InetSocketAddress(const sockaddr &address, const socklen_t address_len);
   InetSocketAddress(const InetSocketAddress &src);
   ~InetSocketAddress();
 

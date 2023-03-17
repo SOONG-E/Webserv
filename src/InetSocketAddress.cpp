@@ -16,10 +16,23 @@ InetSocketAddress::InetSocketAddress(const std::string &ip,
   _address = *(addr_info->ai_addr);
   _address_len = addr_info->ai_addrlen;
 
-  freeaddrinfo(addr_info);
-
   _ip = ip;
   _port = port;
+}
+
+InetSocketAddress::InetSocketAddress(const sockaddr &address,
+                                     const socklen_t address_len) {
+  _address = address;
+  _address_len = address_len;
+
+  sockaddr_in addr_in = *((sockaddr_in *)&_address);
+
+  for (int i = 3; i >= 0; --i) {
+    _ip += toString((ntohl(addr_in.sin_addr.s_addr) >> (i * 8)) & 0xFF);
+    if (i == 0) break;
+    _ip += ".";
+  }
+  _port = toString(ntohs(addr_in.sin_port));
 }
 
 InetSocketAddress::InetSocketAddress(const InetSocketAddress &src) {
