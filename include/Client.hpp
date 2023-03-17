@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "HttpParser.hpp"
+#include "HttpRequest.hpp"
 #include "InetSocketAddress.hpp"
 
 class Client {
@@ -14,11 +16,11 @@ class Client {
   Client& operator=(const Client& src);
 
   int getSocket() const;
-  const std::string& getSocketKey() const;
 
  private:
   int _socket;
-  std::string _socket_key;
+  InetSocketAddress _address;
+  HttpRequest _request;
 };
 
 #endif
