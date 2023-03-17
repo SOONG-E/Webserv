@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "Method.hpp"
+#include "constant.hpp"
 
 class HttpRequest {
  public:
@@ -18,6 +18,7 @@ class HttpRequest {
   void setUrl(std::string url);
   void setHost(std::string host);
   void setBody(std::string body);
+  void setContentLength(std::size_t content_length);
   void addheader(std::string key, std::string value);
   void addheader(std::string key, std::vector<std::string> values);
   std::string getHeader(std::string name);
@@ -25,12 +26,14 @@ class HttpRequest {
   std::string getUrl();
   std::string getHost();
   std::string getBody();
+  std::size_t getContentLength();
 
  private:
   std::string method_;
   std::string url_;
   std::string host_;
   std::string body_;
+  std::size_t content_length_;
   std::map<std::string, std::vector<std::string> > header_;
 };
 

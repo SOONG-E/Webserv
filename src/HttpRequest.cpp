@@ -1,12 +1,13 @@
 #include "HttpRequest.hpp"
 
-HttpRequest::HttpRequest() {}
+HttpRequest::HttpRequest() : content_length_(0) {}
 HttpRequest::HttpRequest(const HttpRequest &origin)
     : method_(origin.method_),
       url_(origin.url_),
       host_(origin.host_),
       body_(origin.body_),
-      header_(origin.header_) {}
+      header_(origin.header_),
+      content_length_(origin.content_length_) {}
 HttpRequest::~HttpRequest() {}
 HttpRequest HttpRequest::operator=(const HttpRequest &origin) {
   HttpRequest out(origin);
@@ -30,6 +31,10 @@ void HttpRequest::setHost(std::string host) { host_ = host; }
 
 void HttpRequest::setBody(std::string body) { body_ = body; }
 
+void HttpRequest::setContentLength(std::size_t content_length) {
+  content_length_ = content_length;
+}
+
 void HttpRequest::addheader(std::string key, std::string value) {
   if (0 < header_.count(key)) {
     throw std::exception();
@@ -48,7 +53,7 @@ std::string HttpRequest::getHeader(std::string name) {
 
   it = header_.find(name);
   if (it != header_.end()) return *(it->second.begin());
-  return NULL;
+  return "";
 }
 
 std::string HttpRequest::getMethod() { return (method_); }
