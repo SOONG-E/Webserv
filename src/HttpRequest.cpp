@@ -1,12 +1,21 @@
 #include "HttpRequest.hpp"
 
 HttpRequest::HttpRequest() {}
-HttpRequest::HttpRequest(const HttpRequest &origin) {}
+HttpRequest::HttpRequest(const HttpRequest &origin)
+    : method_(origin.method_),
+      url_(origin.url_),
+      host_(origin.host_),
+      body_(origin.body_),
+      header_(origin.header_) {}
 HttpRequest::~HttpRequest() {}
-HttpRequest HttpRequest::operator=(const HttpRequest &origin) { return *this; }
+HttpRequest HttpRequest::operator=(const HttpRequest &origin) {
+  HttpRequest out(origin);
+
+  return out;
+}
 
 void HttpRequest::setMethod(std::string method) {
-  for (int i = 0; i < methods->size(); ++i) {
+  for (std::size_t i = 0; i < methods->size(); ++i) {
     if (methods[i] == method) {
       method_ = method;
       return;

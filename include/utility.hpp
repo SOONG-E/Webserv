@@ -7,7 +7,7 @@
 bool isNumber(const std::string& str);
 std::string readFile(const char* filename);
 std::vector<std::string> split(const std::string& content,
-                               const std::string& delim);
+                               const std::string& delim = " \t\n\v\f\r");
 int stoi(const std::string& str);
 
 #endif
