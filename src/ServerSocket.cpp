@@ -45,7 +45,7 @@ Client ServerSocket::accept() const {
   if (client_socket == -1) throw SocketAcceptException(strerror(errno));
 
   const int buf_size = 65536;
-  if (setsockopt(client_socket, SOL_SOCKET, SO_RCVBUF, &MAX_BUF_SIZE,
+  if (setsockopt(client_socket, SOL_SOCKET, SO_RCVBUF, &buf_size,
                  sizeof(buf_size)) < 0)
     throw SocketSetFlagException(strerror(errno));
 
