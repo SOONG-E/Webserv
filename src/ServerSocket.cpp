@@ -44,11 +44,6 @@ Client ServerSocket::accept() const {
   int client_socket = ::accept(_socket, &client_addr, &client_addrlen);
   if (client_socket == -1) throw SocketAcceptException(strerror(errno));
 
-  const int buf_size = 65536;
-  if (setsockopt(client_socket, SOL_SOCKET, SO_RCVBUF, &buf_size,
-                 sizeof(buf_size)) < 0)
-    throw SocketSetFlagException(strerror(errno));
-
   if (fcntl(client_socket, F_SETFL, O_NONBLOCK) == -1)
     throw SocketSetFlagException(strerror(errno));
 
