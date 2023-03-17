@@ -1,7 +1,6 @@
 # Others
 .vscode
 .DS_Store
-webserv.conf
 
 # Prerequisites
 *.d
