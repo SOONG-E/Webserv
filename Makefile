@@ -1,17 +1,14 @@
 NAME = webserv
 
 CXX = c++
-# CXXFLAGS = -std=c++98 -MMD -MP# --save-temps
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -MMD -MP
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -MMD -MP -g# --save-temps
 
 SRCDIR = src
 INCDIR = include
 TMPDIR = tmp
 
-SRC = Config.cpp ConfigParser.cpp ServerBlock.cpp utility.cpp webserv.cpp
-
-SRCS = $(SRC)
-OBJS = $(addprefix $(TMPDIR)/,$(SRC:.cpp=.o))
+SRCS = $(wildcard $(SRCDIR)/*.cpp)
+OBJS = $(patsubst $(SRCDIR)/%.cpp, $(TMPDIR)/%.o, $(SRCS))
 DEPS = $(OBJS:.o=.d)
 
 .DEFAULT_GOAL = all
