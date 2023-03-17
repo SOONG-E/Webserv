@@ -1,10 +1,14 @@
 #include "ServerBlock.hpp"
 
+#include <cerrno>
+#include <cstdlib>
 #include <iostream>
 
+#include "ByteUnits.hpp"
 #include "constant.hpp"
+#include "exception.hpp"
 
-ServerBlock::ServerBlock() : body_limit_(kDefaults[kClientMaxBodySize]) {}
+ServerBlock::ServerBlock() { setBodyLimit(kDefaults[kClientMaxBodySize]); }
 
 ServerBlock::ServerBlock(const ServerBlock& origin)
     : listens_(origin.listens_),
@@ -30,8 +34,19 @@ const std::vector<Listen>& ServerBlock::getListens(void) const {
   return listens_;
 }
 
-void ServerBlock::setBodyLimit(const std::string& body_limit) {
-  body_limit_ = body_limit;
+void ServerBlock::setBodyLimit(const std::string& raw) {
+  static ByteUnits units;
+  char* unit;
+  body_limit_ = std::strtoul(raw.c_str(), &unit, 10);
+  if (errno == ERANGE) {
+    throw ConfigException(strerror(errno));
+  }
+  if (*unit == '\0') return;
+  try {
+    body_limit_ *= units.size.at(unit);
+  } catch (const std::out_of_range& e) {
+    throw ConfigException(kErrors[kToken]);
+  }
 }
 
 void ServerBlock::addListen(const std::string& socket_key) {
@@ -55,7 +70,7 @@ void ServerBlock::reset(void) {
   listens_.clear();
   server_names_.clear();
   error_pages_.clear();
-  body_limit_ = kDefaults[kClientMaxBodySize];
+  setBodyLimit(kDefaults[kClientMaxBodySize]);
   location_blocks_.clear();
 }
 

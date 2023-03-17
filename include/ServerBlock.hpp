@@ -32,7 +32,7 @@ class ServerBlock {
   std::vector<Listen> listens_;
   std::set<std::string> server_names_;
   std::map<std::string, std::string> error_pages_;
-  std::string body_limit_;
+  std::size_t body_limit_;
   std::vector<LocationBlock> location_blocks_;
 };
 
