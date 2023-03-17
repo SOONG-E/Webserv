@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "Client.hpp"
+#include "Config.hpp"
 #include "Selector.hpp"
 #include "ServerSocket.hpp"
 
