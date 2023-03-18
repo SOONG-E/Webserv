@@ -29,7 +29,7 @@ void ServerSocket::bind(const SocketAddress& address, int backlog) {
     throw SocketBindException(strerror(errno));
 
   if (fcntl(socket_, F_SETFL, O_NONBLOCK) == -1)
-    throw SocketSetFlagException(strerror(errno));
+    throw SocketBindException(strerror(errno));
 
   if (listen(socket_, backlog) == -1)
     throw SocketBindException(strerror(errno));
@@ -45,7 +45,7 @@ Client ServerSocket::accept() const {
   if (client_socket == -1) throw SocketAcceptException(strerror(errno));
 
   if (fcntl(client_socket, F_SETFL, O_NONBLOCK) == -1)
-    throw SocketSetFlagException(strerror(errno));
+    throw SocketAcceptException(strerror(errno));
 
   return Client(client_socket, SocketAddress(client_addr, client_addrlen),
                 address_);
@@ -67,13 +67,6 @@ ServerSocket::SocketBindException::SocketBindException(const char* cause)
     : cause(cause) {}
 
 const char* ServerSocket::SocketBindException::what() const throw() {
-  return cause;
-}
-
-ServerSocket::SocketSetFlagException::SocketSetFlagException(const char* cause)
-    : cause(cause) {}
-
-const char* ServerSocket::SocketSetFlagException::what() const throw() {
   return cause;
 }
 

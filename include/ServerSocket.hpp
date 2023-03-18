@@ -47,16 +47,6 @@ class ServerSocket {
     const char* what() const throw();
   };
 
-  class SocketSetFlagException : public std::exception {
-   public:
-    SocketSetFlagException(const char* cause);
-
-   private:
-    const char* cause;
-
-    const char* what() const throw();
-  };
-
   class SocketAcceptException : public std::exception {
    public:
     SocketAcceptException(const char* cause);
