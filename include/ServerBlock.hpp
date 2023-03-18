@@ -17,6 +17,7 @@ class ServerBlock {
   virtual ~ServerBlock();
 
   const std::vector<Listen>& getListens(void) const;
+  const std::set<std::string>& getServerNames(void) const;
 
   void addListen(const std::string& socket_key);
   void addServerName(const std::string& name);

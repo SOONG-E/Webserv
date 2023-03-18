@@ -35,6 +35,10 @@ const std::vector<Listen>& ServerBlock::getListens(void) const {
   return listens_;
 }
 
+const std::set<std::string>& ServerBlock::getServerNames(void) const {
+  return server_names_;
+}
+
 void ServerBlock::setBodyLimit(const std::string& raw) {
   static ByteUnits units;
   char* unit;
