@@ -33,6 +33,7 @@ class Client {
   const ServerBlock* server_block_;
 
   // exception
+ public:
   class SocketReceiveException : public std::exception {
    public:
     SocketReceiveException(const char* cause);
