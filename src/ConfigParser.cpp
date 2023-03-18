@@ -37,7 +37,7 @@ const Config& ConfigParser::parse(void) {
     parseServerBlock();
     config_.addServerBlock(server_block_);
   }
-  if (expect() != "") {
+  if (!expect().empty()) {
     throw ConfigException(kErrors[kToken]);
   }
   return config_;
@@ -170,7 +170,7 @@ void ConfigParser::parseIndex(void) {
 
 std::string ConfigParser::expect(const std::string& expected) {
   skipWhitespace();
-  if (expected != "") {
+  if (!expected.empty()) {
     if (content_.substr(pos_, expected.size()) != expected) {
       throw ConfigException(kErrors[kToken]);
     }
@@ -180,7 +180,7 @@ std::string ConfigParser::expect(const std::string& expected) {
   std::string token = "";
   std::string delim = ";{}";
   while (pos_ < content_.size() && !std::isspace(content_[pos_])) {
-    if (token != "" && delim.find(content_[pos_]) != std::string::npos) break;
+    if (!token.empty() && delim.find(content_[pos_]) != std::string::npos) break;
     token += content_[pos_];
     pos_ += 1;
   }
