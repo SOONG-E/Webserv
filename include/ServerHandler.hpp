@@ -1,12 +1,15 @@
 #ifndef SERVER_HANDLER_HPP
 #define SERVER_HANDLER_HPP
 
+#include <unistd.h>
+
 #include <list>
 #include <map>
 #include <vector>
 
 #include "Client.hpp"
 #include "Config.hpp"
+#include "HttpRequest.hpp"
 #include "Selector.hpp"
 #include "ServerSocket.hpp"
 
@@ -34,6 +37,10 @@ class ServerHandler {
   clients_type _clients;
   selector_type _server_selector;
   selector_type _client_selector;
+
+  const ServerBlock *getServerBlock(const std::string &key,
+                                    const std::string &server_name);
+  void closeConnection(int client_socket);
 };
 
 #endif

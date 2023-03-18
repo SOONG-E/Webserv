@@ -42,7 +42,8 @@ void ServerHandler::createServers() {
 
     ServerSocket server_socket;
     server_socket.open();
-    server_socket.bind(InetSocketAddress(ip, port), 128);
+    server_socket.bind(SocketAddress(ip, port), 128);
+
     _server_sockets.push_back(server_socket);
 
     _server_selector.registerSocket(server_socket.getSocket());
@@ -66,11 +67,43 @@ void ServerHandler::respondToClients() {
   if (_client_selector.select() > 0) {
     for (clients_type::iterator it = _clients.begin(); it != _clients.end();
          ++it) {
-      int client_socket = it->second.getSocket();
-      if (_client_selector.isSetRead(client_socket)) {
-      }
-      if (_client_selector.isSetWrite(client_socket)) {
+      Client *client = &it->second;
+
+      if (_client_selector.isSetRead(client->getSocket())) {
+        std::string buf = client->receive();
+        if (buf.empty()) {
+          closeConnection(client->getSocket());
+          continue;
+        }
+
+        HttpParser &parser = client->getParser();
+        const HttpRequest &request = parser.getRequest();
+
+        if (parser.getBuffer().empty()) {
+          parser.appendBuffer(buf);
+          const ServerBlock *server_block =
+              getServerBlock(client->getKey(), request.getHeader("Host"));
+          client->setServerBlock(server_block);
+        }
       }
     }
   }
+}
+
+const ServerBlock *ServerHandler::getServerBlock(
+    const std::string &key, const std::string &server_name) {
+  const std::vector<ServerBlock> &serv_blocks = _server_blocks[key];
+  for (size_t i = 0; i < serv_blocks.size(); ++i) {
+    const std::set<std::string> &serv_names = serv_blocks[i].getServerNames();
+    if (serv_names.find(server_name) != serv_names.end()) {
+      return &serv_blocks[i];
+    }
+  }
+  return &serv_blocks[0];
+}
+
+void ServerHandler::closeConnection(int client_socket) {
+  _clients.erase(client_socket);
+  _client_selector.clear(client_socket);
+  close(client_socket);
 }
