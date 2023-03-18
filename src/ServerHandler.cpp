@@ -70,7 +70,14 @@ void ServerHandler::respondToClients() {
       Client *client = &it->second;
 
       if (client_selector_.isSetRead(client->getSocket())) {
-        std::string buf = client->receive();
+        std::string buf;
+
+        try {
+          buf = client->receive();
+        } catch (const Client::SocketReceiveException &e) {
+          // 500 보내기
+        }
+
         if (buf.empty()) {
           closeConnection(client->getSocket());
           continue;
