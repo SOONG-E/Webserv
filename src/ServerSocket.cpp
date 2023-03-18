@@ -19,7 +19,7 @@ void ServerSocket::open() {
   if (_socket == -1) throw SocketOpenException(strerror(errno));
 }
 
-void ServerSocket::bind(const InetSocketAddress& address, int backlog) {
+void ServerSocket::bind(const SocketAddress& address, int backlog) {
   const int enable = 1;
   if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
     throw SocketBindException(strerror(errno));
@@ -47,12 +47,13 @@ Client ServerSocket::accept() const {
   if (fcntl(client_socket, F_SETFL, O_NONBLOCK) == -1)
     throw SocketSetFlagException(strerror(errno));
 
-  return Client(client_socket, InetSocketAddress(client_addr, client_addrlen));
+  return Client(client_socket, SocketAddress(client_addr, client_addrlen),
+                _address);
 }
 
 int ServerSocket::getSocket() const { return _socket; }
 
-const InetSocketAddress& ServerSocket::getAddress() const { return _address; }
+const SocketAddress& ServerSocket::getAddress() const { return _address; }
 
 // exception
 ServerSocket::SocketOpenException::SocketOpenException(const char* cause)

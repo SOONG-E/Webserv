@@ -5,7 +5,7 @@
 #include <sys/socket.h>
 
 #include "Client.hpp"
-#include "InetSocketAddress.hpp"
+#include "SocketAddress.hpp"
 #include "constant.hpp"
 
 class ServerSocket {
@@ -17,14 +17,14 @@ class ServerSocket {
   ServerSocket& operator=(const ServerSocket& src);
 
   void open();
-  void bind(const InetSocketAddress& address, int backlog);
+  void bind(const SocketAddress& address, int backlog);
   Client accept() const;
   int getSocket() const;
-  const InetSocketAddress& getAddress() const;
+  const SocketAddress& getAddress() const;
 
  private:
   int _socket;
-  InetSocketAddress _address;
+  SocketAddress _address;
 
  public:
   class SocketOpenException : public std::exception {
