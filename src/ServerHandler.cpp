@@ -77,14 +77,17 @@ void ServerHandler::respondToClients() {
         }
 
         HttpParser &parser = client->getParser();
+        parser.appendBuffer(buf);
+
         const HttpRequest &request = parser.getRequest();
 
-        if (parser.getBuffer().empty()) {
-          parser.appendBuffer(buf);
+        if (!client->getServerBlock()) {
           const ServerBlock *server_block =
               getServerBlock(client->getKey(), request.getHeader("Host"));
           client->setServerBlock(server_block);
         }
+        // 잘못된 요청은 파싱에서 처리하고, cliend_max_body_limit 넘거나
+        // Connection:close 등의 처리하고 응답해줘야함
       }
     }
   }
@@ -92,14 +95,15 @@ void ServerHandler::respondToClients() {
 
 const ServerBlock *ServerHandler::getServerBlock(
     const std::string &key, const std::string &server_name) {
-  const std::vector<ServerBlock> &serv_blocks = server_blocks_[key];
-  for (size_t i = 0; i < serv_blocks.size(); ++i) {
-    const std::set<std::string> &serv_names = serv_blocks[i].getServerNames();
-    if (serv_names.find(server_name) != serv_names.end()) {
-      return &serv_blocks[i];
+  const std::vector<ServerBlock> &blocks_of_key = server_blocks_[key];
+  for (size_t i = 0; i < blocks_of_key.size(); ++i) {
+    const std::set<std::string> &names_of_key =
+        blocks_of_key[i].getServerNames();
+    if (names_of_key.find(server_name) != names_of_key.end()) {
+      return &blocks_of_key[i];
     }
   }
-  return &serv_blocks[0];
+  return &blocks_of_key[0];
 }
 
 void ServerHandler::closeConnection(int client_socket) {
