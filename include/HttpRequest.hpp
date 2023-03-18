@@ -21,12 +21,13 @@ class HttpRequest {
   void setContentLength(std::size_t content_length);
   void addheader(std::string key, std::string value);
   void addheader(std::string key, std::vector<std::string> values);
-  std::string getHeader(std::string name);
-  std::string getMethod();
-  std::string getUrl();
-  std::string getHost();
-  std::string getBody();
-  std::size_t getContentLength();
+  std::string getHeader(std::string name) const;
+  std::string getMethod() const;
+  std::string getUrl() const;
+  std::string getHost() const;
+  std::string getBody() const;
+  std::size_t getContentLength() const;
+  bool isEmpty();
 
  private:
   std::string method_;
@@ -34,7 +35,7 @@ class HttpRequest {
   std::string host_;
   std::string body_;
   std::size_t content_length_;
-  std::map<std::string, std::vector<std::string> > header_;
+  std::map<std::string, std::vector<std::string> > headers_;
 };
 
 #endif
