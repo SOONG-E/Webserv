@@ -22,9 +22,11 @@ void ServerHandler::configureServer(const Config &config) {
 
   for (size_t i = 0; i < serv_info.size(); ++i) {
     const std::vector<Listen> &listens = serv_info[i].getListens();
+
     for (size_t i = 0; i < listens.size(); ++i) {
       if (server_blocks_.find(listens[i].socket_key) == server_blocks_.end()) {
         std::vector<ServerBlock> in(1, serv_info[i]);
+
         server_blocks_[listens[i].socket_key] = in;
       } else {
         server_blocks_[listens[i].socket_key].push_back(serv_info[i]);
@@ -71,7 +73,6 @@ void ServerHandler::respondToClients() {
 
       if (client_selector_.isSetRead(client->getSocket())) {
         std::string buf;
-
         try {
           buf = client->receive();
         } catch (const Client::SocketReceiveException &e) {
