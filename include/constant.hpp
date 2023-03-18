@@ -15,12 +15,15 @@ enum ErrorIndex {
   kToken,
 };
 
+const std::size_t HEADER_MAX_SIZE = 8192;
 const std::string kBase10 = "0123456789";
+const std::string kWhitespace = " \t\n\v\f\r";
+const std::string CRLF = "\r\n";
+const std::string DOUBLE_CRLF = "\r\n\r\n";
 const std::string kDefaults[] = {"0.0.0.0", "80", "1m"};
 const std::string kErrors[] = {"Error: ", "Invalid argument",
                                "File open failed", "Unexpected token"};
-
-const std::string methods[8] = {"OPTIONS", "GET",    "HEAD",  "POST",
-                                "PUT",     "DELETE", "TRACE", "CONNECT"};
+const std::string methods[] = {"OPTIONS", "GET",    "HEAD",  "POST",
+                               "PUT",     "DELETE", "TRACE", "CONNECT"};
 
 #endif
