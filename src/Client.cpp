@@ -3,8 +3,8 @@
 Client::Client(int socket, const SocketAddress& cli_addr,
                const SocketAddress& serv_addr)
     : socket_(socket),
-      cli_addr_(cli_addr),
-      serv_addr_(serv_addr),
+      cli_address_(cli_addr),
+      serv_address_(serv_addr),
       server_block_(NULL) {}
 
 Client::Client(const Client& src) { *this = src; }
@@ -13,8 +13,8 @@ Client::~Client() {}
 
 Client& Client::operator=(const Client& src) {
   socket_ = src.socket_;
-  cli_addr_ = src.cli_addr_;
-  serv_addr_ = src.serv_addr_;
+  cli_address_ = src.cli_address_;
+  serv_address_ = src.serv_address_;
   parser_ = src.parser_;
   server_block_ = src.server_block_;
 
@@ -26,8 +26,10 @@ int Client::getSocket() const { return socket_; }
 HttpParser& Client::getParser() { return parser_; }
 
 std::string Client::getKey() const {
-  return serv_addr_.getIP() + ":" + serv_addr_.getPort();
+  return serv_address_.getIP() + ":" + serv_address_.getPort();
 }
+
+const ServerBlock* Client::getServerBlock() const { return server_block_; }
 
 void Client::setServerBlock(const ServerBlock* server_block) {
   server_block_ = server_block;

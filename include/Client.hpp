@@ -21,13 +21,14 @@ class Client {
   int getSocket() const;
   HttpParser& getParser();
   std::string getKey() const;
+  const ServerBlock* getServerBlock() const;
   void setServerBlock(const ServerBlock* server_block);
   std::string receive() const;
 
  private:
   int socket_;
-  SocketAddress cli_addr_;
-  SocketAddress serv_addr_;
+  SocketAddress cli_address_;
+  SocketAddress serv_address_;
   HttpParser parser_;
   const ServerBlock* server_block_;
 
