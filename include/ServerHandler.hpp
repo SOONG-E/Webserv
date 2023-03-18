@@ -32,11 +32,11 @@ class ServerHandler {
   typedef std::map<int, Client> clients_type;
   typedef Selector selector_type;
 
-  server_blocks_type _server_blocks;
-  server_sockets_type _server_sockets;
-  clients_type _clients;
-  selector_type _server_selector;
-  selector_type _client_selector;
+  server_blocks_type server_blocks_;
+  server_sockets_type server_sockets_;
+  clients_type clients_;
+  selector_type server_selector_;
+  selector_type client_selector_;
 
   const ServerBlock *getServerBlock(const std::string &key,
                                     const std::string &server_name);

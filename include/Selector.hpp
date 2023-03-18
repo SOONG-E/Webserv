@@ -22,10 +22,10 @@ class Selector {
   bool isSetWrite(int fd) const;
 
  private:
-  int _max_fd;
-  fd_set _fds;
-  fd_set _read_fds;
-  fd_set _write_fds;
+  int max_fd_;
+  fd_set fds_;
+  fd_set read_fds_;
+  fd_set write_fds_;
 
   // exception
  public:

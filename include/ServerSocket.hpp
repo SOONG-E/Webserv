@@ -23,8 +23,8 @@ class ServerSocket {
   const SocketAddress& getAddress() const;
 
  private:
-  int _socket;
-  SocketAddress _address;
+  int socket_;
+  SocketAddress address_;
 
  public:
   class SocketOpenException : public std::exception {

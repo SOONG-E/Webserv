@@ -26,10 +26,10 @@ class SocketAddress {
   const std::string &getPort() const;
 
  private:
-  sockaddr _address;
-  socklen_t _address_len;
-  std::string _ip;
-  std::string _port;
+  sockaddr address_;
+  socklen_t address_len_;
+  std::string ip_;
+  std::string port_;
 };
 
 #endif

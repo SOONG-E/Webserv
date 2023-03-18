@@ -25,11 +25,11 @@ class Client {
   std::string receive() const;
 
  private:
-  int _socket;
-  SocketAddress _cli_addr;
-  SocketAddress _serv_addr;
-  HttpParser _parser;
-  const ServerBlock* _server_block;
+  int socket_;
+  SocketAddress cli_addr_;
+  SocketAddress serv_addr_;
+  HttpParser parser_;
+  const ServerBlock* server_block_;
 
   // exception
   class SocketReceiveException : public std::exception {

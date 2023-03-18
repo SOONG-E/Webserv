@@ -8,11 +8,11 @@ ServerHandler::~ServerHandler() {}
 
 ServerHandler &ServerHandler::operator=(const ServerHandler &src) {
   if (this != &src) {
-    _server_blocks = src._server_blocks;
-    _server_sockets = src._server_sockets;
-    _clients = src._clients;
-    _server_selector = src._server_selector;
-    _client_selector = src._client_selector;
+    server_blocks_ = src.server_blocks_;
+    server_sockets_ = src.server_sockets_;
+    clients_ = src.clients_;
+    server_selector_ = src.server_selector_;
+    client_selector_ = src.client_selector_;
   }
   return *this;
 }
@@ -23,19 +23,19 @@ void ServerHandler::configureServer(const Config &config) {
   for (size_t i = 0; i < serv_info.size(); ++i) {
     const std::vector<Listen> &listens = serv_info[i].getListens();
     for (size_t i = 0; i < listens.size(); ++i) {
-      if (_server_blocks.find(listens[i].socket_key) == _server_blocks.end()) {
+      if (server_blocks_.find(listens[i].socket_key) == server_blocks_.end()) {
         std::vector<ServerBlock> in(1, serv_info[i]);
-        _server_blocks[listens[i].socket_key] = in;
+        server_blocks_[listens[i].socket_key] = in;
       } else {
-        _server_blocks[listens[i].socket_key].push_back(serv_info[i]);
+        server_blocks_[listens[i].socket_key].push_back(serv_info[i]);
       }
     }
   }
 }
 
 void ServerHandler::createServers() {
-  for (server_blocks_type::const_iterator it = _server_blocks.begin();
-       it != _server_blocks.end(); ++it) {
+  for (server_blocks_type::const_iterator it = server_blocks_.begin();
+       it != server_blocks_.end(); ++it) {
     size_t pos = it->first.find(':');
     std::string ip = it->first.substr(0, pos);
     std::string port = it->first.substr(pos + 1);
@@ -44,32 +44,32 @@ void ServerHandler::createServers() {
     server_socket.open();
     server_socket.bind(SocketAddress(ip, port), 128);
 
-    _server_sockets.push_back(server_socket);
+    server_sockets_.push_back(server_socket);
 
-    _server_selector.registerSocket(server_socket.getSocket());
+    server_selector_.registerSocket(server_socket.getSocket());
   }
 }
 
 void ServerHandler::acceptConnections() {
-  if (_server_selector.select() > 0) {
-    for (size_t i = 0; i < _server_sockets.size(); ++i) {
-      if (_server_selector.isSetRead(_server_sockets[i].getSocket())) {
-        Client new_client = _server_sockets[i].accept();
+  if (server_selector_.select() > 0) {
+    for (size_t i = 0; i < server_sockets_.size(); ++i) {
+      if (server_selector_.isSetRead(server_sockets_[i].getSocket())) {
+        Client new_client = server_sockets_[i].accept();
 
-        _client_selector.registerSocket(new_client.getSocket());
-        _clients.insert(std::make_pair(new_client.getSocket(), new_client));
+        client_selector_.registerSocket(new_client.getSocket());
+        clients_.insert(std::make_pair(new_client.getSocket(), new_client));
       }
     }
   }
 }
 
 void ServerHandler::respondToClients() {
-  if (_client_selector.select() > 0) {
-    for (clients_type::iterator it = _clients.begin(); it != _clients.end();
+  if (client_selector_.select() > 0) {
+    for (clients_type::iterator it = clients_.begin(); it != clients_.end();
          ++it) {
       Client *client = &it->second;
 
-      if (_client_selector.isSetRead(client->getSocket())) {
+      if (client_selector_.isSetRead(client->getSocket())) {
         std::string buf = client->receive();
         if (buf.empty()) {
           closeConnection(client->getSocket());
@@ -92,7 +92,7 @@ void ServerHandler::respondToClients() {
 
 const ServerBlock *ServerHandler::getServerBlock(
     const std::string &key, const std::string &server_name) {
-  const std::vector<ServerBlock> &serv_blocks = _server_blocks[key];
+  const std::vector<ServerBlock> &serv_blocks = server_blocks_[key];
   for (size_t i = 0; i < serv_blocks.size(); ++i) {
     const std::set<std::string> &serv_names = serv_blocks[i].getServerNames();
     if (serv_names.find(server_name) != serv_names.end()) {
@@ -103,7 +103,7 @@ const ServerBlock *ServerHandler::getServerBlock(
 }
 
 void ServerHandler::closeConnection(int client_socket) {
-  _clients.erase(client_socket);
-  _client_selector.clear(client_socket);
+  clients_.erase(client_socket);
+  client_selector_.clear(client_socket);
   close(client_socket);
 }

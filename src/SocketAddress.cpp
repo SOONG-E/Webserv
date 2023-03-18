@@ -1,7 +1,7 @@
 #include "SocketAddress.hpp"
 
-SocketAddress::SocketAddress() : _address_len(0) {
-  memset(&_address, 0, sizeof(_address));
+SocketAddress::SocketAddress() : address_len_(0) {
+  memset(&address_, 0, sizeof(address_));
 }
 
 SocketAddress::SocketAddress(const std::string &ip, const std::string &port) {
@@ -16,50 +16,50 @@ SocketAddress::SocketAddress(const std::string &ip, const std::string &port) {
 
   if (result != 0) throw std::invalid_argument(gai_strerror(result));
 
-  _address = *(addr_info->ai_addr);
-  _address_len = addr_info->ai_addrlen;
+  address_ = *(addr_info->ai_addr);
+  address_len_ = addr_info->ai_addrlen;
 
-  _ip = ip;
-  _port = port;
+  ip_ = ip;
+  port_ = port;
 
   freeaddrinfo(addr_info);
 }
 
 SocketAddress::SocketAddress(const sockaddr &address,
                              const socklen_t address_len) {
-  _address = address;
-  _address_len = address_len;
+  address_ = address;
+  address_len_ = address_len;
 
-  sockaddr_in addr_in = *(reinterpret_cast<sockaddr_in *>(&_address));
+  sockaddr_in addr_in = *(reinterpret_cast<sockaddr_in *>(&address_));
 
   for (int i = 3; i >= 0; --i) {
-    _ip += toString((ntohl(addr_in.sin_addr.s_addr) >> (i * 8)) & 0xFF);
+    ip_ += toString((ntohl(addr_in.sin_addr.s_addr) >> (i * 8)) & 0xFF);
     if (i == 0) break;
-    _ip += ".";
+    ip_ += ".";
   }
-  _port = toString(ntohs(addr_in.sin_port));
+  port_ = toString(ntohs(addr_in.sin_port));
 }
 
 SocketAddress::SocketAddress(const SocketAddress &src) { *this = src; }
 
 SocketAddress &SocketAddress::operator=(const SocketAddress &src) {
   if (this != &src) {
-    _address = src._address;
-    _address_len = src._address_len;
-    _ip = src._ip;
-    _port = src._port;
+    address_ = src.address_;
+    address_len_ = src.address_len_;
+    ip_ = src.ip_;
+    port_ = src.port_;
   }
   return *this;
 }
 
 SocketAddress::~SocketAddress() {}
 
-sockaddr &SocketAddress::getAddress() { return _address; }
+sockaddr &SocketAddress::getAddress() { return address_; }
 
-const sockaddr &SocketAddress::getAddress() const { return _address; }
+const sockaddr &SocketAddress::getAddress() const { return address_; }
 
-socklen_t SocketAddress::getAddressLen() const { return _address_len; }
+socklen_t SocketAddress::getAddressLen() const { return address_len_; }
 
-const std::string &SocketAddress::getIP() const { return _ip; }
+const std::string &SocketAddress::getIP() const { return ip_; }
 
-const std::string &SocketAddress::getPort() const { return _port; }
+const std::string &SocketAddress::getPort() const { return port_; }

@@ -1,59 +1,59 @@
 #include "ServerSocket.hpp"
 
-ServerSocket::ServerSocket() : _socket(-1) {}
+ServerSocket::ServerSocket() : socket_(-1) {}
 
 ServerSocket::ServerSocket(const ServerSocket& src) { *this = src; }
 
 ServerSocket::~ServerSocket() {}
 
 ServerSocket& ServerSocket::operator=(const ServerSocket& src) {
-  _socket = src._socket;
-  _address = src._address;
+  socket_ = src.socket_;
+  address_ = src.address_;
 
   return *this;
 }
 
 void ServerSocket::open() {
-  if (_socket != -1) throw SocketOpenException("already open");
-  _socket = socket(AF_INET, SOCK_STREAM, 0);
-  if (_socket == -1) throw SocketOpenException(strerror(errno));
+  if (socket_ != -1) throw SocketOpenException("already open");
+  socket_ = socket(AF_INET, SOCK_STREAM, 0);
+  if (socket_ == -1) throw SocketOpenException(strerror(errno));
 }
 
 void ServerSocket::bind(const SocketAddress& address, int backlog) {
   const int enable = 1;
-  if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+  if (setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
     throw SocketBindException(strerror(errno));
 
-  if (::bind(_socket, (sockaddr*)&address.getAddress(),
+  if (::bind(socket_, (sockaddr*)&address.getAddress(),
              address.getAddressLen()) == -1)
     throw SocketBindException(strerror(errno));
 
-  if (fcntl(_socket, F_SETFL, O_NONBLOCK) == -1)
+  if (fcntl(socket_, F_SETFL, O_NONBLOCK) == -1)
     throw SocketSetFlagException(strerror(errno));
 
-  if (listen(_socket, backlog) == -1)
+  if (listen(socket_, backlog) == -1)
     throw SocketBindException(strerror(errno));
 
-  _address = address;
+  address_ = address;
 }
 
 Client ServerSocket::accept() const {
   sockaddr client_addr;
   socklen_t client_addrlen;
 
-  int client_socket = ::accept(_socket, &client_addr, &client_addrlen);
+  int client_socket = ::accept(socket_, &client_addr, &client_addrlen);
   if (client_socket == -1) throw SocketAcceptException(strerror(errno));
 
   if (fcntl(client_socket, F_SETFL, O_NONBLOCK) == -1)
     throw SocketSetFlagException(strerror(errno));
 
   return Client(client_socket, SocketAddress(client_addr, client_addrlen),
-                _address);
+                address_);
 }
 
-int ServerSocket::getSocket() const { return _socket; }
+int ServerSocket::getSocket() const { return socket_; }
 
-const SocketAddress& ServerSocket::getAddress() const { return _address; }
+const SocketAddress& ServerSocket::getAddress() const { return address_; }
 
 // exception
 ServerSocket::SocketOpenException::SocketOpenException(const char* cause)
