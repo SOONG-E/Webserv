@@ -27,6 +27,10 @@ std::string readFile(const char* filename) {
   return content.str();
 }
 
+std::string readFile(const std::string& filename) {
+  return readFile(filename.c_str());
+}
+
 std::vector<std::string> split(const std::string& content,
                                const std::string& delim) {
   std::vector<std::string> substrings;
