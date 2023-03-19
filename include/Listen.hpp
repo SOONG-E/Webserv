@@ -6,10 +6,10 @@
 #include "utility.hpp"
 
 struct Listen {
-  Listen() : host(kDefaults[kHost]), port(kDefaults[kPort]) {}
+  Listen() : host(DEFAULTS[HOST]), port(DEFAULTS[PORT]) {}
 
   explicit Listen(const std::string& token)
-      : host(kDefaults[kHost]), port(kDefaults[kPort]) {
+      : host(DEFAULTS[HOST]), port(DEFAULTS[PORT]) {
     std::vector<std::string> splitted = split(token, ":");
     if (splitted.size() == 1) {
       if (isNumber(splitted[0])) {
@@ -21,7 +21,7 @@ struct Listen {
       host = splitted[0];
       port = splitted[1];
     } else {
-      throw ConfigException(kErrors[kToken]);
+      throw ConfigException(ERRORS[TOKEN]);
     }
     socket_key = host + ":" + port;
   }

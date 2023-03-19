@@ -6,14 +6,14 @@
 #include "exception.hpp"
 
 std::string trim(std::string str) {
-  std::size_t start = str.find_first_not_of(kWhitespace);
-  std::size_t end = str.find_last_not_of(kWhitespace);
+  std::size_t start = str.find_first_not_of(WHITESPACE);
+  std::size_t end = str.find_last_not_of(WHITESPACE);
 
   return (str.substr(start, end + 1));
 }
 
 bool isNumber(const std::string& str) {
-  return str.find_first_not_of(kBase10) == std::string::npos;
+  return str.find_first_not_of(BASE10) == std::string::npos;
 }
 
 std::string readFile(const char* filename) {

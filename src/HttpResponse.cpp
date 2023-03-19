@@ -34,7 +34,7 @@ std::string HttpResponse::getDate() const {
 std::string HttpResponse::generate(const HttpRequest& request,
                                    const ServerBlock* server_block) {
   if (code_ != "200") {
-    body_ = readFile(kDefaults[kErrorPage]);
+    body_ = readFile(DEFAULTS[ERROR_PAGE]);
     generateHeader();
     return header_ + body_;
   }
@@ -49,7 +49,7 @@ std::string HttpResponse::generate(const HttpRequest& request,
     }
   }
   if (body_.empty()) {
-    body_ = readFile(kDefaults[kErrorPage]);
+    body_ = readFile(DEFAULTS[ERROR_PAGE]);
     code_ = "404";
     reason_ = "Not Found";
   }

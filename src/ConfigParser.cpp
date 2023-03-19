@@ -38,7 +38,7 @@ const Config& ConfigParser::parse(void) {
     config_.addServerBlock(server_block_);
   }
   if (!expect().empty()) {
-    throw ConfigException(kErrors[kToken]);
+    throw ConfigException(ERRORS[TOKEN]);
   }
   return config_;
 }
@@ -67,7 +67,7 @@ void ConfigParser::parseServerBlock(void) {
       parseLocationBlock();
       server_block_.addLocationBlock(location_block_);
     } else {
-      throw ConfigException(kErrors[kToken]);
+      throw ConfigException(ERRORS[TOKEN]);
     }
   }
   expect("}");
@@ -125,7 +125,7 @@ void ConfigParser::parseLocationBlock(void) {
     } else if (token == "index") {
       parseIndex();
     } else {
-      throw ConfigException(kErrors[kToken]);
+      throw ConfigException(ERRORS[TOKEN]);
     }
   }
   expect("}");
@@ -174,7 +174,7 @@ std::string ConfigParser::expect(const std::string& expected) {
   skipWhitespace();
   if (!expected.empty()) {
     if (content_.substr(pos_, expected.size()) != expected) {
-      throw ConfigException(kErrors[kToken]);
+      throw ConfigException(ERRORS[TOKEN]);
     }
     pos_ += expected.size();
     return expected;

@@ -9,7 +9,7 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-ServerBlock::ServerBlock() { setBodyLimit(kDefaults[kClientMaxBodySize]); }
+ServerBlock::ServerBlock() { setBodyLimit(DEFAULTS[CLIENT_MAX_BODY_SIZE]); }
 
 ServerBlock::ServerBlock(const ServerBlock& origin)
     : listens_(origin.listens_),
@@ -54,7 +54,7 @@ void ServerBlock::setBodyLimit(const std::string& raw) {
   try {
     body_limit_ *= units.size.at(unit);
   } catch (const std::out_of_range& e) {
-    throw ConfigException(kErrors[kToken]);
+    throw ConfigException(ERRORS[TOKEN]);
   }
 }
 
@@ -79,7 +79,7 @@ void ServerBlock::reset(void) {
   listens_.clear();
   server_names_.clear();
   error_pages_.clear();
-  setBodyLimit(kDefaults[kClientMaxBodySize]);
+  setBodyLimit(DEFAULTS[CLIENT_MAX_BODY_SIZE]);
   location_blocks_.clear();
 }
 

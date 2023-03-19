@@ -9,7 +9,7 @@
 class ExceptionTemplate : public std::runtime_error {
  public:
   explicit ExceptionTemplate(const std::string& err_info)
-      : std::runtime_error(kErrors[kPrefix] + err_info) {}
+      : std::runtime_error(ERRORS[PREFIX] + err_info) {}
 };
 
 #endif

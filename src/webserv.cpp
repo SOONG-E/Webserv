@@ -8,7 +8,7 @@
 
 int main(int argc, char* argv[]) {
   if (argc != 2) {
-    std::cerr << kErrors[kPrefix] << kErrors[kArg] << '\n';
+    std::cerr << ERRORS[PREFIX] << ERRORS[ARG] << '\n';
     return EXIT_FAILURE;
   }
   try {
