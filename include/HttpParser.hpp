@@ -10,13 +10,19 @@ class HttpParser {
   // 400
   class BadRequestException : public ExceptionTemplate {
    public:
-    BadRequestException() : ExceptionTemplate("Bad request") {}
+    BadRequestException() : ExceptionTemplate("Bad Request") {}
+  };
+
+  // 411
+  class LengthRequired : public ExceptionTemplate {
+   public:
+    LengthRequired() : ExceptionTemplate("Length Required") {}
   };
 
   // 413
   class PayloadTooLargeException : public ExceptionTemplate {
    public:
-    PayloadTooLargeException() : ExceptionTemplate("Payload too large") {}
+    PayloadTooLargeException() : ExceptionTemplate("Payload Too Large") {}
   };
 
   // 505
@@ -34,14 +40,14 @@ class HttpParser {
   std::size_t getContentLength(void);
   const HttpRequest& getRequest(void) const;
   const std::string& getBuffer(void) const;
+  std::size_t getBoundPos(void) const;
 
   void appendBuffer(const std::string& socket_buffer);
-  bool isBodySet(void) const;
-
- private:
   void setHeader(void);
   void handlePost(void);
+  bool isCompleted(void) const;
 
+ private:
   static HttpRequest parseHeader(const std::string& request);
   static void parseRequestLine(HttpRequest& http_request,
                                const std::string& request);

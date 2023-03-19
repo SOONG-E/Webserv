@@ -32,12 +32,10 @@ const HttpRequest& HttpParser::getRequest(void) const { return request_; }
 
 const std::string& HttpParser::getBuffer(void) const { return buffer_; }
 
+std::size_t HttpParser::getBoundPos(void) const { return bound_pos_; }
+
 void HttpParser::appendBuffer(const std::string& socket_buffer) {
   buffer_ += socket_buffer;
-  if (bound_pos_ == 0) {
-    setHeader();
-  }
-  handlePost();
 }
 
 bool HttpParser::isBodySet(void) const { return !request_.getBody().empty(); }
@@ -60,7 +58,7 @@ void HttpParser::handlePost(void) {
     return;
   }
   if (request_.getHeader("Transfer-Encoding") != "chunked") {
-    throw BadRequestException();
+    throw LengthRequired();
   }
   if (buffer_.find(DOUBLE_CRLF, bound_pos_) == std::string::npos) return;
   unchunkMessage(request_, buffer_.substr(bound_pos_));
