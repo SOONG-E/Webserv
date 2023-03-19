@@ -6,6 +6,8 @@
 #include "utility.hpp"
 
 struct Listen {
+  Listen() : host(kDefaults[kHost]), port(kDefaults[kPort]) {}
+
   explicit Listen(const std::string& token)
       : host(kDefaults[kHost]), port(kDefaults[kPort]) {
     std::vector<std::string> splitted = split(token, ":");
