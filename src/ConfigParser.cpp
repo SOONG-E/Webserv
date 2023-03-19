@@ -119,6 +119,8 @@ void ConfigParser::parseLocationBlock(void) {
     } else if (token == "return") {
       parseReturn();
     } else if (token == "root") {
+      parseRoot();
+    } else if (token == "autoindex") {
       parseAutoindex();
     } else if (token == "index") {
       parseIndex();
@@ -180,7 +182,8 @@ std::string ConfigParser::expect(const std::string& expected) {
   std::string token = "";
   std::string delim = ";{}";
   while (pos_ < content_.size() && !std::isspace(content_[pos_])) {
-    if (!token.empty() && delim.find(content_[pos_]) != std::string::npos) break;
+    if (!token.empty() && delim.find(content_[pos_]) != std::string::npos)
+      break;
     token += content_[pos_];
     pos_ += 1;
   }
