@@ -1,5 +1,7 @@
 #include "ServerHandler.hpp"
 
+#include "constant.hpp"
+
 ServerHandler::ServerHandler() {}
 
 ServerHandler::ServerHandler(const ServerHandler &src) { *this = src; }
@@ -72,12 +74,7 @@ void ServerHandler::respondToClients() {
       Client *client = &it->second;
 
       if (client_selector_.isSetRead(client->getSocket())) {
-        std::string buf;
-        try {
-          buf = client->receive();
-        } catch (const Client::SocketReceiveException &e) {
-          // 500 보내기
-        }
+        std::string buf = client->receive();
 
         if (buf.empty()) {
           closeConnection(client->getSocket());
@@ -86,16 +83,27 @@ void ServerHandler::respondToClients() {
 
         HttpParser &parser = client->getParser();
         parser.appendBuffer(buf);
+        try {
+          if (parser.getBoundPos() == 0) {
+            parser.setHeader();
+          }
+          parser.handlePost();
+        } catch (const HttpParser::BadRequestException &e) {
+          sendErrorPage("400", "Bad Request", client);
+        } catch (const HttpParser::LengthRequired &e) {
+          sendErrorPage("411", "Length Required", client);
+        } catch (const HttpParser::PayloadTooLargeException &e) {
+          sendErrorPage("413", "Payload Too Large", client);
+        }
 
-        const HttpRequest &request = parser.getRequest();
-
-        if (!client->getServerBlock()) {
+        if (parser.isCompleted() &&
+            client_selector_.isSetWrite(client->getSocket())) {
+          const HttpRequest &request = parser.getRequest();
           const ServerBlock *server_block =
               getServerBlock(client->getKey(), request.getHeader("Host"));
-          client->setServerBlock(server_block);
+
+          client->send(server_block);
         }
-        // 잘못된 요청은 파싱에서 처리하고, cliend_max_body_limit 넘거나
-        // Connection:close 등의 처리하고 응답해줘야함
       }
     }
   }
@@ -118,4 +126,10 @@ void ServerHandler::closeConnection(int client_socket) {
   clients_.erase(client_socket);
   client_selector_.clear(client_socket);
   close(client_socket);
+}
+
+void ServerHandler::sendErrorPage(const std::string &response_code,
+                                  const std::string &msg, Client *client) {
+  client->getHttpResponse().setCode(response_code);
+  std::string content = readFile(kDefaults[kErrorPage]);
 }
