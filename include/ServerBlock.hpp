@@ -18,6 +18,7 @@ class ServerBlock {
 
   const std::vector<Listen>& getListens(void) const;
   const std::set<std::string>& getServerNames(void) const;
+  const std::vector<LocationBlock>& getLocationBlocks(void) const;
 
   void addListen(const std::string& socket_key);
   void addServerName(const std::string& name);

@@ -39,6 +39,10 @@ const std::set<std::string>& ServerBlock::getServerNames(void) const {
   return server_names_;
 }
 
+const std::vector<LocationBlock>& ServerBlock::getLocationBlocks(void) const {
+  return location_blocks_;
+}
+
 void ServerBlock::setBodyLimit(const std::string& raw) {
   static ByteUnits units;
   char* unit;
