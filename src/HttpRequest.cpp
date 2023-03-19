@@ -3,7 +3,7 @@
 HttpRequest::HttpRequest() : content_length_(0) {}
 HttpRequest::HttpRequest(const HttpRequest &origin)
     : method_(origin.method_),
-      url_(origin.url_),
+      uri_(origin.uri_),
       host_(origin.host_),
       body_(origin.body_),
       headers_(origin.headers_),
@@ -16,8 +16,8 @@ HttpRequest HttpRequest::operator=(const HttpRequest &origin) {
 }
 
 void HttpRequest::setMethod(std::string method) {
-  for (std::size_t i = 0; i < methods->size(); ++i) {
-    if (methods[i] == method) {
+  for (std::size_t i = 0; i < METHODS_COUNT; ++i) {
+    if (METHODS[i] == method) {
       method_ = method;
       return;
     }
@@ -25,7 +25,7 @@ void HttpRequest::setMethod(std::string method) {
   throw std::exception();
 }
 
-void HttpRequest::setUrl(std::string url) { url_ = url; }
+void HttpRequest::setUri(std::string uri) { uri_ = uri; }
 
 void HttpRequest::setHost(std::string host) { host_ = host; }
 
@@ -56,13 +56,8 @@ std::string HttpRequest::getHeader(std::string name) {
   return "";
 }
 
-bool HttpRequest::isEmpty() {
-  if (method_.length() == 0) return true;
-  return false;
-}
-
 std::string HttpRequest::getMethod() { return (method_); }
-std::string HttpRequest::getUrl() { return (url_); }
+std::string HttpRequest::getUri() { return (uri_); }
 std::string HttpRequest::getHost() { return (host_); }
 std::string HttpRequest::getBody() { return (body_); }
 std::size_t HttpRequest::getContentLength() { return (content_length_); }

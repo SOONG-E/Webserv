@@ -15,7 +15,7 @@ class HttpRequest {
   HttpRequest operator=(const HttpRequest &origin);
 
   void setMethod(std::string method);
-  void setUrl(std::string url);
+  void setUri(std::string uri);
   void setHost(std::string host);
   void setBody(std::string body);
   void setContentLength(std::size_t content_length);
@@ -23,19 +23,20 @@ class HttpRequest {
   void addheader(std::string key, std::vector<std::string> values);
   std::string getHeader(std::string name) const;
   std::string getMethod() const;
-  std::string getUrl() const;
+  std::string getUri() const;
   std::string getHost() const;
   std::string getBody() const;
   std::size_t getContentLength() const;
-  bool isEmpty();
 
  private:
+  typedef std::map<std::string, std::vector<std::string> > header_type;
+
   std::string method_;
-  std::string url_;
+  std::string uri_;
   std::string host_;
   std::string body_;
   std::size_t content_length_;
-  std::map<std::string, std::vector<std::string> > headers_;
+  header_type headers_;
 };
 
 #endif
