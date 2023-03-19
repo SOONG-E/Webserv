@@ -2,34 +2,32 @@
 #define HTTP_PARSER_HPP_
 
 #include "HttpRequest.hpp"
+#include "ResponseStatus.hpp"
 #include "exception.hpp"
 #include "utility.hpp"
 
 class HttpParser {
  public:
-  // 400
   class BadRequestException : public ExceptionTemplate {
    public:
-    BadRequestException() : ExceptionTemplate("Bad Request") {}
+    BadRequestException() : ExceptionTemplate(ReponseStatus::REASONS[C400]) {}
   };
 
-  // 411
   class LengthRequired : public ExceptionTemplate {
    public:
-    LengthRequired() : ExceptionTemplate("Length Required") {}
+    LengthRequired() : ExceptionTemplate(ReponseStatus::REASONS[C411]) {}
   };
 
-  // 413
   class PayloadTooLargeException : public ExceptionTemplate {
    public:
-    PayloadTooLargeException() : ExceptionTemplate("Payload Too Large") {}
+    PayloadTooLargeException()
+        : ExceptionTemplate(ReponseStatus::REASONS[C413]) {}
   };
 
-  // 505
   class HttpVersionNotSupportedException : public ExceptionTemplate {
    public:
     HttpVersionNotSupportedException()
-        : ExceptionTemplate("HTTP Version Not Supported") {}
+        : ExceptionTemplate(ReponseStatus::REASONS[C505]) {}
   };
 
   explicit HttpParser(const std::string& socket_buffer = "");

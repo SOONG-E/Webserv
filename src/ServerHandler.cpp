@@ -1,5 +1,6 @@
 #include "ServerHandler.hpp"
 
+#include "ResponseStatus.hpp"
 #include "constant.hpp"
 
 ServerHandler::ServerHandler() {}
@@ -89,11 +90,11 @@ void ServerHandler::respondToClients() {
           }
           parser.handlePost();
         } catch (const HttpParser::BadRequestException &e) {
-          sendErrorPage("400", "Bad Request", client);
+          sendErrorPage("400", ReponseStatus::REASONS[C400], client);
         } catch (const HttpParser::LengthRequired &e) {
-          sendErrorPage("411", "Length Required", client);
+          sendErrorPage("411", ReponseStatus::REASONS[C411], client);
         } catch (const HttpParser::PayloadTooLargeException &e) {
-          sendErrorPage("413", "Payload Too Large", client);
+          sendErrorPage("413", ReponseStatus::REASONS[C413], client);
         }
 
         if (parser.isCompleted() &&
