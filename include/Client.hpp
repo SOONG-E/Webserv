@@ -3,9 +3,11 @@
 
 #define BUF_SIZE 65536
 
+#include <cstring>
 #include <string>
 
 #include "HttpParser.hpp"
+#include "HttpResponse.hpp"
 #include "ServerBlock.hpp"
 #include "SocketAddress.hpp"
 
@@ -21,22 +23,34 @@ class Client {
   int getSocket() const;
   HttpParser& getParser();
   std::string getKey() const;
-  const ServerBlock* getServerBlock() const;
-  void setServerBlock(const ServerBlock* server_block);
+  HttpResponse& getHttpResponse();
+
   std::string receive() const;
+  void send(const ServerBlock* server_block);
 
  private:
   int socket_;
   SocketAddress cli_address_;
   SocketAddress serv_address_;
   HttpParser parser_;
-  const ServerBlock* server_block_;
+  HttpResponse response_;
+  std::string backup_;
 
   // exception
  public:
   class SocketReceiveException : public std::exception {
    public:
     SocketReceiveException(const char* cause);
+
+   private:
+    const char* cause;
+
+    const char* what() const throw();
+  };
+
+  class SocketSendException : public std::exception {
+   public:
+    SocketSendException(const char* cause);
 
    private:
     const char* cause;

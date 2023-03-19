@@ -2,10 +2,7 @@
 
 Client::Client(int socket, const SocketAddress& cli_addr,
                const SocketAddress& serv_addr)
-    : socket_(socket),
-      cli_address_(cli_addr),
-      serv_address_(serv_addr),
-      server_block_(NULL) {}
+    : socket_(socket), cli_address_(cli_addr), serv_address_(serv_addr) {}
 
 Client::Client(const Client& src) { *this = src; }
 
@@ -16,7 +13,6 @@ Client& Client::operator=(const Client& src) {
   cli_address_ = src.cli_address_;
   serv_address_ = src.serv_address_;
   parser_ = src.parser_;
-  server_block_ = src.server_block_;
 
   return *this;
 }
@@ -29,11 +25,7 @@ std::string Client::getKey() const {
   return serv_address_.getIP() + ":" + serv_address_.getPort();
 }
 
-const ServerBlock* Client::getServerBlock() const { return server_block_; }
-
-void Client::setServerBlock(const ServerBlock* server_block) {
-  server_block_ = server_block;
-}
+HttpResponse& Client::getHttpResponse() { return response_; }
 
 std::string Client::receive() const {
   char buf[BUF_SIZE] = {0};
@@ -44,9 +36,27 @@ std::string Client::receive() const {
   return std::string(buf, static_cast<size_t>(read_bytes));
 }
 
+void Client::send(const ServerBlock* server_block) {
+  std::string response = response_.generate(parser_.getRequest(), server_block);
+  response = backup_ + response;
+  size_t response_size = response.size();
+
+  ssize_t write_bytes = ::send(socket_, response.c_str(), response_size, 0);
+
+  if (write_bytes == -1) throw SocketSendException(strerror(errno));
+  if (write_bytes < response_size) {
+    backup_ = response.substr(write_bytes);
+  }
+}
+
 Client::SocketReceiveException::SocketReceiveException(const char* cause)
     : cause(cause) {}
 
 const char* Client::SocketReceiveException::what() const throw() {
   return cause;
 }
+
+Client::SocketSendException::SocketSendException(const char* cause)
+    : cause(cause) {}
+
+const char* Client::SocketSendException::what() const throw() { return cause; }
