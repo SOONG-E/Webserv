@@ -8,6 +8,8 @@
 
 class HttpResponse {
  public:
+  static const std::string DEFAULT_CODE;
+
   HttpResponse();
   HttpResponse(const HttpResponse& origin);
   HttpResponse& operator=(const HttpResponse& origin);
@@ -30,5 +32,7 @@ class HttpResponse {
   std::string header_;
   std::string body_;
 };
+
+const std::string HttpResponse::DEFAULT_CODE = "200";
 
 #endif

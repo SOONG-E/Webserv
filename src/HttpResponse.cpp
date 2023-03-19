@@ -1,6 +1,9 @@
 #include "HttpResponse.hpp"
 
-HttpResponse::HttpResponse() : code_("200"), reason_("OK") {}
+#include "ResponseStatus.hpp"
+
+HttpResponse::HttpResponse()
+    : code_(DEFAULT_CODE), reason_(ReponseStatus::REASONS[C200]) {}
 
 HttpResponse::HttpResponse(const HttpResponse& origin) {}
 
@@ -33,7 +36,7 @@ std::string HttpResponse::getDate() const {
 
 std::string HttpResponse::generate(const HttpRequest& request,
                                    const ServerBlock* server_block) {
-  if (code_ != "200") {
+  if (code_ != DEFAULT_CODE) {
     body_ = readFile(DEFAULTS[ERROR_PAGE]);
     generateHeader();
     return header_ + body_;
@@ -51,7 +54,7 @@ std::string HttpResponse::generate(const HttpRequest& request,
   if (body_.empty()) {
     body_ = readFile(DEFAULTS[ERROR_PAGE]);
     code_ = "404";
-    reason_ = "Not Found";
+    reason_ = ReponseStatus::REASONS[C404];
   }
   generateHeader();
   return header_ + body_;
