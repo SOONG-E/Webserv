@@ -1,14 +1,17 @@
+#include "HttpParser.hpp"
+
 #include <exception>
 #include <iostream>
 
-#include "HttpParser.hpp"
 #include "constant.hpp"
 
 HttpParser::HttpParser(const std::string& socket_buffer)
     : buffer_(socket_buffer), bound_pos_(0) {}
 
 HttpParser::HttpParser(const HttpParser& origin)
-    : request_(origin.request_), buffer_(origin.buffer_), bound_pos_(origin.bound_pos_) {}
+    : request_(origin.request_),
+      buffer_(origin.buffer_),
+      bound_pos_(origin.bound_pos_) {}
 
 HttpParser& HttpParser::operator=(const HttpParser& origin) {
   if (this != &origin) {
@@ -37,9 +40,13 @@ void HttpParser::appendBuffer(const std::string& socket_buffer) {
   handlePost();
 }
 
+bool HttpParser::isBodySet(void) const { return !request_.getBody().empty(); }
+
 void HttpParser::setHeader(void) {
   bound_pos_ = buffer_.find(DOUBLE_CRLF);
-  if (bound_pos_ == std::string::npos || bound_pos_ > HEADER_MAX_SIZE) throw;  // 413 ERROR
+  if (bound_pos_ == std::string::npos || bound_pos_ > HEADER_MAX_SIZE) {
+    throw PayloadTooLargeException();
+  }
   request_ = HttpParser::parseHeader(buffer_.substr(0, bound_pos_ + 1));
   bound_pos_ += DOUBLE_CRLF.size();
 }
@@ -53,7 +60,7 @@ void HttpParser::handlePost(void) {
     return;
   }
   if (request_.getHeader("Transfer-Encoding") != "chunked") {
-    throw;
+    throw BadRequestException();
   }
   if (buffer_.find(DOUBLE_CRLF, bound_pos_) == std::string::npos) return;
   unchunkMessage(request_, buffer_.substr(bound_pos_));
@@ -74,21 +81,26 @@ HttpRequest HttpParser::parseHeader(const std::string& request) {
 void HttpParser::parseRequestLine(HttpRequest& request_,
                                   const std::string& request) {
   std::vector<std::string> request_line = split(request);
-  if (request_line.size() < 3) throw std::exception();
-  if (request_line[2] != "HTTP/1.1") throw std::exception();
+  if (request_line.size() < 3 || request_line[2].length() < 6 ||
+      request_line[2].substr(0, 4) != "HTTP") {
+    throw BadRequestException();
+  }
+  if (request_line[2].substr(0, 5) != "HTTP/" ||
+      request_line[2].substr(6) != "1.1") {
+    throw HttpVersionNotSupportedException();
+  }
   request_.setMethod(request_line[0]);
   request_.setUrl(request_line[1]);
 }
 
 void HttpParser::parseHeaders(HttpRequest& request_, std::string header_part) {
   std::vector<std::string> headers = splitByCRLF(header_part);
-
   std::vector<std::string> line;
   for (std::vector<std::string>::iterator header = headers.begin();
        header != headers.end(); ++header) {
     if (header->length() == 0) break;
     line = split(*header, ":");
-    if (line.size() < 2) throw std::exception();
+    if (line.size() < 2) throw BadRequestException();
     request_.addheader(trim(line[0]), trim(line[1]));
   }
   request_.setHost(request_.getHeader("Host"));
@@ -100,13 +112,13 @@ void HttpParser::unchunkMessage(HttpRequest& request_, std::string body) {
   std::size_t chunk_size = 0;
 
   std::vector<std::string> chunks = splitByCRLF(body);
-  if (chunks.size() < 1) throw std::exception();
+  if (chunks.size() < 1) throw BadRequestException();
 
   chunk_size = hexToInt(chunks[0]);
   std::size_t idx = 1;
   while (chunk_size && idx + 1 < chunks.size()) {
     content_length += chunk_size;
-    if (chunks[idx].length() != chunk_size) throw std::exception();
+    if (chunks[idx].length() != chunk_size) throw BadRequestException();
     content += chunks[idx++];
     chunk_size = hexToInt(chunks[idx++]);
   }

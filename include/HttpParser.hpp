@@ -2,11 +2,30 @@
 #define HTTP_PARSER_HPP_
 
 #include "HttpRequest.hpp"
-#include "constant.hpp"
+#include "exception.hpp"
 #include "utility.hpp"
 
 class HttpParser {
  public:
+  // 400
+  class BadRequestException : public ExceptionTemplate {
+   public:
+    BadRequestException() : ExceptionTemplate("Bad request") {}
+  };
+
+  // 413
+  class PayloadTooLargeException : public ExceptionTemplate {
+   public:
+    PayloadTooLargeException() : ExceptionTemplate("Payload too large") {}
+  };
+
+  // 505
+  class HttpVersionNotSupportedException : public ExceptionTemplate {
+   public:
+    HttpVersionNotSupportedException()
+        : ExceptionTemplate("HTTP Version Not Supported") {}
+  };
+
   explicit HttpParser(const std::string& socket_buffer = "");
   HttpParser(const HttpParser& origin);
   HttpParser& operator=(const HttpParser& origin);
@@ -17,6 +36,7 @@ class HttpParser {
   const std::string& getBuffer(void) const;
 
   void appendBuffer(const std::string& socket_buffer);
+  bool isBodySet(void) const;
 
  private:
   void setHeader(void);
