@@ -27,7 +27,6 @@ struct LocationBlock {
   std::string root;
   std::string autoindex;
   std::set<std::string> index;
-  // std::set<std::string> try_files;
 };
 
 const std::string LocationBlock::DEFAULTS[] = {"html", "off", "index.html"};

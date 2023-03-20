@@ -114,8 +114,8 @@ void ConfigParser::parseLocationBlock(void) {
   while (true) {
     std::string token = peek();
     if (token == "}") break;
-    if (token == "limit_except") {
-      parseLimitExcept();
+    if (token == "allowed_methods") {
+      parseAllowedMethods();
     } else if (token == "return") {
       parseReturn();
     } else if (token == "root") {
@@ -131,16 +131,12 @@ void ConfigParser::parseLocationBlock(void) {
   expect("}");
 }
 
-void ConfigParser::parseLimitExcept(void) {
-  expect("limit_except");
-  while (peek() != "{") {
+void ConfigParser::parseAllowedMethods(void) {
+  expect("allowed_methods");
+  while (peek() != ";") {
     location_block_.allowed_methods.insert(expect());
   }
-  expect("{");
-  expect("deny");
-  expect("all");
   expect(";");
-  expect("}");
 }
 
 void ConfigParser::parseReturn(void) {

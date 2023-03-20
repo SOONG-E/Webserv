@@ -21,7 +21,7 @@ class ConfigParser {
   void parseClientMaxBodySize(void);
 
   void parseLocationBlock(void);
-  void parseLimitExcept(void);
+  void parseAllowedMethods(void);
   void parseReturn(void);
   void parseRoot(void);
   void parseAutoindex(void);
