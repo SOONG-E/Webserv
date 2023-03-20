@@ -17,7 +17,15 @@ void HttpResponse::setCode(const std::string& code) { code_ = code; }
 
 void HttpResponse::setReason(const std::string& reason) { reason_ = reason; }
 
-void HttpResponse::generateHeader() {
+std::string HttpResponse::getDate(void) const {
+  char buf[30];
+  time_t timestamp = time(NULL);
+  struct tm* time_info = localtime(&timestamp);
+  strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", time_info);
+  return std::string(buf);
+}
+
+void HttpResponse::generateHeader(void) {
   header_ = "HTTP/1.1 " + code_ + " " + reason_ + CRLF;
   header_ += "Date: " + getDate() + CRLF;
   header_ += "Server: Webserv" + CRLF;
@@ -26,12 +34,20 @@ void HttpResponse::generateHeader() {
   header_ += "Connection: Keep-Alive" + DOUBLE_CRLF;
 }
 
-std::string HttpResponse::getDate() const {
-  char buf[30];
-  time_t timestamp = time(NULL);
-  struct tm* time_info = localtime(&timestamp);
-  strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", time_info);
-  return std::string(buf);
+void HttpResponse::rootUri(const std::string& request_uri,
+                           const std::vector<LocationBlock>& locations) {
+  std::size_t end_pos = -1;
+  do {
+    end_pos = request_uri.find("/", end_pos + 1);
+    if (end_pos == std::string::npos) throw;
+    std::string rooted_uri = request_uri.substr(0, end_pos + 1);
+    for (std::size_t i = 0; i < locations.size(); ++i) {
+      if (rooted_uri == locations[i].uri) {
+        body_ = readFile(locations[i].root + request_uri.substr(end_pos + 1));
+        return;
+      }
+    }
+  } while (body_.empty());
 }
 
 std::string HttpResponse::generate(const HttpRequest& request,
@@ -41,17 +57,9 @@ std::string HttpResponse::generate(const HttpRequest& request,
     generateHeader();
     return header_ + body_;
   }
-  const std::vector<LocationBlock>& locations =
-      server_block->getLocationBlocks();
-  std::size_t location_end = request.getUri().rfind("/");
-  std::string location = request.getUri().substr(0, location_end + 1);
-  for (std::size_t i = 0; i < locations.size(); ++i) {
-    if (location == locations[i].uri) {
-      body_ = readFile(locations[i].root + location);
-      break;
-    }
-  }
-  if (body_.empty()) {
+  try {
+    rootUri(request.getUri(), server_block->getLocationBlocks());
+  } catch (...) {
     body_ = readFile(DEFAULTS[ERROR_PAGE]);
     code_ = "404";
     reason_ = ReponseStatus::REASONS[C404];

@@ -19,13 +19,14 @@ class HttpResponse {
   void setCode(const std::string& code);
   void setReason(const std::string& reason);
 
-  void generateStatusLine();
-  void generateHeader();
   std::string generate(const HttpRequest& request,
                        const ServerBlock* server_block);
 
  private:
-  std::string getDate() const;
+  std::string getDate(void) const;
+  void generateHeader(void);
+  void rootUri(const HttpRequest& request,
+               const std::vector<LocationBlock>& locations);
 
   std::string code_;
   std::string reason_;
