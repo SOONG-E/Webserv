@@ -8,7 +8,12 @@
 
 class HttpResponse {
  public:
-  static const std::string DEFAULT_CODE;
+  enum Index {
+    CODE,
+    ERROR_PAGE,
+  };
+
+  static const std::string DEFAULTS[];
 
   HttpResponse();
   HttpResponse(const HttpResponse& origin);

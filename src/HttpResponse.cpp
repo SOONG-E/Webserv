@@ -2,10 +2,10 @@
 
 #include "ResponseStatus.hpp"
 
-const std::string HttpResponse::DEFAULT_CODE = "200";
+const std::string HttpResponse::DEFAULTS[] = {"200", "page/error.html"};
 
 HttpResponse::HttpResponse()
-    : code_(DEFAULT_CODE), reason_(ResponseStatus::REASONS[C200]) {}
+    : code_(DEFAULTS[CODE]), reason_(ResponseStatus::REASONS[C200]) {}
 
 HttpResponse::HttpResponse(const HttpResponse& origin)
     : code_(origin.code_),
@@ -66,7 +66,7 @@ void HttpResponse::rootUri(const std::string& request_uri,
 
 std::string HttpResponse::generate(const HttpRequest& request,
                                    const ServerBlock* server_block) {
-  if (code_ != DEFAULT_CODE) {
+  if (code_ != DEFAULTS[CODE]) {
     body_ = readFile(DEFAULTS[ERROR_PAGE]);
     generateHeader();
     return header_ + body_;

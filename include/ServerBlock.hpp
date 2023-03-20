@@ -11,6 +11,12 @@
 
 class ServerBlock {
  public:
+  enum Index {
+    CLIENT_MAX_BODY_SIZE,
+  };
+
+  static const std::string DEFAULTS[];
+
   ServerBlock();
   ServerBlock(const ServerBlock& origin);
   ServerBlock& operator=(const ServerBlock& origin);

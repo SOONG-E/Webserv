@@ -9,6 +9,8 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
+const std::string ServerBlock::DEFAULTS[] = {"1m"};
+
 ServerBlock::ServerBlock() { setBodyLimit(DEFAULTS[CLIENT_MAX_BODY_SIZE]); }
 
 ServerBlock::ServerBlock(const ServerBlock& origin)

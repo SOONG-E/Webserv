@@ -6,25 +6,15 @@
 #include "utility.hpp"
 
 struct Listen {
-  Listen() : host(DEFAULTS[HOST]), port(DEFAULTS[PORT]) {}
+  enum Index {
+    HOST,
+    PORT,
+  };
 
-  explicit Listen(const std::string& token)
-      : host(DEFAULTS[HOST]), port(DEFAULTS[PORT]) {
-    std::vector<std::string> splitted = split(token, ":");
-    if (splitted.size() == 1) {
-      if (isNumber(splitted[0])) {
-        port = splitted[0];
-      } else {
-        host = splitted[0];
-      }
-    } else if (splitted.size() == 2) {
-      host = splitted[0];
-      port = splitted[1];
-    } else {
-      throw ConfigException(ERRORS[TOKEN]);
-    }
-    socket_key = host + ":" + port;
-  }
+  static const std::string DEFAULTS[];
+
+  Listen();
+  explicit Listen(const std::string& token);
 
   std::string host;
   std::string port;
