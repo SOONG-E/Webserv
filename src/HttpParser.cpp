@@ -38,7 +38,7 @@ void HttpParser::appendBuffer(const std::string& socket_buffer) {
   buffer_ += socket_buffer;
 }
 
-bool HttpParser::isBodySet(void) const { return !request_.getBody().empty(); }
+bool HttpParser::isCompleted(void) const { return !request_.getBody().empty(); }
 
 void HttpParser::setHeader(void) {
   bound_pos_ = buffer_.find(DOUBLE_CRLF);
@@ -88,7 +88,7 @@ void HttpParser::parseRequestLine(HttpRequest& request_,
     throw HttpVersionNotSupportedException();
   }
   request_.setMethod(request_line[0]);
-  request_.setUrl(request_line[1]);
+  request_.setUri(request_line[1]);
 }
 
 void HttpParser::parseHeaders(HttpRequest& request_, std::string header_part) {

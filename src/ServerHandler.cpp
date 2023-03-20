@@ -90,11 +90,11 @@ void ServerHandler::respondToClients() {
           }
           parser.handlePost();
         } catch (const HttpParser::BadRequestException &e) {
-          sendErrorPage("400", ReponseStatus::REASONS[C400], client);
+          sendErrorPage("400", ResponseStatus::REASONS[C400], client);
         } catch (const HttpParser::LengthRequired &e) {
-          sendErrorPage("411", ReponseStatus::REASONS[C411], client);
+          sendErrorPage("411", ResponseStatus::REASONS[C411], client);
         } catch (const HttpParser::PayloadTooLargeException &e) {
-          sendErrorPage("413", ReponseStatus::REASONS[C413], client);
+          sendErrorPage("413", ResponseStatus::REASONS[C413], client);
         }
 
         if (parser.isCompleted() &&

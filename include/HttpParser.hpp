@@ -10,24 +10,24 @@ class HttpParser {
  public:
   class BadRequestException : public ExceptionTemplate {
    public:
-    BadRequestException() : ExceptionTemplate(ReponseStatus::REASONS[C400]) {}
+    BadRequestException() : ExceptionTemplate(ResponseStatus::REASONS[C400]) {}
   };
 
   class LengthRequired : public ExceptionTemplate {
    public:
-    LengthRequired() : ExceptionTemplate(ReponseStatus::REASONS[C411]) {}
+    LengthRequired() : ExceptionTemplate(ResponseStatus::REASONS[C411]) {}
   };
 
   class PayloadTooLargeException : public ExceptionTemplate {
    public:
     PayloadTooLargeException()
-        : ExceptionTemplate(ReponseStatus::REASONS[C413]) {}
+        : ExceptionTemplate(ResponseStatus::REASONS[C413]) {}
   };
 
   class HttpVersionNotSupportedException : public ExceptionTemplate {
    public:
     HttpVersionNotSupportedException()
-        : ExceptionTemplate(ReponseStatus::REASONS[C505]) {}
+        : ExceptionTemplate(ResponseStatus::REASONS[C505]) {}
   };
 
   explicit HttpParser(const std::string& socket_buffer = "");
