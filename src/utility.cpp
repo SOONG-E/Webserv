@@ -2,7 +2,6 @@
 
 #include <fstream>
 
-#include "constant.hpp"
 #include "exception.hpp"
 
 std::string trim(std::string str) {

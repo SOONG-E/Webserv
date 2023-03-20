@@ -1,7 +1,6 @@
 #ifndef LISTEN_HPP_
 #define LISTEN_HPP_
 
-#include "constant.hpp"
 #include "exception.hpp"
 #include "utility.hpp"
 

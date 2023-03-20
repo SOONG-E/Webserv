@@ -1,5 +1,7 @@
 #include "Listen.hpp"
 
+#include "constant.hpp"
+
 const std::string Listen::DEFAULTS[] = {"0.0.0.0", "80"};
 
 Listen::Listen() : host(DEFAULTS[HOST]), port(DEFAULTS[PORT]) {}

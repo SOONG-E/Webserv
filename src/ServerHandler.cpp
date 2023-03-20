@@ -1,7 +1,6 @@
 #include "ServerHandler.hpp"
 
 #include "ResponseStatus.hpp"
-#include "constant.hpp"
 
 ServerHandler::ServerHandler() {}
 
