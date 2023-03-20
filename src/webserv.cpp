@@ -7,12 +7,13 @@
 #include "constant.hpp"
 
 int main(int argc, char* argv[]) {
-  if (argc != 2) {
-    std::cerr << ERRORS[PREFIX] << ERRORS[ARG] << '\n';
-    return EXIT_FAILURE;
+  if (argc > 2) {
+    std::cerr << ERRORS[PREFIX] << ERRORS[ARG] << std::endl;
+    return 1;
   }
+  const char* filename = (argc == 2) ? argv[1] : "conf/default.conf";
   try {
-    ConfigParser conf(argv[1]);
+    ConfigParser conf(filename);
     ServerHandler handler;
 
     const Config& config = conf.parse();
@@ -25,7 +26,7 @@ int main(int argc, char* argv[]) {
 
   } catch (const std::exception& e) {
     std::cerr << e.what() << "\n";
-    return EXIT_FAILURE;
+    return 1;
   }
-  return EXIT_SUCCESS;
+  return 0;
 }

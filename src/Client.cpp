@@ -1,5 +1,7 @@
 #include "Client.hpp"
 
+#include <cerrno>
+
 Client::Client(int socket, const SocketAddress& cli_addr,
                const SocketAddress& serv_addr)
     : socket_(socket), cli_address_(cli_addr), serv_address_(serv_addr) {}
@@ -37,13 +39,14 @@ std::string Client::receive() const {
 }
 
 void Client::send(const ServerBlock* server_block) {
-  std::string response = response_.generate(parser_.getRequest(), server_block);
-  response = backup_ + response;
+  std::string response =
+      backup_ + response_.generate(parser_.getRequest(), server_block);
   size_t response_size = response.size();
+  size_t write_bytes = ::send(socket_, response.c_str(), response_size, 0);
 
-  ssize_t write_bytes = ::send(socket_, response.c_str(), response_size, 0);
-
-  if (write_bytes == -1) throw SocketSendException(strerror(errno));
+  if (write_bytes == static_cast<size_t>(-1)) {
+    throw SocketSendException(strerror(errno));
+  }
   if (write_bytes < response_size) {
     backup_ = response.substr(write_bytes);
   }

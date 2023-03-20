@@ -13,12 +13,7 @@ struct LocationBlock {
 
   static const std::string DEFAULTS[];
 
-  LocationBlock() : root(DEFAULTS[ROOT]), autoindex(DEFAULTS[AUTOINDEX]) {
-    for (int i = 0; i < METHODS_COUNT; ++i) {
-      allowed_methods.insert(METHODS[i]);
-    }
-    index.insert(DEFAULTS[INDEX]);
-  }
+  LocationBlock();
 
   std::string uri;
   std::set<std::string> allowed_methods;
@@ -28,7 +23,5 @@ struct LocationBlock {
   std::string autoindex;
   std::set<std::string> index;
 };
-
-const std::string LocationBlock::DEFAULTS[] = {"html", "off", "index.html"};
 
 #endif

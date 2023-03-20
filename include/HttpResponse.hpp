@@ -25,7 +25,7 @@ class HttpResponse {
  private:
   std::string getDate(void) const;
   void generateHeader(void);
-  void rootUri(const HttpRequest& request,
+  void rootUri(const std::string& request_uri,
                const std::vector<LocationBlock>& locations);
 
   std::string code_;
@@ -33,7 +33,5 @@ class HttpResponse {
   std::string header_;
   std::string body_;
 };
-
-const std::string HttpResponse::DEFAULT_CODE = "200";
 
 #endif

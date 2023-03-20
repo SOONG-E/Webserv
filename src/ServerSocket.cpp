@@ -1,5 +1,7 @@
 #include "ServerSocket.hpp"
 
+#include <cerrno>
+
 ServerSocket::ServerSocket() : socket_(-1) {}
 
 ServerSocket::ServerSocket(const ServerSocket& src) { *this = src; }

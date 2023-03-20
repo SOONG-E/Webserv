@@ -1,13 +1,15 @@
 #include "SocketAddress.hpp"
 
+#include <cstring>
+
 SocketAddress::SocketAddress() : address_len_(0) {
-  memset(&address_, 0, sizeof(address_));
+  std::memset(&address_, 0, sizeof(address_));
 }
 
 SocketAddress::SocketAddress(const std::string &ip, const std::string &port) {
   struct addrinfo hints, *addr_info;
 
-  memset(&hints, 0, sizeof(hints));
+  std::memset(&hints, 0, sizeof(hints));
 
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;

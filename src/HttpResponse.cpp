@@ -2,12 +2,26 @@
 
 #include "ResponseStatus.hpp"
 
+const std::string HttpResponse::DEFAULT_CODE = "200";
+
 HttpResponse::HttpResponse()
-    : code_(DEFAULT_CODE), reason_(ReponseStatus::REASONS[C200]) {}
+    : code_(DEFAULT_CODE), reason_(ResponseStatus::REASONS[C200]) {}
 
-HttpResponse::HttpResponse(const HttpResponse& origin) {}
+HttpResponse::HttpResponse(const HttpResponse& origin)
+    : code_(origin.code_),
+      reason_(origin.reason_),
+      header_(origin.header_),
+      body_(origin.body_) {}
 
-HttpResponse& HttpResponse::operator=(const HttpResponse& origin) {}
+HttpResponse& HttpResponse::operator=(const HttpResponse& origin) {
+  if (this != &origin) {
+    code_ = origin.code_;
+    reason_ = origin.reason_;
+    header_ = origin.header_;
+    body_ = origin.body_;
+  }
+  return *this;
+}
 
 HttpResponse::~HttpResponse() {}
 
@@ -62,7 +76,7 @@ std::string HttpResponse::generate(const HttpRequest& request,
   } catch (...) {
     body_ = readFile(DEFAULTS[ERROR_PAGE]);
     code_ = "404";
-    reason_ = ReponseStatus::REASONS[C404];
+    reason_ = ResponseStatus::REASONS[C404];
   }
   generateHeader();
   return header_ + body_;

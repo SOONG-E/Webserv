@@ -6,8 +6,8 @@ HttpRequest::HttpRequest(const HttpRequest &origin)
       uri_(origin.uri_),
       host_(origin.host_),
       body_(origin.body_),
-      headers_(origin.headers_),
-      content_length_(origin.content_length_) {}
+      content_length_(origin.content_length_),
+      headers_(origin.headers_) {}
 HttpRequest::~HttpRequest() {}
 HttpRequest HttpRequest::operator=(const HttpRequest &origin) {
   HttpRequest out(origin);
@@ -48,16 +48,16 @@ void HttpRequest::addheader(std::string key, std::vector<std::string> values) {
   headers_[key] = values;
 }
 
-std::string HttpRequest::getHeader(std::string name) {
-  std::map<std::string, std::vector<std::string> >::iterator it;
-
-  it = headers_.find(name);
-  if (it != headers_.end()) return *(it->second.begin());
-  return "";
+std::string HttpRequest::getHeader(std::string name) const {
+  header_type::const_iterator it = headers_.find(name);
+  if (it == headers_.end()) {
+    return "";
+  }
+  return *(it->second.begin());
 }
 
-std::string HttpRequest::getMethod() { return (method_); }
-std::string HttpRequest::getUri() { return (uri_); }
-std::string HttpRequest::getHost() { return (host_); }
-std::string HttpRequest::getBody() { return (body_); }
-std::size_t HttpRequest::getContentLength() { return (content_length_); }
+std::string HttpRequest::getMethod() const { return (method_); }
+std::string HttpRequest::getUri() const { return (uri_); }
+std::string HttpRequest::getHost() const { return (host_); }
+std::string HttpRequest::getBody() const { return (body_); }
+std::size_t HttpRequest::getContentLength() const { return (content_length_); }
