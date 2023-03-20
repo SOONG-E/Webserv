@@ -129,8 +129,8 @@ void ServerHandler::closeConnection(int client_socket) {
   close(client_socket);
 }
 
-void ServerHandler::sendErrorPage(const std::string &response_code,
-                                  const std::string &msg, Client *client) {
-  client->getHttpResponse().setCode(response_code);
-  std::string content = readFile(DEFAULTS[ERROR_PAGE]);
+void ServerHandler::sendErrorPage(const std::string &code,
+                                  const std::string &reason, Client *client) {
+  client->getHttpResponse().setCode(code);
+  client->getHttpResponse().setReason(reason);
 }
