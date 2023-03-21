@@ -47,10 +47,10 @@ std::string Client::receive() const {
 void Client::send(const ServerBlock* server_block) {
   std::string response;
 
-  if (response_obj_.getBackup().empty()) {
-    response = response_obj_.generate(parser_.getRequestObj(), server_block);
-  } else {
+  if (isPartialWritten()) {
     response = response_obj_.getBackup();
+  } else {
+    response = response_obj_.generate(parser_.getRequestObj(), server_block);
   }
   size_t response_size = response.size();
 
