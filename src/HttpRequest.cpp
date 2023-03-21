@@ -48,7 +48,7 @@ void HttpRequest::addheader(std::string key, std::vector<std::string> values) {
   headers_[key] = values;
 }
 
-const std::string &HttpRequest::getHeader(std::string name) const {
+std::string HttpRequest::getHeader(std::string name) const {
   header_type::const_iterator it = headers_.find(name);
   if (it == headers_.end()) {
     return "";

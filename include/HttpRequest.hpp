@@ -21,7 +21,7 @@ class HttpRequest {
   void setContentLength(std::size_t content_length);
   void addheader(std::string key, std::string value);
   void addheader(std::string key, std::vector<std::string> values);
-  const std::string &getHeader(std::string name) const;
+  std::string getHeader(std::string name) const;
   std::string getMethod() const;
   std::string getUri() const;
   std::string getHost() const;
