@@ -9,16 +9,19 @@
 int main(int argc, char* argv[]) {
   if (argc > 2) {
     std::cerr << ERRORS[PREFIX] << ERRORS[ARG] << std::endl;
-    return 1;
+    return EXIT_FAILURE;
   }
+
   const char* filename = (argc == 2) ? argv[1] : "conf/default.conf";
+
   try {
     ConfigParser conf(filename);
-    ServerHandler handler;
-
     const Config& config = conf.parse();
+    
+    ServerHandler handler;
     handler.configureServer(config);
     handler.createServers();
+
     while (1) {
       handler.acceptConnections();
       handler.respondToClients();
@@ -26,7 +29,7 @@ int main(int argc, char* argv[]) {
 
   } catch (const std::exception& e) {
     std::cerr << e.what() << "\n";
-    return 1;
+    return EXIT_FAILURE;
   }
-  return 0;
+  return EXIT_SUCCESS;
 }
