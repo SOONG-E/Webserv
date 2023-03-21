@@ -38,11 +38,11 @@ class ServerHandler {
   selector_type server_selector_;
   selector_type client_selector_;
 
-  const ServerBlock *getServerBlock(const std::string &key,
+  const ServerBlock *getServerBlock_(const std::string &key,
                                     const std::string &server_name);
-  void closeConnection(int client_socket);
-  void receiveRequest(Client *client, HttpParser &parser, int client_socket);
-  void sendResponse(Client *client, HttpParser &parser);
+  void closeConnection_(int client_fd);
+  void receiveRequest_(Client *client, HttpParser &parser, int client_fd);
+  void sendResponse_(Client *client, HttpParser &parser);
 };
 
 #endif

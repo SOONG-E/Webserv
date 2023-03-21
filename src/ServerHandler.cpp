@@ -20,18 +20,18 @@ ServerHandler &ServerHandler::operator=(const ServerHandler &src) {
 }
 
 void ServerHandler::configureServer(const Config &config) {
-  const std::vector<ServerBlock> &serv_info = config.getServerBlocks();
+  const std::vector<ServerBlock> &serv_blocks = config.getServerBlocks();
 
-  for (size_t i = 0; i < serv_info.size(); ++i) {
-    const std::vector<Listen> &listens = serv_info[i].getListens();
+  for (size_t i = 0; i < serv_blocks.size(); ++i) {
+    const std::vector<Listen> &listens = serv_blocks[i].getListens();
 
     for (size_t i = 0; i < listens.size(); ++i) {
       if (server_blocks_.find(listens[i].socket_key) == server_blocks_.end()) {
-        std::vector<ServerBlock> in(1, serv_info[i]);
+        std::vector<ServerBlock> in(1, serv_blocks[i]);
 
         server_blocks_[listens[i].socket_key] = in;
       } else {
-        server_blocks_[listens[i].socket_key].push_back(serv_info[i]);
+        server_blocks_[listens[i].socket_key].push_back(serv_blocks[i]);
       }
     }
   }
@@ -50,30 +50,50 @@ void ServerHandler::createServers() {
 
     server_sockets_.push_back(server_socket);
 
-    server_selector_.registerSocket(server_socket.getSocket());
+    server_selector_.registerFD(server_socket.getFD());
   }
 }
 
 void ServerHandler::acceptConnections() {
   if (server_selector_.select() > 0) {
     for (size_t i = 0; i < server_sockets_.size(); ++i) {
-      if (server_selector_.isSetRead(server_sockets_[i].getSocket())) {
+      if (server_selector_.isSetRead(server_sockets_[i].getFD())) {
         Client new_client = server_sockets_[i].accept();
 
-        client_selector_.registerSocket(new_client.getSocket());
+        client_selector_.registerFD(new_client.getFD());
 
-        clients_.insert(std::make_pair(new_client.getSocket(), new_client));
+        clients_.insert(std::make_pair(new_client.getFD(), new_client));
       }
     }
   }
 }
 
-void ServerHandler::receiveRequest(Client *client, HttpParser &parser,
-                                   int client_socket) {
+void ServerHandler::respondToClients() {
+  if (client_selector_.select() > 0) {
+    for (clients_type::iterator it = clients_.begin(); it != clients_.end();
+         ++it) {
+      Client *client = &it->second;
+      HttpParser parser = client->getParser();
+      int client_fd = client->getFD();
+
+      if (client_selector_.isSetRead(client_fd)) {
+        receiveRequest(client, parser, client_fd);
+      }
+      if (client_selector_.isSetWrite(client_fd) &&
+          (parser.isCompleted() ||
+           client->getResponseObj().getCode() != "200")) {
+        sendResponse(client, parser);
+      }
+    }
+  }
+}
+
+void ServerHandler::receiveRequest_(Client *client, HttpParser &parser,
+                                   int client_fd) {
   std::string request = client->receive();
 
   if (request.empty()) {
-    closeConnection(client_socket);
+    closeConnection(client_fd);
     return;
   }
 
@@ -88,7 +108,7 @@ void ServerHandler::receiveRequest(Client *client, HttpParser &parser,
   }
 }
 
-void ServerHandler::sendResponse(Client *client, HttpParser &parser) {
+void ServerHandler::sendResponse_(Client *client, HttpParser &parser) {
   const std::string &server_name = parser.getRequestObj().getHeader("Host");
   const std::string &socket_key = client->getSocketKey();
   const ServerBlock *server_block = getServerBlock(socket_key, server_name);
@@ -100,41 +120,24 @@ void ServerHandler::sendResponse(Client *client, HttpParser &parser) {
   }
 }
 
-void ServerHandler::respondToClients() {
-  if (client_selector_.select() > 0) {
-    for (clients_type::iterator it = clients_.begin(); it != clients_.end();
-         ++it) {
-      Client *client = &it->second;
-      HttpParser parser = client->getParser();
-      int client_socket = client->getSocket();
+const ServerBlock *ServerHandler::getServerBlock_(
+    const std::string &socket_key, const std::string &server_name) {
+  const std::vector<ServerBlock> &blocks_of_key = server_blocks_[socket_key];
 
-      if (client_selector_.isSetRead(client_socket)) {
-        receiveRequest(client, parser, client_socket);
-      }
-      if (client_selector_.isSetWrite(client_socket) &&
-          (parser.isCompleted() ||
-           client->getResponseObj().getCode() != "200")) {
-        sendResponse(client, parser);
-      }
-    }
-  }
-}
-
-const ServerBlock *ServerHandler::getServerBlock(
-    const std::string &key, const std::string &server_name) {
-  const std::vector<ServerBlock> &blocks_of_key = server_blocks_[key];
   for (size_t i = 0; i < blocks_of_key.size(); ++i) {
     const std::set<std::string> &names_of_key =
         blocks_of_key[i].getServerNames();
+
     if (names_of_key.find(server_name) != names_of_key.end()) {
       return &blocks_of_key[i];
     }
   }
+
   return &blocks_of_key[0];
 }
 
-void ServerHandler::closeConnection(int client_socket) {
-  clients_.erase(client_socket);
-  client_selector_.clear(client_socket);
-  close(client_socket);
+void ServerHandler::closeConnection_(int client_fd) {
+  clients_.erase(client_fd);
+  client_selector_.clear(client_fd);
+  close(client_fd);
 }

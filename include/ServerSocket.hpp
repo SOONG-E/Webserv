@@ -19,11 +19,11 @@ class ServerSocket {
   void open();
   void bind(const SocketAddress& address, int backlog);
   Client accept() const;
-  int getSocket() const;
+  int getFD() const;
   const SocketAddress& getAddress() const;
 
  private:
-  int socket_;
+  int fd_;
   SocketAddress address_;
 
  public:

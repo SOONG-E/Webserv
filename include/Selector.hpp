@@ -16,7 +16,7 @@ class Selector {
   Selector& operator=(const Selector& src);
 
   int select();
-  void registerSocket(int fd);
+  void registerFD(int fd);
   void clear(int fd);
   bool isSetRead(int fd) const;
   bool isSetWrite(int fd) const;

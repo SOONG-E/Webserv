@@ -13,14 +13,14 @@
 
 class Client {
  public:
-  Client(int socket, const SocketAddress& cli_addr,
+  Client(int fd, const SocketAddress& cli_addr,
          const SocketAddress& serv_addr);
   Client(const Client& src);
   ~Client();
 
   Client& operator=(const Client& src);
 
-  int getSocket() const;
+  int getFD() const;
   HttpParser& getParser();
   const HttpParser& getParser() const;
   const std::string& getSocketKey() const;
@@ -33,7 +33,7 @@ class Client {
   bool isPartialWritten() const;
 
  private:
-  int socket_;
+  int fd_;
   std::string socket_key_;
   SocketAddress cli_address_;
   SocketAddress serv_address_;

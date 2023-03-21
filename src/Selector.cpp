@@ -24,7 +24,7 @@ int Selector::select() {
   return result;
 }
 
-void Selector::registerSocket(int fd) {
+void Selector::registerFD(int fd) {
   FD_SET(fd, &fds_);
   if (fd > max_fd_) max_fd_ = fd;
 }
