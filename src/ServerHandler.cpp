@@ -136,7 +136,7 @@ const ServerBlock *ServerHandler::getServerBlock_(
   return &blocks_of_key[0];
 }
 
-void ServerHandler::__(int client_fd) {
+void ServerHandler::closeConnection_(int client_fd) {
   clients_.erase(client_fd);
   client_selector_.clear(client_fd);
   close(client_fd);
