@@ -22,21 +22,24 @@ class Client {
 
   int getSocket() const;
   HttpParser& getParser();
-  std::string getKey() const;
-  HttpResponse& getHttpResponse();
+  const HttpParser& getParser() const;
+  const std::string& getSocketKey() const;
+  HttpResponse& getResponseObj();
+  const HttpResponse& getResponseObj() const;
 
   std::string receive() const;
   void send(const ServerBlock* server_block);
 
+  bool isPartialWritten() const;
+
  private:
   int socket_;
+  std::string socket_key_;
   SocketAddress cli_address_;
   SocketAddress serv_address_;
   HttpParser parser_;
-  HttpResponse response_;
-  std::string backup_;
+  HttpResponse response_obj_;
 
-  // exception
  public:
   class SocketReceiveException : public std::exception {
    public:
