@@ -36,14 +36,12 @@ class HttpParser {
   ~HttpParser();
 
   std::size_t getContentLength(void);
-  const HttpRequest& getRequest(void) const;
+  const HttpRequest& getRequestObj(void) const;
   const std::string& getBuffer(void) const;
-  std::size_t getBoundPos(void) const;
 
-  void appendBuffer(const std::string& socket_buffer);
-  void setHeader(void);
-  void handlePost(void);
+  void appendRequest(const std::string& socket_buffer);
   bool isCompleted(void) const;
+  void clear(void);
 
  private:
   static HttpRequest parseHeader(const std::string& request);
@@ -52,6 +50,10 @@ class HttpParser {
   static void parseHeaders(HttpRequest& http_request, std::string headers);
   static void unchunkMessage(HttpRequest& http_request, std::string body);
   static std::vector<std::string> splitByCRLF(const std::string& content);
+
+  bool isHeaderSet(void) const;
+  void setHeader(void);
+  void handlePost(void);
 
   HttpRequest request_;
   std::string buffer_;

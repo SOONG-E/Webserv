@@ -28,17 +28,25 @@ std::size_t HttpParser::getContentLength(void) {
   return request_.getContentLength();
 }
 
-const HttpRequest& HttpParser::getRequest(void) const { return request_; }
+const HttpRequest& HttpParser::getRequestObj(void) const { return request_; }
 
 const std::string& HttpParser::getBuffer(void) const { return buffer_; }
 
-std::size_t HttpParser::getBoundPos(void) const { return bound_pos_; }
-
-void HttpParser::appendBuffer(const std::string& socket_buffer) {
+void HttpParser::appendRequest(const std::string& socket_buffer) {
   buffer_ += socket_buffer;
+  if (!isHeaderSet()) {
+    setHeader();
+  }
+  if (request_.getMethod() == "POST") {
+    handlePost();
+  }
 }
 
 bool HttpParser::isCompleted(void) const { return !request_.getBody().empty(); }
+
+void HttpParser::clear(void) { *this = HttpParser(); }
+
+bool HttpParser::isHeaderSet(void) const { return bound_pos_ > 0; }
 
 void HttpParser::setHeader(void) {
   bound_pos_ = buffer_.find(DOUBLE_CRLF);
@@ -51,8 +59,9 @@ void HttpParser::setHeader(void) {
 
 void HttpParser::handlePost(void) {
   if (!request_.getHeader("Content-Length").empty()) {
-    std::size_t content_length = ::stoi(request_.getHeader("Content-Length"));
-    request_.setContentLength(content_length);
+    if (request_.getContentLength() == 0)
+      request_.setContentLength(::stoi(request_.getHeader("Content-Length")));
+    std::size_t content_length = request_.getContentLength();
     if (buffer_.size() - bound_pos_ < content_length) return;
     request_.setBody(buffer_.substr(bound_pos_, content_length));
     return;

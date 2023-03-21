@@ -29,12 +29,13 @@ class HttpResponse {
 
  private:
   std::string getDate(void) const;
-  void generateHeader(void);
-  void rootUri(const std::string& request_uri,
-               const std::vector<LocationBlock>& locations);
+  void generateHeader(std::string& header);
+  std::string rootUri(const std::string& request_uri,
+                      const std::vector<LocationBlock>& locations);
 
   std::string code_;
   std::string reason_;
+  std::string backup_;
   std::string header_;
   std::string body_;
 };
