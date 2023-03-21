@@ -41,8 +41,8 @@ class ServerHandler {
   const ServerBlock *getServerBlock(const std::string &key,
                                     const std::string &server_name);
   void closeConnection(int client_socket);
-  void sendErrorPage(const std::string &code, const std::string &reason,
-                     Client *client);
+  void receiveRequest(Client *client, HttpParser &parser, int client_socket);
+  void sendResponse(Client *client, HttpParser &parser);
 };
 
 #endif

@@ -61,9 +61,42 @@ void ServerHandler::acceptConnections() {
         Client new_client = server_sockets_[i].accept();
 
         client_selector_.registerSocket(new_client.getSocket());
+
         clients_.insert(std::make_pair(new_client.getSocket(), new_client));
       }
     }
+  }
+}
+
+void ServerHandler::receiveRequest(Client *client, HttpParser &parser,
+                                   int client_socket) {
+  std::string request = client->receive();
+
+  if (request.empty()) {
+    closeConnection(client_socket);
+    return;
+  }
+
+  try {
+    parser.appendRequest(request);
+  } catch (const HttpParser::BadRequestException &e) {
+    client->getResponseObj().setStatus("400", ResponseStatus::REASONS[C400]);
+  } catch (const HttpParser::LengthRequired &e) {
+    client->getResponseObj().setStatus("411", ResponseStatus::REASONS[C411]);
+  } catch (const HttpParser::PayloadTooLargeException &e) {
+    client->getResponseObj().setStatus("413", ResponseStatus::REASONS[C413]);
+  }
+}
+
+void ServerHandler::sendResponse(Client *client, HttpParser &parser) {
+  const std::string &server_name = parser.getRequestObj().getHeader("Host");
+  const std::string &socket_key = client->getSocketKey();
+  const ServerBlock *server_block = getServerBlock(socket_key, server_name);
+
+  client->send(server_block);
+
+  if (!client->isPartialWritten()) {
+    parser.clear();
   }
 }
 
@@ -72,38 +105,16 @@ void ServerHandler::respondToClients() {
     for (clients_type::iterator it = clients_.begin(); it != clients_.end();
          ++it) {
       Client *client = &it->second;
+      HttpParser parser = client->getParser();
+      int client_socket = client->getSocket();
 
-      if (client_selector_.isSetRead(client->getSocket())) {
-        std::string buf = client->receive();
-
-        if (buf.empty()) {
-          closeConnection(client->getSocket());
-          continue;
-        }
-
-        HttpParser &parser = client->getParser();
-        parser.appendBuffer(buf);
-        try {
-          if (parser.getBoundPos() == 0) {
-            parser.setHeader();
-          }
-          parser.handlePost();
-        } catch (const HttpParser::BadRequestException &e) {
-          sendErrorPage("400", ResponseStatus::REASONS[C400], client);
-        } catch (const HttpParser::LengthRequired &e) {
-          sendErrorPage("411", ResponseStatus::REASONS[C411], client);
-        } catch (const HttpParser::PayloadTooLargeException &e) {
-          sendErrorPage("413", ResponseStatus::REASONS[C413], client);
-        }
-
-        if (parser.isCompleted() &&
-            client_selector_.isSetWrite(client->getSocket())) {
-          const HttpRequest &request = parser.getRequest();
-          const ServerBlock *server_block =
-              getServerBlock(client->getKey(), request.getHeader("Host"));
-
-          client->send(server_block);
-        }
+      if (client_selector_.isSetRead(client_socket)) {
+        receiveRequest(client, parser, client_socket);
+      }
+      if (client_selector_.isSetWrite(client_socket) &&
+          (parser.isCompleted() ||
+           client->getResponseObj().getCode() != "200")) {
+        sendResponse(client, parser);
       }
     }
   }
@@ -126,10 +137,4 @@ void ServerHandler::closeConnection(int client_socket) {
   clients_.erase(client_socket);
   client_selector_.clear(client_socket);
   close(client_socket);
-}
-
-void ServerHandler::sendErrorPage(const std::string &code,
-                                  const std::string &reason, Client *client) {
-  client->getHttpResponse().setCode(code);
-  client->getHttpResponse().setReason(reason);
 }
