@@ -77,12 +77,12 @@ void ServerHandler::respondToClients() {
       int client_fd = client->getFD();
 
       if (client_selector_.isSetRead(client_fd)) {
-        receiveRequest(client, parser, client_fd);
+        receiveRequest_(client, parser, client_fd);
       }
       if (client_selector_.isSetWrite(client_fd) &&
           (parser.isCompleted() ||
            client->getResponseObj().getCode() != "200")) {
-        sendResponse(client, parser);
+        sendResponse_(client, parser);
       }
     }
   }
@@ -93,7 +93,7 @@ void ServerHandler::receiveRequest_(Client *client, HttpParser &parser,
   std::string request = client->receive();
 
   if (request.empty()) {
-    closeConnection(client_fd);
+    closeConnection_(client_fd);
     return;
   }
 
@@ -111,7 +111,7 @@ void ServerHandler::receiveRequest_(Client *client, HttpParser &parser,
 void ServerHandler::sendResponse_(Client *client, HttpParser &parser) {
   const std::string &server_name = parser.getRequestObj().getHeader("Host");
   const std::string &socket_key = client->getSocketKey();
-  const ServerBlock *server_block = getServerBlock(socket_key, server_name);
+  const ServerBlock *server_block = getServerBlock_(socket_key, server_name);
 
   client->send(server_block);
 
@@ -136,7 +136,7 @@ const ServerBlock *ServerHandler::getServerBlock_(
   return &blocks_of_key[0];
 }
 
-void ServerHandler::closeConnection_(int client_fd) {
+void ServerHandler::__(int client_fd) {
   clients_.erase(client_fd);
   client_selector_.clear(client_fd);
   close(client_fd);
