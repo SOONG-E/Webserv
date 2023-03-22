@@ -1,7 +1,5 @@
 #include "ServerSocket.hpp"
 
-#include <cerrno>
-
 ServerSocket::ServerSocket() : fd_(-1) {}
 
 ServerSocket::ServerSocket(const ServerSocket& src) { *this = src; }
@@ -26,15 +24,14 @@ void ServerSocket::bind(const SocketAddress& address, int backlog) {
   if (setsockopt(fd_, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
     throw SocketBindException(strerror(errno));
 
-  if (::bind(fd_, (sockaddr*)&address.getAddress(),
-             address.getAddressLen()) == -1)
+  if (::bind(fd_, (sockaddr*)&address.getAddress(), address.getAddressLen()) ==
+      -1)
     throw SocketBindException(strerror(errno));
 
   if (fcntl(fd_, F_SETFL, O_NONBLOCK) == -1)
     throw SocketBindException(strerror(errno));
 
-  if (listen(fd_, backlog) == -1)
-    throw SocketBindException(strerror(errno));
+  if (listen(fd_, backlog) == -1) throw SocketBindException(strerror(errno));
 
   address_ = address;
 }
@@ -43,13 +40,15 @@ Client ServerSocket::accept() const {
   sockaddr client_addr;
   socklen_t client_addrlen;
 
-  int client_socket = ::accept(fd_, &client_addr, &client_addrlen);
-  if (client_socket == -1) throw SocketAcceptException(strerror(errno));
+  int client_fd = ::accept(fd_, &client_addr, &client_addrlen);
+  if (client_fd == -1) throw SocketAcceptException(strerror(errno));
 
-  if (fcntl(client_socket, F_SETFL, O_NONBLOCK) == -1)
+  if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
+    close(client_fd);
     throw SocketAcceptException(strerror(errno));
+  }
 
-  return Client(client_socket, SocketAddress(client_addr, client_addrlen),
+  return Client(client_fd, SocketAddress(client_addr, client_addrlen),
                 address_);
 }
 
