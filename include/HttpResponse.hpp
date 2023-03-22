@@ -20,28 +20,20 @@ class HttpResponse {
   HttpResponse& operator=(const HttpResponse& origin);
   ~HttpResponse();
 
-  const std::string& getBackup(void) const;
-  void setBackup(const std::string& backup);
-  const std::string& getCode(void) const;
-  void setCode(const std::string& code);
-  void setReason(const std::string& reason);
   void setStatus(const std::string& code, const std::string& reason);
 
+  bool isSuccess(void) const;
   std::string generate(const HttpRequest& request,
                        const ServerBlock* server_block);
-  std::string generateHeader(const std::string& body) const;
 
  private:
-  std::string getDate(void) const;
-  void generateHeader(std::string& header);
+  std::string currentTime(void) const;
+  std::string generateResponse(const std::string& body) const;
   std::string rootUri(const std::string& request_uri,
-                      const std::vector<LocationBlock>& locations);
+                      const std::vector<LocationBlock>& locations) const;
 
   std::string code_;
   std::string reason_;
-  std::string backup_;
-  std::string header_;
-  std::string body_;
 };
 
 #endif
