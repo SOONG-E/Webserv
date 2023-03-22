@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "ByteUnits.hpp"
+#include "HttpResponse.hpp"
 #include "constant.hpp"
 #include "exception.hpp"
 
@@ -39,6 +40,16 @@ const std::vector<Listen>& ServerBlock::getListens(void) const {
 
 const std::set<std::string>& ServerBlock::getServerNames(void) const {
   return server_names_;
+}
+
+const std::string& ServerBlock::getErrorPage(
+    const std::string& code) const {
+  std::map<std::string, std::string>::const_iterator iter =
+      error_pages_.find(code);
+  if (iter == error_pages_.end()) {
+    return HttpResponse::DEFAULTS[HttpResponse::ERROR_PAGE];
+  }
+  return iter->second;
 }
 
 const std::vector<LocationBlock>& ServerBlock::getLocationBlocks(void) const {
