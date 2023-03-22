@@ -2,7 +2,6 @@
 #define HTTP_PARSER_HPP_
 
 #include "HttpRequest.hpp"
-#include "ResponseStatus.hpp"
 #include "exception.hpp"
 #include "utility.hpp"
 

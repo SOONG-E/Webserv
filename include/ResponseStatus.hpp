@@ -9,6 +9,8 @@ enum StatusIndex {
   C404,
   C411,
   C413,
+  C500,
+  C501,
   C505,
 };
 
