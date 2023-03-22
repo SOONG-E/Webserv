@@ -3,6 +3,7 @@
 
 #define BUF_SIZE 65536
 
+#include <cerrno>
 #include <cstring>
 #include <string>
 
@@ -13,8 +14,7 @@
 
 class Client {
  public:
-  Client(int fd, const SocketAddress& cli_addr,
-         const SocketAddress& serv_addr);
+  Client(int fd, const SocketAddress& cli_addr, const SocketAddress& serv_addr);
   Client(const Client& src);
   ~Client();
 
@@ -26,11 +26,20 @@ class Client {
   const std::string& getSocketKey() const;
   HttpResponse& getResponseObj();
   const HttpResponse& getResponseObj() const;
+  const std::string& getRequestMethod() const;
+  std::string getRequestHeader(const std::string& target) const;
+
+  void setResponseStatus(const std::string& code, const std::string& reason);
+  void clearParser();
+  void clearResponseBuf();
+  void appendRequest(const std::string& request);
 
   std::string receive() const;
   void send(const ServerBlock* server_block);
 
+  bool isResponseSuccess() const;
   bool isPartialWritten() const;
+  bool isParseCompleted() const;
 
  private:
   int fd_;
@@ -39,6 +48,7 @@ class Client {
   SocketAddress serv_address_;
   HttpParser parser_;
   HttpResponse response_obj_;
+  std::string response_buf_;
 
  public:
   class SocketReceiveException : public std::exception {
