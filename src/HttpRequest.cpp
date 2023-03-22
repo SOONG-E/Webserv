@@ -15,15 +15,7 @@ HttpRequest HttpRequest::operator=(const HttpRequest &origin) {
   return out;
 }
 
-void HttpRequest::setMethod(std::string method) {
-  for (std::size_t i = 0; i < METHODS_COUNT; ++i) {
-    if (METHODS[i] == method) {
-      method_ = method;
-      return;
-    }
-  }
-  throw std::exception();
-}
+void HttpRequest::setMethod(std::string method) { method_ = method; }
 
 void HttpRequest::setUri(std::string uri) { uri_ = uri; }
 
