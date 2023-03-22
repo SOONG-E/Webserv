@@ -111,7 +111,8 @@ void HttpParser::parseHeaders(HttpRequest& request_, std::string header_part) {
     request_.addheader(trim(line[0]), trim(line[1]));
   }
   request_.setHost(request_.getHeader("Host"));
-}
+  if (request_.getHost() == "")
+    throw BadRequestException();
 
 void HttpParser::unchunkMessage(HttpRequest& request_, std::string body) {
   std::string content;
