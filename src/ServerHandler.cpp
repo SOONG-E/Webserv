@@ -127,8 +127,8 @@ void ServerHandler::sendResponse(Client *client) {
   try {
     client->send(server_block);
     if (!client->isPartialWritten()) {
-      if (client->getRequestHeader("Connection") == "close" ||
-          !client->isResponseSuccess())
+      std::string connection = client->getRequestHeader("Connection");
+      if (connection == "close" || !client->isResponseSuccess())
         closeConnection(client->getFD());
       else
         client->clearParser();
