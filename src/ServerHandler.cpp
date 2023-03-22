@@ -28,7 +28,6 @@ void ServerHandler::configureServer(const Config &config) {
     for (size_t i = 0; i < listens.size(); ++i) {
       if (server_blocks_.find(listens[i].socket_key) == server_blocks_.end()) {
         std::vector<ServerBlock> in(1, serv_blocks[i]);
-
         server_blocks_[listens[i].socket_key] = in;
       } else {
         server_blocks_[listens[i].socket_key].push_back(serv_blocks[i]);
@@ -47,9 +46,7 @@ void ServerHandler::createServers() {
     ServerSocket server_socket;
     server_socket.open();
     server_socket.bind(SocketAddress(ip, port), 128);
-
     server_sockets_.push_back(server_socket);
-
     server_selector_.registerFD(server_socket.getFD());
   }
 }
@@ -58,11 +55,15 @@ void ServerHandler::acceptConnections() {
   if (server_selector_.select() > 0) {
     for (size_t i = 0; i < server_sockets_.size(); ++i) {
       if (server_selector_.isSetRead(server_sockets_[i].getFD())) {
-        Client new_client = server_sockets_[i].accept();
+        try {
+          Client new_client = server_sockets_[i].accept();
 
-        client_selector_.registerFD(new_client.getFD());
+          client_selector_.registerFD(new_client.getFD());
 
-        clients_.insert(std::make_pair(new_client.getFD(), new_client));
+          clients_.insert(std::make_pair(new_client.getFD(), new_client));
+        } catch (const std::exception &e) {
+          // 에러 로그 출력
+        }
       }
     }
   }
@@ -73,54 +74,72 @@ void ServerHandler::respondToClients() {
     for (clients_type::iterator it = clients_.begin(); it != clients_.end();
          ++it) {
       Client *client = &it->second;
-      HttpParser parser = client->getParser();
-      int client_fd = client->getFD();
 
-      if (client_selector_.isSetRead(client_fd)) {
-        receiveRequest_(client, parser, client_fd);
+      if (client_selector_.isSetRead(client->getFD())) {
+        receiveRequest(client);
       }
-      if (client_selector_.isSetWrite(client_fd) &&
-          (parser.isCompleted() ||
-           client->getResponseObj().getCode() != "200")) {
-        sendResponse_(client, parser);
+      if (client_selector_.isSetWrite(client->getFD()) &&
+          (client->isParseCompleted() || !client->isResponseSuccess())) {
+        sendResponse(client);
       }
     }
   }
 }
 
-void ServerHandler::receiveRequest_(Client *client, HttpParser &parser,
-                                   int client_fd) {
-  std::string request = client->receive();
-
-  if (request.empty()) {
-    closeConnection_(client_fd);
-    return;
+bool ServerHandler::isImplementedMethod(std::string method) {
+  for (std::size_t i = 0; i < METHODS_COUNT; ++i) {
+    if (METHODS[i] == method) {
+      return true;
+    }
   }
+  return false;
+}
+
+void ServerHandler::receiveRequest(Client *client) {
+  try {
+    std::string request = client->receive();
+    if (request.empty()) {
+      closeConnection(client->getFD());
+      return;
+    }
+    client->appendRequest(request);
+  } catch (const Client::SocketReceiveException &e) {
+    client->setResponseStatus("500", ResponseStatus::REASONS[C500]);
+  } catch (const HttpParser::BadRequestException &e) {
+    client->setResponseStatus("400", ResponseStatus::REASONS[C400]);
+  } catch (const HttpParser::LengthRequired &e) {
+    client->setResponseStatus("411", ResponseStatus::REASONS[C411]);
+  } catch (const HttpParser::PayloadTooLargeException &e) {
+    client->setResponseStatus("413", ResponseStatus::REASONS[C413]);
+  } catch (const HttpParser::HttpVersionNotSupportedException &e) {
+    client->setResponseStatus("505", ResponseStatus::REASONS[C505]);
+  }
+  if (!isImplementedMethod(client->getRequestMethod())) {
+    client->setResponseStatus("501", ResponseStatus::REASONS[C501]);
+  }
+}
+
+void ServerHandler::sendResponse(Client *client) {
+  std::string server_name = client->getRequestHeader("Host");
+  const std::string &socket_key = client->getSocketKey();
+  const ServerBlock *server_block = getServerBlock(socket_key, server_name);
 
   try {
-    parser.appendRequest(request);
-  } catch (const HttpParser::BadRequestException &e) {
-    client->getResponseObj().setStatus("400", ResponseStatus::REASONS[C400]);
-  } catch (const HttpParser::LengthRequired &e) {
-    client->getResponseObj().setStatus("411", ResponseStatus::REASONS[C411]);
-  } catch (const HttpParser::PayloadTooLargeException &e) {
-    client->getResponseObj().setStatus("413", ResponseStatus::REASONS[C413]);
+    client->send(server_block);
+    if (!client->isPartialWritten()) {
+      if (client->getRequestHeader("Connection") == "close" ||
+          !client->isResponseSuccess())
+        closeConnection(client->getFD());
+      else
+        client->clearParser();
+    }
+  } catch (const Client::SocketSendException &e) {
+    client->setResponseStatus("500", ResponseStatus::REASONS[C500]);
+    client->clearResponseBuf();
   }
 }
 
-void ServerHandler::sendResponse_(Client *client, HttpParser &parser) {
-  const std::string &server_name = parser.getRequestObj().getHeader("Host");
-  const std::string &socket_key = client->getSocketKey();
-  const ServerBlock *server_block = getServerBlock_(socket_key, server_name);
-
-  client->send(server_block);
-
-  if (!client->isPartialWritten()) {
-    parser.clear();
-  }
-}
-
-const ServerBlock *ServerHandler::getServerBlock_(
+const ServerBlock *ServerHandler::getServerBlock(
     const std::string &socket_key, const std::string &server_name) {
   const std::vector<ServerBlock> &blocks_of_key = server_blocks_[socket_key];
 
@@ -132,11 +151,10 @@ const ServerBlock *ServerHandler::getServerBlock_(
       return &blocks_of_key[i];
     }
   }
-
   return &blocks_of_key[0];
 }
 
-void ServerHandler::closeConnection_(int client_fd) {
+void ServerHandler::closeConnection(int client_fd) {
   clients_.erase(client_fd);
   client_selector_.clear(client_fd);
   close(client_fd);

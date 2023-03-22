@@ -32,17 +32,18 @@ class ServerHandler {
   typedef std::map<int, Client> clients_type;
   typedef Selector selector_type;
 
+  bool isImplementedMethod(std::string method);
+  const ServerBlock *getServerBlock(const std::string &key,
+                                    const std::string &server_name);
+  void closeConnection(int client_fd);
+  void receiveRequest(Client *client);
+  void sendResponse(Client *client);
+
   server_blocks_type server_blocks_;
   server_sockets_type server_sockets_;
   clients_type clients_;
   selector_type server_selector_;
   selector_type client_selector_;
-
-  const ServerBlock *getServerBlock_(const std::string &key,
-                                    const std::string &server_name);
-  void closeConnection_(int client_fd);
-  void receiveRequest_(Client *client, HttpParser &parser, int client_fd);
-  void sendResponse_(Client *client, HttpParser &parser);
 };
 
 #endif
