@@ -59,7 +59,6 @@ void ServerHandler::acceptConnections() {
           Client new_client = server_sockets_[i].accept();
 
           client_selector_.registerFD(new_client.getFD());
-
           clients_.insert(std::make_pair(new_client.getFD(), new_client));
         } catch (const std::exception &e) {
           std::cerr << "[Error] Connection failed: " << e.what() << '\n';
@@ -71,17 +70,25 @@ void ServerHandler::acceptConnections() {
 
 void ServerHandler::respondToClients() {
   if (client_selector_.select() > 0) {
+    std::vector<int> delete_clients;
+
+    delete_clients.reserve(clients_.size());
+
     for (clients_type::iterator it = clients_.begin(); it != clients_.end();
          ++it) {
       Client *client = &it->second;
 
       if (client_selector_.isSetRead(client->getFD())) {
-        receiveRequest(client);
+        receiveRequest(client, delete_clients);
       }
       if (client_selector_.isSetWrite(client->getFD()) &&
           (client->isParseCompleted() || !client->isResponseSuccess())) {
-        sendResponse(client);
+        sendResponse(client, delete_clients);
       }
+    }
+
+    if (!delete_clients.empty()) {
+      deleteClients(delete_clients);
     }
   }
 }
@@ -95,10 +102,13 @@ bool ServerHandler::isImplementedMethod(std::string method) {
   return false;
 }
 
-void ServerHandler::receiveRequest(Client *client) {
+void ServerHandler::receiveRequest(Client *client,
+                                   std::vector<int> &delete_clients) {
   try {
     std::string request = client->receive();
+
     if (request.empty()) {
+      delete_clients.push_back(client->getFD());
       closeConnection(client);
       return;
     }
@@ -119,19 +129,24 @@ void ServerHandler::receiveRequest(Client *client) {
   }
 }
 
-void ServerHandler::sendResponse(Client *client) {
+void ServerHandler::sendResponse(Client *client,
+                                 std::vector<int> &delete_clients) {
   std::string server_name = client->getRequestHeader("Host");
   const std::string &socket_key = client->getSocketKey();
   const ServerBlock *server_block = getServerBlock(socket_key, server_name);
 
   try {
     client->send(server_block);
+
     if (!client->isPartialWritten()) {
       std::string connection = client->getRequestHeader("Connection");
-      if (connection == "close" || !client->isResponseSuccess())
+
+      if (connection == "close" || !client->isResponseSuccess()) {
+        delete_clients.push_back(client->getFD());
         closeConnection(client);
-      else
-        client->clearParser();
+        return;
+      }
+      client->clearParser();
     }
   } catch (const std::exception &e) {
     client->setResponseStatus("500", ResponseStatus::REASONS[C500]);
@@ -156,13 +171,16 @@ const ServerBlock *ServerHandler::getServerBlock(
 }
 
 void ServerHandler::closeConnection(Client *client) {
-  int client_fd = client->getFD();
-
-  clients_.erase(client_fd);
-  client_selector_.clear(client_fd);
-  close(client_fd);
+  close(client->getFD());
 
   Log::header("Close Connection Information");
   client->logAddressInfo();
   Log::footer();
+}
+
+void ServerHandler::deleteClients(const std::vector<int> &delete_clients) {
+  for (size_t i = 0; i < delete_clients.size(); ++i) {
+    clients_.erase(delete_clients[i]);
+    client_selector_.clear(delete_clients[i]);
+  }
 }

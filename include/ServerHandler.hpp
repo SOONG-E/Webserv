@@ -34,9 +34,10 @@ class ServerHandler {
   bool isImplementedMethod(std::string method);
   const ServerBlock *getServerBlock(const std::string &key,
                                     const std::string &server_name);
+  void receiveRequest(Client *client, std::vector<int> &delete_clients);
+  void sendResponse(Client *client, std::vector<int> &delete_clients);
   void closeConnection(Client *client);
-  void receiveRequest(Client *client);
-  void sendResponse(Client *client);
+  void deleteClients(const std::vector<int> &delete_clients);
 
   server_blocks_type server_blocks_;
   server_sockets_type server_sockets_;
