@@ -43,7 +43,8 @@ void HttpParser::appendRequest(const std::string& socket_buffer) {
 }
 
 bool HttpParser::isCompleted(void) const {
-  if (request_.getMethod() != "POST") return true;
+  if (!request_.getMethod().empty() && request_.getMethod() != "POST")
+    return true;
   return !request_.getBody().empty();
 }
 
