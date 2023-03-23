@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "ExceptionTemplate.hpp"
+#include "exception.hpp"
 #include "ResponseStatus.hpp"
 #include "constant.hpp"
 

@@ -35,9 +35,10 @@ HttpResponse& Client::getResponseObj() { return response_obj_; }
 
 const HttpResponse& Client::getResponseObj() const { return response_obj_; }
 
-const std::string& Client::getRequestMethod() const {
+std::string Client::getRequestMethod() const {
   return parser_.getRequestObj().getMethod();
 }
+
 std::string Client::getRequestHeader(const std::string& target) const {
   return parser_.getRequestObj().getHeader(target);
 }

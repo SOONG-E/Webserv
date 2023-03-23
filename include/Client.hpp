@@ -26,7 +26,7 @@ class Client {
   const std::string& getSocketKey() const;
   HttpResponse& getResponseObj();
   const HttpResponse& getResponseObj() const;
-  const std::string& getRequestMethod() const;
+  std::string getRequestMethod() const;
   std::string getRequestHeader(const std::string& target) const;
 
   void setResponseStatus(const std::string& code, const std::string& reason);

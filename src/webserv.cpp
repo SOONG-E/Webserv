@@ -1,5 +1,3 @@
-// #include "webserv.hpp"
-
 #include <iostream>
 
 #include "ConfigParser.hpp"
@@ -17,7 +15,7 @@ int main(int argc, char* argv[]) {
   try {
     ConfigParser conf(filename);
     const Config& config = conf.parse();
-    
+
     ServerHandler handler;
     handler.configureServer(config);
     handler.createServers();

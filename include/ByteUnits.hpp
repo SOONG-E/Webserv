@@ -1,4 +1,4 @@
-#ifndef BTYE_UNITS_HPP_
+#ifndef BYTE_UNITS_HPP_
 #define BYTE_UNITS_HPP_
 
 #include <map>

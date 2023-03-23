@@ -41,10 +41,10 @@ std::string HttpResponse::generate(const HttpRequest& request,
   }
   try {
     body = rootUri(request.getUri(), server_block->getLocationBlocks());
-  } catch (std::runtime_error &e) {
+  } catch (std::runtime_error& e) {
     code_ = "404";
     reason_ = ResponseStatus::REASONS[C404];
-    body = readFile(server_block->getErrorPage(code_));  
+    body = readFile(server_block->getErrorPage(code_));
   }
   return generateResponse(body);
 }
@@ -73,7 +73,7 @@ std::string HttpResponse::rootUri(
   std::size_t end_pos = -1;
   while (true) {
     end_pos = request_uri.find("/", end_pos + 1);
-    if (end_pos == std::string::npos) throw std::runtime_error();
+    if (end_pos == std::string::npos) throw std::runtime_error("");
     std::string rooted_uri = request_uri.substr(0, end_pos + 1);
     for (std::size_t i = 0; i < locations.size(); ++i) {
       if (rooted_uri == locations[i].uri) {
