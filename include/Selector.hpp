@@ -32,11 +32,10 @@ class Selector {
   class SelectFailedException : public std::exception {
    public:
     SelectFailedException(const char* cause);
+    const char* what() const throw();
 
    private:
     const char* cause;
-
-    const char* what() const throw();
   };
 };
 

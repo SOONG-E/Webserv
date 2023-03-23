@@ -33,31 +33,28 @@ class ServerSocket {
   class SocketOpenException : public std::exception {
    public:
     SocketOpenException(const char* cause);
+    const char* what() const throw();
 
    private:
     const char* cause;
-
-    const char* what() const throw();
   };
 
   class SocketBindException : public std::exception {
    public:
     SocketBindException(const char* cause);
+    const char* what() const throw();
 
    private:
     const char* cause;
-
-    const char* what() const throw();
   };
 
   class SocketAcceptException : public std::exception {
    public:
     SocketAcceptException(const char* cause);
+    const char* what() const throw();
 
    private:
     const char* cause;
-
-    const char* what() const throw();
   };
 };
 
