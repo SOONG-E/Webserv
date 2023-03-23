@@ -41,7 +41,9 @@ Client ServerSocket::accept() const {
   socklen_t client_addrlen;
 
   int client_fd = ::accept(fd_, &client_addr, &client_addrlen);
-  if (client_fd == -1) throw SocketAcceptException(strerror(errno));
+  if (client_fd == -1) {
+    throw SocketAcceptException(strerror(errno));
+  }
 
   if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
     close(client_fd);
