@@ -1,6 +1,7 @@
 #include "HttpRequest.hpp"
 
 HttpRequest::HttpRequest() : content_length_(0) {}
+
 HttpRequest::HttpRequest(const HttpRequest &origin)
     : method_(origin.method_),
       uri_(origin.uri_),
@@ -8,12 +9,20 @@ HttpRequest::HttpRequest(const HttpRequest &origin)
       body_(origin.body_),
       content_length_(origin.content_length_),
       headers_(origin.headers_) {}
-HttpRequest::~HttpRequest() {}
-HttpRequest HttpRequest::operator=(const HttpRequest &origin) {
-  HttpRequest out(origin);
 
-  return out;
+HttpRequest HttpRequest::operator=(const HttpRequest &origin) {
+  if (this != &origin) {
+    method_ = origin.method_;
+    uri_ = origin.uri_;
+    host_ = origin.host_;
+    body_ = origin.body_;
+    content_length_ = origin.content_length_;
+    headers_ = origin.headers_;
+  }
+  return *this;
 }
+
+HttpRequest::~HttpRequest() {}
 
 void HttpRequest::setMethod(std::string method) { method_ = method; }
 

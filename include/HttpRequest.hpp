@@ -13,8 +13,8 @@ class HttpRequest {
  public:
   HttpRequest();
   HttpRequest(const HttpRequest &origin);
-  ~HttpRequest();
   HttpRequest operator=(const HttpRequest &origin);
+  ~HttpRequest();
 
   void setMethod(std::string method);
   void setUri(std::string uri);
