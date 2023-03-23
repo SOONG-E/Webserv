@@ -11,5 +11,5 @@ void Log::header(const std::string& title) {
 }
 
 void Log::footer(void) {
-  std::cout << std::setfill(MARGIN_CHAR) << std::setw(WIDTH) << "\n";
+  std::cout << std::setfill(MARGIN_CHAR) << std::setw(WIDTH) << "\n\n";
 }
