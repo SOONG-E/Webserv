@@ -24,7 +24,6 @@ void ServerHandler::configureServer(const Config &config) {
 
   for (size_t i = 0; i < serv_blocks.size(); ++i) {
     const std::vector<Listen> &listens = serv_blocks[i].getListens();
-
     for (size_t i = 0; i < listens.size(); ++i) {
       if (server_blocks_.find(listens[i].socket_key) == server_blocks_.end()) {
         std::vector<ServerBlock> in(1, serv_blocks[i]);
@@ -106,7 +105,6 @@ void ServerHandler::receiveRequest(Client *client,
                                    std::vector<int> &delete_clients) {
   try {
     std::string request = client->receive();
-
     if (request.empty()) {
       delete_clients.push_back(client->getFD());
       closeConnection(client);
@@ -137,7 +135,6 @@ void ServerHandler::sendResponse(Client *client,
 
   try {
     client->send(server_block);
-
     if (!client->isPartialWritten()) {
       std::string connection = client->getRequestHeader("Connection");
 
@@ -157,17 +154,17 @@ void ServerHandler::sendResponse(Client *client,
 
 const ServerBlock *ServerHandler::getServerBlock(
     const std::string &socket_key, const std::string &server_name) {
-  const std::vector<ServerBlock> &blocks_of_key = server_blocks_[socket_key];
+  const std::vector<ServerBlock> &server_blocks = server_blocks_[socket_key];
 
-  for (size_t i = 0; i < blocks_of_key.size(); ++i) {
-    const std::set<std::string> &names_of_key =
-        blocks_of_key[i].getServerNames();
+  for (size_t i = 0; i < server_blocks.size(); ++i) {
+    const std::set<std::string> &server_names =
+        server_blocks[i].getServerNames();
 
-    if (names_of_key.find(server_name) != names_of_key.end()) {
-      return &blocks_of_key[i];
+    if (server_names.find(server_name) != server_names.end()) {
+      return &server_blocks[i];
     }
   }
-  return &blocks_of_key[0];
+  return &server_blocks[0];
 }
 
 void ServerHandler::closeConnection(Client *client) {
