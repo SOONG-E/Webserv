@@ -5,7 +5,9 @@ Client::Client(int fd, const SocketAddress& cli_addr,
     : fd_(fd),
       socket_key_(serv_addr.getIP() + ":" + serv_addr.getPort()),
       cli_address_(cli_addr),
-      serv_address_(serv_addr) {}
+      serv_address_(serv_addr) {
+  logConnectionInfo();
+}
 
 Client::Client(const Client& src) { *this = src; }
 
@@ -58,7 +60,10 @@ std::string Client::receive() const {
   ssize_t read_bytes = recv(fd_, &buf, BUF_SIZE, 0);
   if (read_bytes == -1) throw SocketReceiveException(strerror(errno));
 
-  return std::string(buf, static_cast<size_t>(read_bytes));
+  std::string ret(buf, static_cast<size_t>(read_bytes));
+
+  logReceiveInfo(ret);
+  return ret;
 }
 
 void Client::send(const ServerBlock* server_block) {
@@ -73,6 +78,12 @@ void Client::send(const ServerBlock* server_block) {
     throw SocketSendException(strerror(errno));
   }
 
+  Log::header("Send Information");
+  logAddressInfo();
+  std::cout << "[Send Data] " << '\n'
+            << response_buf_.substr(0, write_bytes) << '\n';
+  Log::footer();
+
   response_buf_.erase(0, write_bytes);
 }
 
@@ -85,6 +96,26 @@ bool Client::isParseCompleted() const { return parser_.isCompleted(); }
 void Client::clearParser() { parser_.clear(); }
 
 void Client::clearResponseBuf() { response_buf_.clear(); }
+
+void Client::logAddressInfo() const {
+  std::cout << "[Client address]" << '\n'
+            << cli_address_.getIP() << ":" << cli_address_.getPort() << '\n'
+            << "[Server address]" << '\n'
+            << serv_address_.getIP() << ":" << serv_address_.getPort() << '\n';
+}
+
+void Client::logConnectionInfo() const {
+  Log::header("Connection Information");
+  logAddressInfo();
+  Log::footer();
+}
+
+void Client::logReceiveInfo(const std::string& request) const {
+  Log::header("Receive Information");
+  logAddressInfo();
+  std::cout << "[Receive data]" << '\n' << request << '\n';
+  Log::footer();
+}
 
 Client::SocketReceiveException::SocketReceiveException(const char* cause)
     : cause(cause) {}

@@ -62,7 +62,7 @@ void ServerHandler::acceptConnections() {
 
           clients_.insert(std::make_pair(new_client.getFD(), new_client));
         } catch (const std::exception &e) {
-          // 에러 로그 출력
+          std::cerr << "[Error] Connection failed: " << e.what() << '\n';
         }
       }
     }
@@ -99,7 +99,7 @@ void ServerHandler::receiveRequest(Client *client) {
   try {
     std::string request = client->receive();
     if (request.empty()) {
-      closeConnection(client->getFD());
+      closeConnection(client);
       return;
     }
     client->appendRequest(request);
@@ -129,13 +129,14 @@ void ServerHandler::sendResponse(Client *client) {
     if (!client->isPartialWritten()) {
       std::string connection = client->getRequestHeader("Connection");
       if (connection == "close" || !client->isResponseSuccess())
-        closeConnection(client->getFD());
+        closeConnection(client);
       else
         client->clearParser();
     }
-  } catch (const Client::SocketSendException &e) {
+  } catch (const std::exception &e) {
     client->setResponseStatus("500", ResponseStatus::REASONS[C500]);
     client->clearResponseBuf();
+    std::cerr << "[Error] Send failed: " << e.what() << '\n';
   }
 }
 
@@ -154,8 +155,14 @@ const ServerBlock *ServerHandler::getServerBlock(
   return &blocks_of_key[0];
 }
 
-void ServerHandler::closeConnection(int client_fd) {
+void ServerHandler::closeConnection(Client *client) {
+  int client_fd = client->getFD();
+
   clients_.erase(client_fd);
   client_selector_.clear(client_fd);
   close(client_fd);
+
+  Log::header("Close Connection Information");
+  client->logAddressInfo();
+  Log::footer();
 }

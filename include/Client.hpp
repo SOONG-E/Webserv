@@ -5,10 +5,12 @@
 
 #include <cerrno>
 #include <cstring>
+#include <iostream>
 #include <string>
 
 #include "HttpParser.hpp"
 #include "HttpResponse.hpp"
+#include "Log.hpp"
 #include "ServerBlock.hpp"
 #include "SocketAddress.hpp"
 
@@ -41,6 +43,10 @@ class Client {
   bool isPartialWritten() const;
   bool isParseCompleted() const;
 
+  void logAddressInfo() const;
+  void logConnectionInfo() const;
+  void logReceiveInfo(const std::string& request) const;
+
  private:
   int fd_;
   std::string socket_key_;
@@ -54,21 +60,19 @@ class Client {
   class SocketReceiveException : public std::exception {
    public:
     SocketReceiveException(const char* cause);
+    const char* what() const throw();
 
    private:
     const char* cause;
-
-    const char* what() const throw();
   };
 
   class SocketSendException : public std::exception {
    public:
     SocketSendException(const char* cause);
+    const char* what() const throw();
 
    private:
     const char* cause;
-
-    const char* what() const throw();
   };
 };
 

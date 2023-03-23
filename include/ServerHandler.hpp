@@ -35,7 +35,7 @@ class ServerHandler {
   bool isImplementedMethod(std::string method);
   const ServerBlock *getServerBlock(const std::string &key,
                                     const std::string &server_name);
-  void closeConnection(int client_fd);
+  void closeConnection(Client *client);
   void receiveRequest(Client *client);
   void sendResponse(Client *client);
 
