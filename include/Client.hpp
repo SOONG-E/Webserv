@@ -25,9 +25,7 @@ class Client {
   int getFD() const;
   HttpParser& getParser();
   const HttpParser& getParser() const;
-  const std::string& getSocketKey() const;
-  HttpResponse& getResponseObj();
-  const HttpResponse& getResponseObj() const;
+  std::string getSocketKey() const;
   std::string getRequestMethod() const;
   std::string getRequestHeader(const std::string& target) const;
 
@@ -49,7 +47,6 @@ class Client {
 
  private:
   int fd_;
-  std::string socket_key_;
   SocketAddress cli_address_;
   SocketAddress serv_address_;
   HttpParser parser_;
