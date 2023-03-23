@@ -1,6 +1,10 @@
 #include "Selector.hpp"
 
-Selector::Selector() : max_fd_(-1) { FD_ZERO(&fds_); }
+Selector::Selector() : max_fd_(-1) {
+  FD_ZERO(&fds_);
+  tm_.tv_sec = 0;
+  tm_.tv_usec = 0;
+}
 
 Selector::Selector(const Selector &src) { *this = src; }
 
@@ -19,7 +23,7 @@ Selector &Selector::operator=(const Selector &src) {
 int Selector::select() {
   read_fds_ = fds_;
   write_fds_ = fds_;
-  int result = ::select(max_fd_ + 1, &read_fds_, &write_fds_, 0, 0);
+  int result = ::select(max_fd_ + 1, &read_fds_, &write_fds_, 0, &tm_);
   if (result == -1) throw SelectFailedException(strerror(errno));
   return result;
 }

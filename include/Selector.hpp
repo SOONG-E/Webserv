@@ -22,6 +22,7 @@ class Selector {
   bool isSetWrite(int fd) const;
 
  private:
+  struct timeval tm_;
   int max_fd_;
   fd_set fds_;
   fd_set read_fds_;
