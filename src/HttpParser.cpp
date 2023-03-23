@@ -74,26 +74,27 @@ void HttpParser::handlePost(void) {
 }
 
 HttpRequest HttpParser::parseHeader(const std::string& request) {
-  HttpRequest request_;
+  HttpRequest request2;
   std::size_t boundary = request.find(CRLF);
   std::string request_line = request.substr(0, boundary);
-  parseRequestLine(request_, request_line);
+  parseRequestLine(request2, request_line);
 
   std::string headers = request.substr(boundary + CRLF.length());
-  parseHeaders(request_, headers);
+  parseHeaders(request2, headers);
 
-  return request_;
+  return request2;
 }
 
 void HttpParser::parseRequestLine(HttpRequest& request_,
                                   const std::string& request) {
   std::vector<std::string> request_line = split(request);
+
   if (request_line.size() < 3 || request_line[2].length() < 6 ||
       request_line[2].substr(0, 4) != "HTTP") {
     throw BadRequestException();
   }
   if (request_line[2].substr(0, 5) != "HTTP/" ||
-      request_line[2].substr(6) != "1.1") {
+      request_line[2].substr(5) != "1.1") {
     throw HttpVersionNotSupportedException();
   }
   request_.setMethod(request_line[0]);
@@ -111,8 +112,7 @@ void HttpParser::parseHeaders(HttpRequest& request_, std::string header_part) {
     request_.addheader(trim(line[0]), trim(line[1]));
   }
   request_.setHost(request_.getHeader("Host"));
-  if (request_.getHost() == "")
-    throw BadRequestException();
+  if (request_.getHost() == "") throw BadRequestException();
 }
 
 void HttpParser::unchunkMessage(HttpRequest& request_, std::string body) {
