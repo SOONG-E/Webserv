@@ -4,7 +4,7 @@
 
 #include "ResponseStatus.hpp"
 
-const std::string HttpResponse::DEFAULTS[] = {"200", "page/error.html"};
+const std::string HttpResponse::DEFAULTS[] = {"200", "html/error.html"};
 
 HttpResponse::HttpResponse()
     : code_(DEFAULTS[CODE]), reason_(ResponseStatus::REASONS[C200]) {}
@@ -77,7 +77,11 @@ std::string HttpResponse::rootUri(
     std::string rooted_uri = request_uri.substr(0, end_pos + 1);
     for (std::size_t i = 0; i < locations.size(); ++i) {
       if (rooted_uri == locations[i].uri) {
-        return readFile(locations[i].root + request_uri.substr(end_pos + 1));
+        std::string filename = locations[i].root + request_uri.substr(end_pos);
+        if (end_pos == rooted_uri.size() - 1) {
+          filename += "/" + *locations[i].index.begin();
+        }
+        return readFile(filename);
       }
     }
   }
