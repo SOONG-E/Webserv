@@ -33,7 +33,7 @@ class HttpResponse {
   std::string rootUri(const std::string& request_uri,
                       const std::vector<LocationBlock>& locations) const;
   std::string readIndexFile(const std::set<std::string>& index,
-                            const std::string& filename);
+                            const std::string& filename) const;
 
   std::string code_;
   std::string reason_;

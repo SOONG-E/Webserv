@@ -94,7 +94,7 @@ std::string HttpResponse::rootUri(
 }
 
 std::string HttpResponse::readIndexFile(const std::set<std::string>& index,
-                                        const std::string& filename) {
+                                        const std::string& filename) const {
   for (std::set<std::string>::const_iterator iter = index.begin();
        iter != index.end(); ++iter) {
     try {
