@@ -81,7 +81,7 @@ void ServerHandler::respondToClients() {
         receiveRequest(client, delete_clients);
       }
       if (client_selector_.isSetWrite(client->getFD()) &&
-          (client->isParseCompleted() || !client->isResponseSuccess())) {
+          (client->isParseCompleted() || client->isErrorStatus())) {
         sendResponse(client, delete_clients);
       }
     }
@@ -138,7 +138,7 @@ void ServerHandler::sendResponse(Client *client,
     if (!client->isPartialWritten()) {
       std::string connection = client->getRequestHeader("Connection");
 
-      if (connection == "close" || !client->isResponseSuccess()) {
+      if (connection == "close" || client->isErrorStatus()) {
         delete_clients.push_back(client->getFD());
         closeConnection(client);
         return;
