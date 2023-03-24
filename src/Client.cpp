@@ -85,7 +85,7 @@ void Client::send(const ServerBlock* server_block) {
   response_buf_.erase(0, write_bytes);
 }
 
-bool Client::isResponseSuccess() const { return response_obj_.isSuccess(); }
+bool Client::isErrorStatus() const { return !response_obj_.isSuccess(); }
 
 bool Client::isPartialWritten() const { return !response_buf_.empty(); }
 

@@ -37,7 +37,7 @@ class Client {
   std::string receive() const;
   void send(const ServerBlock* server_block);
 
-  bool isResponseSuccess() const;
+  bool isErrorStatus() const;
   bool isPartialWritten() const;
   bool isParseCompleted() const;
 
