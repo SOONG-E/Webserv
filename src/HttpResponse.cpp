@@ -37,7 +37,7 @@ std::string HttpResponse::generate(const HttpRequest& request,
   std::string body;
   if (!isSuccess()) {
     body = readFile(server_block->getErrorPage(code_));
-    return generateResponse(body);
+    return generateResponse(request, body);
   }
   try {
     body = rootUri(request.getUri(), server_block->getLocationBlocks());
@@ -46,7 +46,23 @@ std::string HttpResponse::generate(const HttpRequest& request,
     reason_ = ResponseStatus::REASONS[C404];
     body = readFile(server_block->getErrorPage(code_));
   }
-  return generateResponse(body);
+  return generateResponse(request, body);
+}
+
+std::string HttpResponse::generateResponse(const HttpRequest& request,
+                                           const std::string& body) const {
+  std::string header = "HTTP/1.1 " + code_ + " " + reason_ + CRLF;
+  header += "Date: " + currentTime() + CRLF;
+  header += "Server: Webserv" + CRLF;
+  header += "Content-Length: " + toString(body.size()) + CRLF;
+  header += "Content-Type: text/html" + CRLF;
+  header += "Connection: ";
+  if (request.getHeader("Connection").empty()) {
+    header += "Keep-Alive" + DOUBLE_CRLF;
+    return header + body;
+  }
+  header += request.getHeader("Connection") + DOUBLE_CRLF;
+  return header + body;
 }
 
 std::string HttpResponse::currentTime(void) const {
@@ -57,32 +73,35 @@ std::string HttpResponse::currentTime(void) const {
   return std::string(buf);
 }
 
-std::string HttpResponse::generateResponse(const std::string& body) const {
-  std::string header = "HTTP/1.1 " + code_ + " " + reason_ + CRLF;
-  header += "Date: " + currentTime() + CRLF;
-  header += "Server: Webserv" + CRLF;
-  header += "Content-Length: " + toString(body.size()) + CRLF;
-  header += "Content-Type: text/html" + CRLF;
-  header += "Connection: Keep-Alive" + DOUBLE_CRLF;
-  return header + body;
-}
-
 std::string HttpResponse::rootUri(
     const std::string& request_uri,
     const std::vector<LocationBlock>& locations) const {
-  std::size_t end_pos = -1;
+  std::size_t end_pos = request_uri.size();
   while (true) {
-    end_pos = request_uri.find("/", end_pos + 1);
+    end_pos = request_uri.rfind("/", end_pos - 1);
     if (end_pos == std::string::npos) throw std::runtime_error("");
     std::string rooted_uri = request_uri.substr(0, end_pos + 1);
     for (std::size_t i = 0; i < locations.size(); ++i) {
       if (rooted_uri == locations[i].uri) {
         std::string filename = locations[i].root + request_uri.substr(end_pos);
-        if (end_pos == rooted_uri.size() - 1) {
-          filename += "/" + *locations[i].index.begin();
+        if (filename.back() == '/') {
+          return readIndexFile(locations[i].index, filename);
         }
         return readFile(filename);
       }
     }
   }
+}
+
+std::string HttpResponse::readIndexFile(const std::set<std::string>& index,
+                                        const std::string& filename) {
+  for (std::set<std::string>::const_iterator iter = index.begin();
+       iter != index.end(); ++iter) {
+    try {
+      return readFile(filename + *iter);
+    } catch (std::runtime_error& e) {
+      continue;
+    }
+  }
+  throw FileOpenException();
 }

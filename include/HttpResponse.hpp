@@ -27,10 +27,13 @@ class HttpResponse {
                        const ServerBlock* server_block);
 
  private:
+  std::string generateResponse(const HttpRequest& request,
+                               const std::string& body) const;
   std::string currentTime(void) const;
-  std::string generateResponse(const std::string& body) const;
   std::string rootUri(const std::string& request_uri,
                       const std::vector<LocationBlock>& locations) const;
+  std::string readIndexFile(const std::set<std::string>& index,
+                            const std::string& filename);
 
   std::string code_;
   std::string reason_;
