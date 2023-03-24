@@ -8,7 +8,7 @@ std::string trim(std::string str) {
   std::size_t start = str.find_first_not_of(WHITESPACE);
   std::size_t end = str.find_last_not_of(WHITESPACE);
 
-  return (str.substr(start, end + 1));
+  return (str.substr(start, end - start + 1));
 }
 
 bool isNumber(const std::string& str) {

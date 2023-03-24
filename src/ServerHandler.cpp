@@ -111,6 +111,10 @@ void ServerHandler::receiveRequest(Client *client,
       return;
     }
     client->appendRequest(request);
+    if (client->isParseCompleted() &&
+        !isImplementedMethod(client->getRequestMethod())) {
+      client->setResponseStatus("501", ResponseStatus::REASONS[C501]);
+    }
   } catch (const HttpParser::BadRequestException &e) {
     client->setResponseStatus("400", ResponseStatus::REASONS[C400]);
   } catch (const HttpParser::LengthRequired &e) {
@@ -121,9 +125,6 @@ void ServerHandler::receiveRequest(Client *client,
     client->setResponseStatus("505", ResponseStatus::REASONS[C505]);
   } catch (const std::exception &e) {
     client->setResponseStatus("500", ResponseStatus::REASONS[C500]);
-  }
-  if (!isImplementedMethod(client->getRequestMethod())) {
-    client->setResponseStatus("501", ResponseStatus::REASONS[C501]);
   }
 }
 
