@@ -1,6 +1,6 @@
 #include "HttpRequest.hpp"
 
-HttpRequest::HttpRequest() : content_length_(0) {}
+HttpRequest::HttpRequest() : content_length_(-1) {}
 
 HttpRequest::HttpRequest(const HttpRequest &origin)
     : method_(origin.method_),

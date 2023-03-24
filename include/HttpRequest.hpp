@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
-#include "exception.hpp"
 #include "ResponseStatus.hpp"
 #include "constant.hpp"
+#include "exception.hpp"
 
 class HttpRequest {
  public:
@@ -29,10 +29,6 @@ class HttpRequest {
   std::string getHost() const;
   std::string getBody() const;
   std::size_t getContentLength() const;
-  class NotImplemented : public ExceptionTemplate {
-   public:
-    NotImplemented() : ExceptionTemplate(ResponseStatus::REASONS[C413]) {}
-  };
 
  private:
   typedef std::map<std::string, std::vector<std::string> > header_type;

@@ -6,7 +6,7 @@
 #include "constant.hpp"
 
 HttpParser::HttpParser(const std::string& socket_buffer)
-    : buffer_(socket_buffer), bound_pos_(0) {}
+    : buffer_(socket_buffer), bound_pos_(std::string::npos) {}
 
 HttpParser::HttpParser(const HttpParser& origin)
     : request_(origin.request_),
@@ -45,16 +45,21 @@ void HttpParser::appendRequest(const std::string& socket_buffer) {
 bool HttpParser::isCompleted(void) const {
   if (!request_.getMethod().empty() && request_.getMethod() != "POST")
     return true;
-  return !request_.getBody().empty();
+  return request_.getBody().size() == request_.getContentLength();
 }
 
 void HttpParser::clear(void) { *this = HttpParser(); }
 
-bool HttpParser::isHeaderSet(void) const { return bound_pos_ > 0; }
+bool HttpParser::isHeaderSet(void) const {
+  return bound_pos_ != std::string::npos;
+}
 
 void HttpParser::setHeader(void) {
   bound_pos_ = buffer_.find(DOUBLE_CRLF);
-  if (bound_pos_ == std::string::npos || bound_pos_ > HEADER_MAX_SIZE) {
+  if (buffer_.size() <= HEADER_MAX_SIZE && bound_pos_ == std::string::npos) {
+    return;
+  }
+  if (bound_pos_ > HEADER_MAX_SIZE) {
     throw PayloadTooLargeException();
   }
   request_ = HttpParser::parseHeader(buffer_.substr(0, bound_pos_ + 1));
@@ -63,7 +68,7 @@ void HttpParser::setHeader(void) {
 
 void HttpParser::handlePost(void) {
   if (!request_.getHeader("Content-Length").empty()) {
-    if (request_.getContentLength() == 0)
+    if (request_.getContentLength() == static_cast<std::size_t>(-1))
       request_.setContentLength(::stoi(request_.getHeader("Content-Length")));
     std::size_t content_length = request_.getContentLength();
     if (buffer_.size() - bound_pos_ < content_length) return;
