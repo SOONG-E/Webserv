@@ -12,9 +12,8 @@ class HttpResponse {
   static const int DEFAULT_INDEX = C200;
   static const std::string DEFAULT_ERROR_PAGE;
 
-  HttpResponse();
+  explicit HttpResponse(const ServerBlock& default_server);
   HttpResponse(const HttpResponse& origin);
-  HttpResponse& operator=(const HttpResponse& origin);
   ~HttpResponse();
 
   const ServerBlock* getServerBlock(void) const;
@@ -38,6 +37,7 @@ class HttpResponse {
 
   std::string code_;
   std::string reason_;
+  const ServerBlock& default_server_;
   const ServerBlock* server_block_;
   const LocationBlock* location_block_;
 };

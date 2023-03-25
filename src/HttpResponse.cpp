@@ -4,27 +4,19 @@
 
 const std::string HttpResponse::DEFAULT_ERROR_PAGE = "html/error.html";
 
-HttpResponse::HttpResponse()
+HttpResponse::HttpResponse(const ServerBlock& default_server)
     : code_(ResponseStatus::CODES[DEFAULT_INDEX]),
       reason_(ResponseStatus::REASONS[DEFAULT_INDEX]),
+      default_server_(default_server),
       server_block_(NULL),
       location_block_(NULL) {}
 
 HttpResponse::HttpResponse(const HttpResponse& origin)
     : code_(origin.code_),
       reason_(origin.reason_),
+      default_server_(origin.default_server_),
       server_block_(origin.server_block_),
       location_block_(origin.location_block_) {}
-
-HttpResponse& HttpResponse::operator=(const HttpResponse& origin) {
-  if (this != &origin) {
-    code_ = origin.code_;
-    reason_ = origin.reason_;
-    server_block_ = origin.server_block_;
-    location_block_ = origin.location_block_;
-  }
-  return *this;
-}
 
 HttpResponse::~HttpResponse() {}
 
@@ -63,6 +55,9 @@ bool HttpResponse::isSuccessCode(void) const {
 std::string HttpResponse::generate(const HttpRequest& request) {
   std::string body;
   if (!isSuccessCode()) {
+    if (!server_block_) {
+      server_block_ = &default_server_;
+    }
     body = readFile(server_block_->getErrorPage(code_));
     return generateResponse(request, body);
   }
