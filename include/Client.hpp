@@ -26,30 +26,15 @@ class Client {
   HttpParser& getParser();
   const HttpParser& getParser() const;
   std::string getSocketKey() const;
-  std::size_t getClientMaxBodySize() const;
-  std::string getRequestMethod() const;
-  std::size_t getRequestContentLength() const;
-  std::string getRequestHeader(const std::string& target) const;
-  const ServerBlock* getResponseServerBlock() const;
-  const LocationBlock* getResponseLocationBlock() const;
-  const std::string& getRequestUri() const;
-  void setResponseServerBlock(const ServerBlock* server_block);
-  void setResponseLocationBlock(const LocationBlock* location_block);
-
-  void setResponseStatus(const std::string& code, const std::string& reason);
-  void setServerBlock(const ServerBlock* server_block);
-  void setLocationBlock(const LocationBlock* location_block);
-  void clearParser();
-  void clearResponseBuf();
-  void appendRequest(const std::string& request);
+  const HttpRequest& getRequestObj() const;
+  HttpResponse& getResponseObj();
+  const HttpResponse& getResponseObj() const;
+  void clearBuffer();
 
   std::string receive() const;
   void send();
 
-  bool isAllowedMethod() const;
-  bool isErrorStatus() const;
   bool isPartialWritten() const;
-  bool isParseCompleted() const;
 
   void logAddressInfo() const;
   void logConnectionInfo() const;
@@ -61,7 +46,7 @@ class Client {
   SocketAddress serv_address_;
   HttpParser parser_;
   HttpResponse response_obj_;
-  std::string response_buf_;
+  std::string buf_;
 
  public:
   class SocketReceiveException : public std::exception {

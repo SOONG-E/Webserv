@@ -18,8 +18,8 @@ class Selector {
   int select();
   void registerFD(int fd);
   void clear(int fd);
-  bool isSetRead(int fd) const;
-  bool isSetWrite(int fd) const;
+  bool isReadable(int fd) const;
+  bool isWritable(int fd) const;
 
  private:
   struct timeval tm_;

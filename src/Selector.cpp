@@ -34,8 +34,8 @@ void Selector::registerFD(int fd) {
 }
 void Selector::clear(int fd) { FD_CLR(fd, &fds_); }
 
-bool Selector::isSetRead(int fd) const { return FD_ISSET(fd, &read_fds_); }
-bool Selector::isSetWrite(int fd) const { return FD_ISSET(fd, &write_fds_); }
+bool Selector::isReadable(int fd) const { return FD_ISSET(fd, &read_fds_); }
+bool Selector::isWritable(int fd) const { return FD_ISSET(fd, &write_fds_); }
 
 Selector::SelectFailedException::SelectFailedException(const char *cause)
     : cause(cause) {}

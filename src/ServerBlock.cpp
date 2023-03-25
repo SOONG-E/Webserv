@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "HttpResponse.hpp"
+#include "ResponseException.hpp"
 
 ServerBlock::ServerBlock() {}
 
@@ -36,13 +37,34 @@ const std::string& ServerBlock::getErrorPage(const std::string& code) const {
   std::map<std::string, std::string>::const_iterator iter =
       error_pages_.find(code);
   if (iter == error_pages_.end()) {
-    return HttpResponse::DEFAULTS[HttpResponse::ERROR_PAGE];
+    return HttpResponse::DEFAULT_ERROR_PAGE;
   }
   return iter->second;
 }
 
 const std::vector<LocationBlock>& ServerBlock::getLocationBlocks(void) const {
   return location_blocks_;
+}
+
+const LocationBlock& ServerBlock::findLocationBlock(
+    const std::string& request_uri) const {
+  std::size_t end_pos = request_uri.size();
+
+  while (true) {
+    end_pos = request_uri.rfind("/", end_pos - 1);
+    if (end_pos == std::string::npos) {
+      throw ResponseException(C404);
+    }
+
+    std::string rooted_uri = request_uri.substr(0, end_pos + 1);
+
+    for (std::size_t i = 0; i < location_blocks_.size(); ++i) {
+      if (rooted_uri == location_blocks_[i].uri) {
+        return location_blocks_[i];
+      }
+    }
+    throw ResponseException(C404);
+  }
 }
 
 void ServerBlock::addListen(const std::string& socket_key) {

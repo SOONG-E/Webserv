@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "HttpParser.hpp"
 #include "Listen.hpp"
 #include "LocationBlock.hpp"
 
@@ -20,6 +21,8 @@ class ServerBlock {
   const std::set<std::string>& getServerNames(void) const;
   const std::string& getErrorPage(const std::string& code) const;
   const std::vector<LocationBlock>& getLocationBlocks(void) const;
+
+  const LocationBlock& findLocationBlock(const std::string& request_uri) const;
 
   void addListen(const std::string& socket_key);
   void addServerName(const std::string& name);

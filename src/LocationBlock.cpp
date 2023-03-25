@@ -17,6 +17,22 @@ LocationBlock::LocationBlock()
   index.insert(DEFAULTS[INDEX]);
 }
 
+bool LocationBlock::isAllowedMethod(std::string method) const {
+  if (allowed_methods.find(method) == allowed_methods.end()) {
+    return false;
+  }
+  return true;
+}
+
+bool LocationBlock::isImplementedMethod(std::string method) const {
+  for (std::size_t i = 0; i < METHODS_COUNT; ++i) {
+    if (METHODS[i] == method) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void LocationBlock::setBodyLimit(const std::string& raw) {
   static ByteUnits units;
   char* unit;

@@ -1,5 +1,6 @@
 #include "ServerHandler.hpp"
 
+#include "ResponseException.hpp"
 #include "ResponseStatus.hpp"
 
 ServerHandler::ServerHandler() {}
@@ -28,6 +29,7 @@ void ServerHandler::configureServer(const Config &config) {
     for (size_t i = 0; i < listens.size(); ++i) {
       if (server_blocks_.find(listens[i].socket_key) == server_blocks_.end()) {
         std::vector<ServerBlock> in(1, serv_blocks[i]);
+
         server_blocks_[listens[i].socket_key] = in;
       } else {
         server_blocks_[listens[i].socket_key].push_back(serv_blocks[i]);
@@ -54,14 +56,18 @@ void ServerHandler::createServers() {
 void ServerHandler::acceptConnections() {
   if (server_selector_.select() > 0) {
     for (size_t i = 0; i < server_sockets_.size(); ++i) {
-      if (server_selector_.isSetRead(server_sockets_[i].getFD())) {
+      if (server_selector_.isReadable(server_sockets_[i].getFD())) {
         try {
           Client new_client = server_sockets_[i].accept();
+          const ServerBlock &server_block =
+              findServerBlock(new_client.getSocketKey(), "");
 
-          new_client.setResponseServerBlock(
-              findServerBlock(new_client.getSocketKey(), ""));
-          client_selector_.registerFD(new_client.getFD());
-          clients_.insert(std::make_pair(new_client.getFD(), new_client));
+          new_client.getResponseObj().setServerBlock(&server_block);
+
+          int client_fd = new_client.getFD();
+
+          client_selector_.registerFD(client_fd);
+          clients_.insert(std::make_pair(client_fd, new_client));
         } catch (const std::exception &e) {
           std::cerr << "[Error] Connection failed: " << e.what() << '\n';
         }
@@ -72,20 +78,23 @@ void ServerHandler::acceptConnections() {
 
 void ServerHandler::respondToClients() {
   if (client_selector_.select() > 0) {
+    Client *client;
     std::vector<int> delete_clients;
 
     delete_clients.reserve(clients_.size());
 
     for (clients_type::iterator it = clients_.begin(); it != clients_.end();
          ++it) {
-      Client *client = &it->second;
+      client = &it->second;
+      int client_fd = client->getFD();
 
-      if (client_selector_.isSetRead(client->getFD())) {
-        receiveRequest(client, delete_clients);
+      if (client_selector_.isReadable(client_fd)) {
+        receiveRequest(*client, delete_clients);
       }
-      if (client_selector_.isSetWrite(client->getFD()) &&
-          (client->isParseCompleted() || client->isErrorStatus())) {
-        sendResponse(client, delete_clients);
+      if (client_selector_.isWritable(client_fd) &&
+          (client->getParser().isCompleted() ||
+           !client->getResponseObj().isSuccessCode())) {
+        sendResponse(*client, delete_clients);
       }
     }
 
@@ -95,89 +104,77 @@ void ServerHandler::respondToClients() {
   }
 }
 
-bool ServerHandler::isImplementedMethod(std::string method) const {
-  for (std::size_t i = 0; i < METHODS_COUNT; ++i) {
-    if (METHODS[i] == method) {
-      return true;
-    }
-  }
-  return false;
-}
-
-void ServerHandler::validateRequest(Client *client) {
-  if (!isImplementedMethod(client->getRequestMethod())) {
-    throw HttpParser::NotImplementException();
-  } else if (!client->isAllowedMethod()) {
-    throw HttpParser::MethodNotAllowedException();
-  } else if (client->getRequestMethod() == "POST" &&
-             client->getClientMaxBodySize() <
-                 client->getRequestContentLength()) {
-    throw HttpParser::PayloadTooLargeException();
-  }
-}
-
-void ServerHandler::receiveRequest(Client *client,
+void ServerHandler::receiveRequest(Client &client,
                                    std::vector<int> &delete_clients) {
   try {
-    std::string request = client->receive();
+    std::string request = client.receive();
+
     if (request.empty()) {
-      delete_clients.push_back(client->getFD());
+      delete_clients.push_back(client.getFD());
       closeConnection(client);
       return;
     }
-    client->appendRequest(request);
-    if (client->isParseCompleted()) {
-      const ServerBlock *server_block = findServerBlock(
-          client->getSocketKey(), client->getRequestHeader("Host"));
-      const LocationBlock *location_block =
-          findLocationBlock(server_block, client->getRequestUri());
 
-      client->setResponseServerBlock(server_block);
-      client->setResponseLocationBlock(location_block);
+    HttpParser &parser = client.getParser();
+    parser.appendRequest(request);
 
-      validateRequest(client);
+    if (parser.isCompleted()) {
+      const HttpRequest &request_obj = client.getRequestObj();
+      const ServerBlock &server_block =
+          findServerBlock(client.getSocketKey(), request_obj.getHeader("Host"));
+      const LocationBlock &location_block =
+          server_block.findLocationBlock(request_obj.getUri());
+
+      HttpResponse &response_obj = client.getResponseObj();
+      response_obj.setServerBlock(&server_block);
+      response_obj.setLocationBlock(&location_block);
+
+      validateRequest(request_obj, location_block);
     }
-  } catch (const HttpParser::BadRequestException &e) {
-    client->setResponseStatus("400", ResponseStatus::REASONS[C400]);
-  } catch (const HttpParser::NotFoundException &e) {
-    client->setResponseStatus("404", ResponseStatus::REASONS[C404]);
-  } catch (const HttpParser::MethodNotAllowedException &e) {
-    client->setResponseStatus("405", ResponseStatus::REASONS[C405]);
-  } catch (const HttpParser::LengthRequiredException &e) {
-    client->setResponseStatus("411", ResponseStatus::REASONS[C411]);
-  } catch (const HttpParser::PayloadTooLargeException &e) {
-    client->setResponseStatus("413", ResponseStatus::REASONS[C413]);
-  } catch (const HttpParser::NotImplementException &e) {
-    client->setResponseStatus("501", ResponseStatus::REASONS[C501]);
-  } catch (const HttpParser::HttpVersionNotSupportedException &e) {
-    client->setResponseStatus("505", ResponseStatus::REASONS[C505]);
-  } catch (const std::exception &e) {
-    client->setResponseStatus("500", ResponseStatus::REASONS[C500]);
+  } catch (const ResponseException &e) {
+    client.getResponseObj().setStatus(e.index);
   }
 }
 
-void ServerHandler::sendResponse(Client *client,
+void ServerHandler::sendResponse(Client &client,
                                  std::vector<int> &delete_clients) {
   try {
-    client->send();
-    if (!client->isPartialWritten()) {
-      std::string connection = client->getRequestHeader("Connection");
+    client.send();
+    if (!client.isPartialWritten()) {
+      const HttpRequest &request_obj = client.getRequestObj();
+      HttpResponse &response_obj = client.getResponseObj();
+      HttpParser &parser = client.getParser();
 
-      if (connection == "close" || client->isErrorStatus()) {
-        delete_clients.push_back(client->getFD());
+      if (request_obj.getHeader("Connection") == "close" ||
+          !response_obj.isSuccessCode()) {
+        delete_clients.push_back(client.getFD());
         closeConnection(client);
         return;
       }
-      client->clearParser();
+      parser.clear();
+      response_obj.clear();
     }
   } catch (const std::exception &e) {
-    client->setResponseStatus("500", ResponseStatus::REASONS[C500]);
-    client->clearResponseBuf();
+    client.getResponseObj().setStatus(C500);
+    client.clearBuffer();
     std::cerr << "[Error] Send failed: " << e.what() << '\n';
   }
 }
 
-const ServerBlock *ServerHandler::findServerBlock(
+void ServerHandler::validateRequest(const HttpRequest &request_obj,
+                                    const LocationBlock &location_block) {
+  const std::string &request_method = request_obj.getMethod();
+  if (!location_block.isImplementedMethod(request_method)) {
+    throw ResponseException(C501);
+  } else if (!location_block.isAllowedMethod(request_method)) {
+    throw ResponseException(C405);
+  } else if (request_method == "POST" &&
+             location_block.body_limit < request_obj.getContentLength()) {
+    throw ResponseException(C413);
+  }
+}
+
+const ServerBlock &ServerHandler::findServerBlock(
     const std::string &socket_key, const std::string &server_name) {
   const std::vector<ServerBlock> &server_blocks = server_blocks_[socket_key];
 
@@ -186,41 +183,18 @@ const ServerBlock *ServerHandler::findServerBlock(
         server_blocks[i].getServerNames();
 
     if (server_names.find(server_name) != server_names.end()) {
-      return &server_blocks[i];
+      return server_blocks[i];
     }
   }
-  return &server_blocks[0];
+  return server_blocks[0];
 }
 
-const LocationBlock *ServerHandler::findLocationBlock(
-    const ServerBlock *server_block, const std::string &request_uri) {
-  std::size_t end_pos = request_uri.size();
-
-  while (true) {
-    end_pos = request_uri.rfind("/", end_pos - 1);
-    if (end_pos == std::string::npos) {
-      throw HttpParser::NotFoundException();
-    }
-
-    const std::vector<LocationBlock> &locations =
-        server_block->getLocationBlocks();
-    std::string rooted_uri = request_uri.substr(0, end_pos + 1);
-
-    for (std::size_t i = 0; i < locations.size(); ++i) {
-      if (rooted_uri == locations[i].uri) {
-        return &locations[i];
-      }
-    }
-    throw HttpParser::NotFoundException();
-  }
-}
-
-void ServerHandler::closeConnection(Client *client) {
-  close(client->getFD());
+void ServerHandler::closeConnection(Client &client) {
+  close(client.getFD());
 
   Log::header("Close Connection Information");
-  client->logAddressInfo();
-  Log::footer();
+  client.logAddressInfo();
+  Log::footer("Close Connection");
 }
 
 void ServerHandler::deleteClients(const std::vector<int> &delete_clients) {
