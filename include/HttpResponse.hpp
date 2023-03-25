@@ -4,16 +4,13 @@
 #include <string>
 
 #include "HttpRequest.hpp"
+#include "ResponseStatus.hpp"
 #include "ServerBlock.hpp"
 
 class HttpResponse {
  public:
-  enum Index {
-    CODE,
-    ERROR_PAGE,
-  };
-
-  static const std::string DEFAULTS[];
+  static const int DEFAULT_INDEX = C200;
+  static const std::string DEFAULT_ERROR_PAGE;
 
   HttpResponse();
   HttpResponse(const HttpResponse& origin);
@@ -23,12 +20,12 @@ class HttpResponse {
   const ServerBlock* getServerBlock(void) const;
   const LocationBlock* getLocationBlock(void) const;
 
-  void setStatus(const std::string& code, const std::string& reason);
+  void setStatus(const int index);
   void setServerBlock(const ServerBlock* server_block);
   void setLocationBlock(const LocationBlock* location_block);
 
-  bool isAllowedMethod(std::string method) const;
-  bool isSuccess(void) const;
+  void clear(void);
+  bool isSuccessCode(void) const;
   std::string generate(const HttpRequest& request);
 
  private:

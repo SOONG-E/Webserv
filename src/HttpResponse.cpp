@@ -2,13 +2,11 @@
 
 #include <stdexcept>
 
-#include "ResponseStatus.hpp"
-
-const std::string HttpResponse::DEFAULTS[] = {"200", "html/error.html"};
+const std::string HttpResponse::DEFAULT_ERROR_PAGE = "html/error.html";
 
 HttpResponse::HttpResponse()
-    : code_(DEFAULTS[CODE]),
-      reason_(ResponseStatus::REASONS[C200]),
+    : code_(ResponseStatus::CODES[DEFAULT_INDEX]),
+      reason_(ResponseStatus::REASONS[DEFAULT_INDEX]),
       server_block_(NULL),
       location_block_(NULL) {}
 
@@ -38,10 +36,9 @@ const LocationBlock* HttpResponse::getLocationBlock(void) const {
   return location_block_;
 }
 
-void HttpResponse::setStatus(const std::string& code,
-                             const std::string& reason) {
-  code_ = code;
-  reason_ = reason;
+void HttpResponse::setStatus(const int index) {
+  code_ = ResponseStatus::CODES[index];
+  reason_ = ResponseStatus::REASONS[index];
 }
 
 void HttpResponse::setServerBlock(const ServerBlock* server_block) {
@@ -52,21 +49,20 @@ void HttpResponse::setLocationBlock(const LocationBlock* location_block) {
   location_block_ = location_block;
 }
 
-bool HttpResponse::isAllowedMethod(std::string method) const {
-  if (location_block_->allowed_methods.find(method) ==
-      location_block_->allowed_methods.end()) {
-    return false;
-  }
-  return true;
+void HttpResponse::clear(void) {
+  code_ = ResponseStatus::CODES[DEFAULT_INDEX];
+  reason_ = ResponseStatus::REASONS[DEFAULT_INDEX];
+  server_block_ = NULL;
+  location_block_ = NULL;
 }
 
-bool HttpResponse::isSuccess(void) const {
+bool HttpResponse::isSuccessCode(void) const {
   return code_.size() == 3 && code_[0] == '2';
 }
 
 std::string HttpResponse::generate(const HttpRequest& request) {
   std::string body;
-  if (!isSuccess()) {
+  if (!isSuccessCode()) {
     body = readFile(server_block_->getErrorPage(code_));
     return generateResponse(request, body);
   }
