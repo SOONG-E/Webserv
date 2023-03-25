@@ -11,16 +11,10 @@
 
 class ServerBlock {
  public:
-  enum Index {
-    CLIENT_MAX_BODY_SIZE,
-  };
-
-  static const std::string DEFAULTS[];
-
   ServerBlock();
   ServerBlock(const ServerBlock& origin);
   ServerBlock& operator=(const ServerBlock& origin);
-  virtual ~ServerBlock();
+  ~ServerBlock();
 
   const std::vector<Listen>& getListens(void) const;
   const std::set<std::string>& getServerNames(void) const;
@@ -30,7 +24,6 @@ class ServerBlock {
   void addListen(const std::string& socket_key);
   void addServerName(const std::string& name);
   void addErrorPage(const std::string& code, const std::string& page);
-  void setBodyLimit(const std::string& body_limit);
   void addLocationBlock(const LocationBlock& location_block);
 
   void reset(void);
@@ -41,7 +34,6 @@ class ServerBlock {
   std::vector<Listen> listens_;
   std::set<std::string> server_names_;
   std::map<std::string, std::string> error_pages_;
-  std::size_t body_limit_;
   std::vector<LocationBlock> location_blocks_;
 };
 

@@ -1,24 +1,15 @@
 #include "ServerBlock.hpp"
 
-#include <cerrno>
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
 
-#include "ByteUnits.hpp"
 #include "HttpResponse.hpp"
-#include "constant.hpp"
-#include "exception.hpp"
 
-const std::string ServerBlock::DEFAULTS[] = {"1m"};
-
-ServerBlock::ServerBlock() { setBodyLimit(DEFAULTS[CLIENT_MAX_BODY_SIZE]); }
+ServerBlock::ServerBlock() {}
 
 ServerBlock::ServerBlock(const ServerBlock& origin)
     : listens_(origin.listens_),
       server_names_(origin.server_names_),
       error_pages_(origin.error_pages_),
-      body_limit_(origin.body_limit_),
       location_blocks_(origin.location_blocks_) {}
 
 ServerBlock& ServerBlock::operator=(const ServerBlock& origin) {
@@ -26,7 +17,6 @@ ServerBlock& ServerBlock::operator=(const ServerBlock& origin) {
     listens_ = origin.listens_;
     server_names_ = origin.server_names_;
     error_pages_ = origin.error_pages_;
-    body_limit_ = origin.body_limit_;
     location_blocks_ = origin.location_blocks_;
   }
   return *this;
@@ -42,8 +32,7 @@ const std::set<std::string>& ServerBlock::getServerNames(void) const {
   return server_names_;
 }
 
-const std::string& ServerBlock::getErrorPage(
-    const std::string& code) const {
+const std::string& ServerBlock::getErrorPage(const std::string& code) const {
   std::map<std::string, std::string>::const_iterator iter =
       error_pages_.find(code);
   if (iter == error_pages_.end()) {
@@ -54,21 +43,6 @@ const std::string& ServerBlock::getErrorPage(
 
 const std::vector<LocationBlock>& ServerBlock::getLocationBlocks(void) const {
   return location_blocks_;
-}
-
-void ServerBlock::setBodyLimit(const std::string& raw) {
-  static ByteUnits units;
-  char* unit;
-  body_limit_ = std::strtoul(raw.c_str(), &unit, 10);
-  if (errno == ERANGE) {
-    throw ConfigException(std::strerror(errno));
-  }
-  if (*unit == '\0') return;
-  try {
-    body_limit_ *= units.size.at(unit);
-  } catch (const std::out_of_range& e) {
-    throw ConfigException(ERRORS[TOKEN]);
-  }
 }
 
 void ServerBlock::addListen(const std::string& socket_key) {
@@ -92,7 +66,6 @@ void ServerBlock::reset(void) {
   listens_.clear();
   server_names_.clear();
   error_pages_.clear();
-  setBodyLimit(DEFAULTS[CLIENT_MAX_BODY_SIZE]);
   location_blocks_.clear();
 }
 
@@ -124,5 +97,4 @@ void ServerBlock::print(const int index) const {
        it != error_pages_.end(); ++it) {
     std::cout << "error page: " << it->first << " " << it->second << "\n";
   }
-  std::cout << "client max body size: " << body_limit_ << "\n";
 }

@@ -61,8 +61,6 @@ void ConfigParser::parseServerBlock(void) {
       parseServerName();
     } else if (token == "error_page") {
       parseErrorPage();
-    } else if (token == "client_max_body_size") {
-      parseClientMaxBodySize();
     } else if (token == "location") {
       parseLocationBlock();
       server_block_.addLocationBlock(location_block_);
@@ -103,7 +101,7 @@ void ConfigParser::parseErrorPage(void) {
 
 void ConfigParser::parseClientMaxBodySize(void) {
   expect("client_max_body_size");
-  server_block_.setBodyLimit(expect());
+  location_block_.setBodyLimit(expect());
   expect(";");
 }
 
@@ -114,7 +112,9 @@ void ConfigParser::parseLocationBlock(void) {
   while (true) {
     std::string token = peek();
     if (token == "}") break;
-    if (token == "allowed_methods") {
+    if (token == "client_max_body_size") {
+      parseClientMaxBodySize();
+    } else if (token == "allowed_methods") {
       parseAllowedMethods();
     } else if (token == "return") {
       parseReturn();

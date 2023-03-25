@@ -18,9 +18,9 @@ class ConfigParser {
   void parseListen(void);
   void parseServerName(void);
   void parseErrorPage(void);
-  void parseClientMaxBodySize(void);
 
   void parseLocationBlock(void);
+  void parseClientMaxBodySize(void);
   void parseAllowedMethods(void);
   void parseReturn(void);
   void parseRoot(void);
