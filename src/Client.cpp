@@ -1,25 +1,23 @@
 #include "Client.hpp"
 
-Client::Client(int fd, const SocketAddress& cli_addr,
-               const SocketAddress& serv_addr)
-    : fd_(fd), cli_address_(cli_addr), serv_address_(serv_addr) {
+Client::Client(int fd, const ServerBlock& default_server,
+               const SocketAddress& cli_addr, const SocketAddress& serv_addr)
+    : fd_(fd),
+      cli_address_(cli_addr),
+      serv_address_(serv_addr),
+      response_obj_(default_server) {
   logConnectionInfo();
 }
 
-Client::Client(const Client& src) { *this = src; }
+Client::Client(const Client& src)
+    : fd_(src.fd_),
+      cli_address_(src.cli_address_),
+      serv_address_(src.serv_address_),
+      parser_(src.parser_),
+      response_obj_(src.response_obj_),
+      buf_(src.buf_) {}
 
 Client::~Client() {}
-
-Client& Client::operator=(const Client& src) {
-  fd_ = src.fd_;
-  cli_address_ = src.cli_address_;
-  serv_address_ = src.serv_address_;
-  parser_ = src.parser_;
-  response_obj_ = src.response_obj_;
-  buf_ = src.buf_;
-
-  return *this;
-}
 
 int Client::getFD() const { return fd_; }
 

@@ -16,11 +16,10 @@
 
 class Client {
  public:
-  Client(int fd, const SocketAddress& cli_addr, const SocketAddress& serv_addr);
+  Client(int fd, const ServerBlock& default_server,
+         const SocketAddress& cli_addr, const SocketAddress& serv_addr);
   Client(const Client& src);
   ~Client();
-
-  Client& operator=(const Client& src);
 
   int getFD() const;
   HttpParser& getParser();
