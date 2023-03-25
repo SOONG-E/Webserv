@@ -97,7 +97,9 @@ std::string HttpResponse::currentTime(void) const {
 
 std::string HttpResponse::rootUri(const std::string& request_uri) const {
   std::string filename =
-      location_block_->root + request_uri.substr(request_uri.size());
+      location_block_->root +
+      request_uri.substr(request_uri.find(location_block_->uri) +
+                         location_block_->uri.size() - 1);
   if (filename.back() == '/') {
     return readIndexFile(location_block_->index, filename);
   }
