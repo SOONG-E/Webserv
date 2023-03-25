@@ -10,12 +10,13 @@ const std::string ResponseStatus::CODES[] = {"200",
                                              "501",
                                              "505"};
 
-const std::string ResponseStatus::REASONS[] = {"OK",
-                                               "Bad Request",
-                                               "Not Found",
-                                               "Method Not Allowed",
-                                               "Length Required",
-                                               "Payload Too Large",
-                                               "Internal Server Error",
-                                               "Not Implement",
-                                               "HTTP Version Not Supported"};
+const std::string ResponseStatus::REASONS[] = {
+    "OK",                           // 200
+    "Bad Request",                  // 400
+    "Not Found",                    // 404
+    "Method Not Allowed",           // 405
+    "Length Required",              // 411
+    "Payload Too Large",            // 413
+    "Internal Server Error",        // 500
+    "Not Implement",                // 501
+    "HTTP Version Not Supported"};  // 505

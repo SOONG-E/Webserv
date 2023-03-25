@@ -1,8 +1,8 @@
 #include "HttpParser.hpp"
 
-#include <exception>
 #include <iostream>
 
+#include "ResponseException.hpp"
 #include "constant.hpp"
 
 HttpParser::HttpParser(const std::string& socket_buffer)
@@ -60,7 +60,7 @@ void HttpParser::setHeader(void) {
     return;
   }
   if (bound_pos_ > HEADER_MAX_SIZE) {
-    throw PayloadTooLargeException();
+    throw ResponseException(C413);
   }
   request_ = HttpParser::parseHeader(buffer_.substr(0, bound_pos_));
   bound_pos_ += DOUBLE_CRLF.size();
@@ -72,7 +72,7 @@ void HttpParser::handlePost(void) {
       request_.setContentLength(::stoi(request_.getHeader("Content-Length")));
     std::size_t content_length = request_.getContentLength();
     if (content_length < buffer_.size() - bound_pos_) {
-      throw PayloadTooLargeException();
+      throw ResponseException(C413);
     }
     if (content_length == buffer_.size() - bound_pos_) {
       request_.setBody(buffer_.substr(bound_pos_, content_length));
@@ -80,7 +80,7 @@ void HttpParser::handlePost(void) {
     return;
   }
   if (request_.getHeader("Transfer-Encoding") != "chunked") {
-    throw LengthRequiredException();
+    throw ResponseException(C411);
   }
   if (buffer_.find(DOUBLE_CRLF, bound_pos_) == std::string::npos) return;
   unchunkMessage(request_, buffer_.substr(bound_pos_));
@@ -103,11 +103,11 @@ void HttpParser::parseRequestLine(HttpRequest& request_,
 
   if (request_line.size() < 3 || request_line[2].length() < 6 ||
       request_line[2].substr(0, 4) != "HTTP") {
-    throw BadRequestException();
+    throw ResponseException(C400);
   }
   if (request_line[2].substr(0, 5) != "HTTP/" ||
       request_line[2].substr(5) != "1.1") {
-    throw HttpVersionNotSupportedException();
+    throw ResponseException(C505);
   }
   request_.setMethod(request_line[0]);
   request_.setUri(request_line[1]);
@@ -120,11 +120,11 @@ void HttpParser::parseHeaders(HttpRequest& request_, std::string header_part) {
        header != headers.end(); ++header) {
     if (header->length() == 0) break;
     line = split(*header, ":");
-    if (line.size() < 2) throw BadRequestException();
+    if (line.size() < 2) throw ResponseException(C400);
     request_.addheader(trim(line[0]), trim(line[1]));
   }
   request_.setHost(request_.getHeader("Host"));
-  if (request_.getHost().empty()) throw BadRequestException();
+  if (request_.getHost().empty()) throw ResponseException(C400);
   if (request_.getHeader("Content-Type").empty())
     request_.addheader("Content-Type", "application/octet-stream");
 }
@@ -135,12 +135,12 @@ void HttpParser::unchunkMessage(HttpRequest& request_, std::string body) {
   std::size_t chunk_size = 0;
 
   std::vector<std::string> chunks = splitByCRLF(body);
-  if (chunks.size() < 1) throw BadRequestException();
+  if (chunks.size() < 1) throw ResponseException(C400);
   chunk_size = hexToInt(chunks[0]);
   std::size_t idx = 1;
   while (chunk_size && idx + 1 < chunks.size()) {
     content_length += chunk_size;
-    if (chunks[idx].length() != chunk_size) throw BadRequestException();
+    if (chunks[idx].length() != chunk_size) throw ResponseException(C400);
     content += chunks[idx++];
     chunk_size = hexToInt(chunks[idx++]);
   }

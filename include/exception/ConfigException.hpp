@@ -1,7 +1,7 @@
 #ifndef CONFIG_EXCEPTION_HPP_
 #define CONFIG_EXCEPTION_HPP_
 
-#include "ExceptionTemplate.hpp"
+#include "exception/ExceptionTemplate.hpp"
 
 class ConfigException : public ExceptionTemplate {
  public:

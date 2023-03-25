@@ -7,46 +7,6 @@
 
 class HttpParser {
  public:
-  class MethodNotAllowedException : public ExceptionTemplate {
-   public:
-    MethodNotAllowedException()
-        : ExceptionTemplate(ResponseStatus::REASONS[C405]) {}
-  };
-
-  class NotImplementException : public ExceptionTemplate {
-   public:
-    NotImplementException()
-        : ExceptionTemplate(ResponseStatus::REASONS[C501]) {}
-  };
-
-  class BadRequestException : public ExceptionTemplate {
-   public:
-    BadRequestException() : ExceptionTemplate(ResponseStatus::REASONS[C400]) {}
-  };
-
-  class NotFoundException : public ExceptionTemplate {
-   public:
-    NotFoundException() : ExceptionTemplate(ResponseStatus::REASONS[C404]) {}
-  };
-
-  class LengthRequiredException : public ExceptionTemplate {
-   public:
-    LengthRequiredException()
-        : ExceptionTemplate(ResponseStatus::REASONS[C411]) {}
-  };
-
-  class PayloadTooLargeException : public ExceptionTemplate {
-   public:
-    PayloadTooLargeException()
-        : ExceptionTemplate(ResponseStatus::REASONS[C413]) {}
-  };
-
-  class HttpVersionNotSupportedException : public ExceptionTemplate {
-   public:
-    HttpVersionNotSupportedException()
-        : ExceptionTemplate(ResponseStatus::REASONS[C505]) {}
-  };
-
   explicit HttpParser(const std::string& socket_buffer = "");
   HttpParser(const HttpParser& origin);
   HttpParser& operator=(const HttpParser& origin);
