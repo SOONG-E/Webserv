@@ -58,11 +58,11 @@ void ServerHandler::acceptConnections() {
     for (size_t i = 0; i < server_sockets_.size(); ++i) {
       if (server_selector_.isReadable(server_sockets_[i].getFD())) {
         try {
-          Client new_client = server_sockets_[i].accept();
-          const ServerBlock &server_block =
-              findServerBlock(new_client.getSocketKey(), "");
+          SocketAddress address = server_sockets_[i].getAddress();
+          std::string sockey_key = address.getIP() + ":" + address.getPort();
+          const ServerBlock &default_server = findServerBlock(sockey_key, "");
 
-          new_client.getResponseObj().setServerBlock(&server_block);
+          Client new_client = server_sockets_[i].accept(default_server);
 
           int client_fd = new_client.getFD();
 

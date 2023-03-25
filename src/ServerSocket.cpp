@@ -36,7 +36,7 @@ void ServerSocket::bind(const SocketAddress& address, int backlog) {
   address_ = address;
 }
 
-Client ServerSocket::accept() const {
+Client ServerSocket::accept(const ServerBlock& default_server) const {
   sockaddr client_addr;
   socklen_t client_addrlen;
 
@@ -50,8 +50,8 @@ Client ServerSocket::accept() const {
     throw SocketAcceptException(strerror(errno));
   }
 
-  return Client(client_fd, SocketAddress(client_addr, client_addrlen),
-                address_);
+  return Client(client_fd, default_server,
+                SocketAddress(client_addr, client_addrlen), address_);
 }
 
 int ServerSocket::getFD() const { return fd_; }

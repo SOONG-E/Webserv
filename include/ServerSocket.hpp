@@ -8,6 +8,7 @@
 #include <cerrno>
 
 #include "Client.hpp"
+#include "ServerBlock.hpp"
 #include "SocketAddress.hpp"
 #include "constant.hpp"
 
@@ -21,7 +22,7 @@ class ServerSocket {
 
   void open();
   void bind(const SocketAddress& address, int backlog);
-  Client accept() const;
+  Client accept(const ServerBlock& default_server) const;
   int getFD() const;
   const SocketAddress& getAddress() const;
 
