@@ -24,10 +24,10 @@ class HttpRequest {
   void addheader(std::string key, std::string value);
   void addheader(std::string key, std::vector<std::string> values);
   std::string getHeader(std::string name) const;
-  std::string getMethod() const;
-  std::string getUri() const;
-  std::string getHost() const;
-  std::string getBody() const;
+  const std::string &getMethod() const;
+  const std::string &getUri() const;
+  const std::string &getHost() const;
+  const std::string &getBody() const;
   std::size_t getContentLength() const;
 
  private:

@@ -57,8 +57,8 @@ std::string HttpRequest::getHeader(std::string name) const {
   return *(it->second.begin());
 }
 
-std::string HttpRequest::getMethod() const { return (method_); }
-std::string HttpRequest::getUri() const { return (uri_); }
-std::string HttpRequest::getHost() const { return (host_); }
-std::string HttpRequest::getBody() const { return (body_); }
+const std::string &HttpRequest::getMethod() const { return (method_); }
+const std::string &HttpRequest::getUri() const { return (uri_); }
+const std::string &HttpRequest::getHost() const { return (host_); }
+const std::string &HttpRequest::getBody() const { return (body_); }
 std::size_t HttpRequest::getContentLength() const { return (content_length_); }
