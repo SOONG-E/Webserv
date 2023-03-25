@@ -7,7 +7,7 @@
 std::string trim(std::string str) {
   std::size_t start = str.find_first_not_of(WHITESPACE);
   std::size_t end = str.find_last_not_of(WHITESPACE);
-
+  if (start == std::string::npos) return "";
   return (str.substr(start, end - start + 1));
 }
 
@@ -35,13 +35,15 @@ std::vector<std::string> split(const std::string& content,
   std::vector<std::string> substrings;
   std::size_t start = 0;
   std::size_t end;
-  while (true) {
+  while (start != content.size()) {
     end = content.find_first_of(delim, start);
-    if (end == std::string::npos) break;
+    if (end == std::string::npos) {
+      substrings.push_back(content.substr(start));
+      break;
+    }
     substrings.push_back(content.substr(start, end - start));
     start = end + 1;
   }
-  substrings.push_back(content.substr(start));
   return substrings;
 }
 
