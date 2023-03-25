@@ -31,12 +31,40 @@ std::string Client::getSocketKey() const {
   return serv_address_.getIP() + ":" + serv_address_.getPort();
 }
 
+std::size_t Client::getClientMaxBodySize() const {
+  return response_obj_.getLocationBlock()->body_limit;
+}
+
 std::string Client::getRequestMethod() const {
   return parser_.getRequestObj().getMethod();
 }
 
+std::size_t Client::getRequestContentLength() const {
+  return parser_.getRequestObj().getContentLength();
+}
+
 std::string Client::getRequestHeader(const std::string& target) const {
   return parser_.getRequestObj().getHeader(target);
+}
+
+const ServerBlock* Client::getResponseServerBlock() const {
+  return response_obj_.getServerBlock();
+}
+
+const LocationBlock* Client::getResponseLocationBlock() const {
+  return response_obj_.getLocationBlock();
+}
+
+const std::string& Client::getRequestUri() const {
+  return parser_.getRequestObj().getUri();
+}
+
+void Client::setResponseServerBlock(const ServerBlock* server_block) {
+  response_obj_.setServerBlock(server_block);
+}
+
+void Client::setResponseLocationBlock(const LocationBlock* location_block) {
+  response_obj_.setLocationBlock(location_block);
 }
 
 void Client::setResponseStatus(const std::string& code,
@@ -64,10 +92,9 @@ std::string Client::receive() const {
   return ret;
 }
 
-void Client::send(const ServerBlock* server_block) {
+void Client::send() {
   if (!isPartialWritten())
-    response_buf_ =
-        response_obj_.generate(parser_.getRequestObj(), server_block);
+    response_buf_ = response_obj_.generate(parser_.getRequestObj());
 
   size_t write_bytes =
       ::send(fd_, response_buf_.c_str(), response_buf_.size(), 0);
@@ -83,6 +110,10 @@ void Client::send(const ServerBlock* server_block) {
   Log::footer();
 
   response_buf_.erase(0, write_bytes);
+}
+
+bool Client::isAllowedMethod() const {
+  return response_obj_.isAllowedMethod(parser_.getRequestObj().getMethod());
 }
 
 bool Client::isErrorStatus() const { return !response_obj_.isSuccess(); }

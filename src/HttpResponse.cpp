@@ -7,20 +7,36 @@
 const std::string HttpResponse::DEFAULTS[] = {"200", "html/error.html"};
 
 HttpResponse::HttpResponse()
-    : code_(DEFAULTS[CODE]), reason_(ResponseStatus::REASONS[C200]) {}
+    : code_(DEFAULTS[CODE]),
+      reason_(ResponseStatus::REASONS[C200]),
+      server_block_(NULL),
+      location_block_(NULL) {}
 
 HttpResponse::HttpResponse(const HttpResponse& origin)
-    : code_(origin.code_), reason_(origin.reason_) {}
+    : code_(origin.code_),
+      reason_(origin.reason_),
+      server_block_(origin.server_block_),
+      location_block_(origin.location_block_) {}
 
 HttpResponse& HttpResponse::operator=(const HttpResponse& origin) {
   if (this != &origin) {
     code_ = origin.code_;
     reason_ = origin.reason_;
+    server_block_ = origin.server_block_;
+    location_block_ = origin.location_block_;
   }
   return *this;
 }
 
 HttpResponse::~HttpResponse() {}
+
+const ServerBlock* HttpResponse::getServerBlock(void) const {
+  return server_block_;
+}
+
+const LocationBlock* HttpResponse::getLocationBlock(void) const {
+  return location_block_;
+}
 
 void HttpResponse::setStatus(const std::string& code,
                              const std::string& reason) {
@@ -28,23 +44,38 @@ void HttpResponse::setStatus(const std::string& code,
   reason_ = reason;
 }
 
+void HttpResponse::setServerBlock(const ServerBlock* server_block) {
+  server_block_ = server_block;
+}
+
+void HttpResponse::setLocationBlock(const LocationBlock* location_block) {
+  location_block_ = location_block;
+}
+
+bool HttpResponse::isAllowedMethod(std::string method) const {
+  if (location_block_->allowed_methods.find(method) ==
+      location_block_->allowed_methods.end()) {
+    return false;
+  }
+  return true;
+}
+
 bool HttpResponse::isSuccess(void) const {
   return code_.size() == 3 && code_[0] == '2';
 }
 
-std::string HttpResponse::generate(const HttpRequest& request,
-                                   const ServerBlock* server_block) {
+std::string HttpResponse::generate(const HttpRequest& request) {
   std::string body;
   if (!isSuccess()) {
-    body = readFile(server_block->getErrorPage(code_));
+    body = readFile(server_block_->getErrorPage(code_));
     return generateResponse(request, body);
   }
   try {
-    body = rootUri(request.getUri(), server_block->getLocationBlocks());
+    body = rootUri(request.getUri());
   } catch (std::runtime_error& e) {
     code_ = "404";
     reason_ = ResponseStatus::REASONS[C404];
-    body = readFile(server_block->getErrorPage(code_));
+    body = readFile(server_block_->getErrorPage(code_));
   }
   return generateResponse(request, body);
 }
@@ -73,24 +104,13 @@ std::string HttpResponse::currentTime(void) const {
   return std::string(buf);
 }
 
-std::string HttpResponse::rootUri(
-    const std::string& request_uri,
-    const std::vector<LocationBlock>& locations) const {
-  std::size_t end_pos = request_uri.size();
-  while (true) {
-    end_pos = request_uri.rfind("/", end_pos - 1);
-    if (end_pos == std::string::npos) throw std::runtime_error("");
-    std::string rooted_uri = request_uri.substr(0, end_pos + 1);
-    for (std::size_t i = 0; i < locations.size(); ++i) {
-      if (rooted_uri == locations[i].uri) {
-        std::string filename = locations[i].root + request_uri.substr(end_pos);
-        if (filename.back() == '/') {
-          return readIndexFile(locations[i].index, filename);
-        }
-        return readFile(filename);
-      }
-    }
+std::string HttpResponse::rootUri(const std::string& request_uri) const {
+  std::string filename =
+      location_block_->root + request_uri.substr(request_uri.size());
+  if (filename.back() == '/') {
+    return readIndexFile(location_block_->index, filename);
   }
+  return readFile(filename);
 }
 
 std::string HttpResponse::readIndexFile(const std::set<std::string>& index,

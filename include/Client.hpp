@@ -26,17 +26,27 @@ class Client {
   HttpParser& getParser();
   const HttpParser& getParser() const;
   std::string getSocketKey() const;
+  std::size_t getClientMaxBodySize() const;
   std::string getRequestMethod() const;
+  std::size_t getRequestContentLength() const;
   std::string getRequestHeader(const std::string& target) const;
+  const ServerBlock* getResponseServerBlock() const;
+  const LocationBlock* getResponseLocationBlock() const;
+  const std::string& getRequestUri() const;
+  void setResponseServerBlock(const ServerBlock* server_block);
+  void setResponseLocationBlock(const LocationBlock* location_block);
 
   void setResponseStatus(const std::string& code, const std::string& reason);
+  void setServerBlock(const ServerBlock* server_block);
+  void setLocationBlock(const LocationBlock* location_block);
   void clearParser();
   void clearResponseBuf();
   void appendRequest(const std::string& request);
 
   std::string receive() const;
-  void send(const ServerBlock* server_block);
+  void send();
 
+  bool isAllowedMethod() const;
   bool isErrorStatus() const;
   bool isPartialWritten() const;
   bool isParseCompleted() const;
