@@ -7,14 +7,32 @@
 
 class HttpParser {
  public:
+  class MethodNotAllowedException : public ExceptionTemplate {
+   public:
+    MethodNotAllowedException()
+        : ExceptionTemplate(ResponseStatus::REASONS[C405]) {}
+  };
+
+  class NotImplementException : public ExceptionTemplate {
+   public:
+    NotImplementException()
+        : ExceptionTemplate(ResponseStatus::REASONS[C501]) {}
+  };
+
   class BadRequestException : public ExceptionTemplate {
    public:
     BadRequestException() : ExceptionTemplate(ResponseStatus::REASONS[C400]) {}
   };
 
-  class LengthRequired : public ExceptionTemplate {
+  class NotFoundException : public ExceptionTemplate {
    public:
-    LengthRequired() : ExceptionTemplate(ResponseStatus::REASONS[C411]) {}
+    NotFoundException() : ExceptionTemplate(ResponseStatus::REASONS[C404]) {}
+  };
+
+  class LengthRequiredException : public ExceptionTemplate {
+   public:
+    LengthRequiredException()
+        : ExceptionTemplate(ResponseStatus::REASONS[C411]) {}
   };
 
   class PayloadTooLargeException : public ExceptionTemplate {
