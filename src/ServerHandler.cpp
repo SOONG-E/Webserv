@@ -60,7 +60,9 @@ void ServerHandler::acceptConnections() {
         try {
           SocketAddress address = server_sockets_[i].getAddress();
           std::string sockey_key = address.getIP() + ":" + address.getPort();
-          const ServerBlock &default_server = findServerBlock(sockey_key, "");
+          const server_blocks_type::const_iterator it =
+              server_blocks_.find(sockey_key);
+          const ServerBlock &default_server = it->second.front();
 
           Client new_client = server_sockets_[i].accept(default_server);
 
