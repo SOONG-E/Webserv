@@ -59,10 +59,10 @@ void ServerHandler::acceptConnections() {
       if (server_selector_.isReadable(server_sockets_[i].getFD())) {
         try {
           SocketAddress address = server_sockets_[i].getAddress();
-          std::string sockey_key = address.getIP() + ":" + address.getPort();
-          const server_blocks_type::const_iterator it =
-              server_blocks_.find(sockey_key);
-          const ServerBlock &default_server = it->second.front();
+          std::string socket_key = address.getIP() + ":" + address.getPort();
+          const std::vector<ServerBlock> &server_blocks_of_key =
+              server_blocks_[socket_key];
+          const ServerBlock &default_server = server_blocks_of_key.front();
 
           Client new_client = server_sockets_[i].accept(default_server);
 
@@ -178,17 +178,18 @@ void ServerHandler::validateRequest(const HttpRequest &request_obj,
 
 const ServerBlock &ServerHandler::findServerBlock(
     const std::string &socket_key, const std::string &server_name) {
-  const std::vector<ServerBlock> &server_blocks = server_blocks_[socket_key];
+  const std::vector<ServerBlock> &server_blocks_of_key =
+      server_blocks_[socket_key];
 
-  for (size_t i = 0; i < server_blocks.size(); ++i) {
+  for (size_t i = 0; i < server_blocks_of_key.size(); ++i) {
     const std::set<std::string> &server_names =
-        server_blocks[i].getServerNames();
+        server_blocks_of_key[i].getServerNames();
 
     if (server_names.find(server_name) != server_names.end()) {
-      return server_blocks[i];
+      return server_blocks_of_key[i];
     }
   }
-  return server_blocks[0];
+  return server_blocks_of_key[0];
 }
 
 void ServerHandler::closeConnection(Client &client) {
