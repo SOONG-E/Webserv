@@ -4,11 +4,19 @@
 #include <string>
 
 struct Log {
-	static const int WIDTH = 55;
-	static const char MARGIN_CHAR = '-';
+  enum ColorIndex {
+    DEFAULT,
+    GREEN,
+  };
 
-	static void header(const std::string& title);
-	static void footer(void);
+  static const int WIDTH = 55;
+  static const char PADDING_CHAR = '-';
+  static const std::string FOOTER_SUFFIX;
+  static const std::string COLORS[];
+
+  static void pad(const std::string& msg, const std::string& color = "");
+  static void header(const std::string& msg);
+  static void footer(const std::string& msg = "");
 };
 
 #endif

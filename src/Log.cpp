@@ -3,13 +3,24 @@
 #include <iomanip>
 #include <iostream>
 
-void Log::header(const std::string& title) {
-  int left_margin = (WIDTH + title.size()) / 2;
-  int right_margin = WIDTH - left_margin;
-  std::cout << std::setfill(MARGIN_CHAR) << std::setw(left_margin) << title
-            << std::setfill(MARGIN_CHAR) << std::setw(right_margin) << "\n";
+const std::string Log::FOOTER_SUFFIX = " Success";
+const std::string Log::COLORS[] = {"\033[0m", "\033[0;32m"};
+
+void Log::pad(const std::string& msg, const std::string& color) {
+  int left_padding = (WIDTH + msg.size()) / 2;
+  int right_padding = WIDTH - left_padding;
+  std::cout << color << std::setfill(PADDING_CHAR) << std::setw(left_padding)
+            << msg << std::setfill(PADDING_CHAR) << std::setw(right_padding)
+            << "\n";
 }
 
-void Log::footer(void) {
-  std::cout << std::setfill(MARGIN_CHAR) << std::setw(WIDTH) << "\n\n";
+void Log::header(const std::string& msg) { pad(msg); }
+
+void Log::footer(const std::string& msg) {
+  if (msg.empty()) {
+    pad(msg);
+  } else {
+    pad(msg + FOOTER_SUFFIX, COLORS[GREEN]);
+  }
+  std::cout << "\n";
 }
