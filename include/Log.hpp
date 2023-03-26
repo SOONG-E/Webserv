@@ -6,6 +6,7 @@
 struct Log {
   enum ColorIndex {
     DEFAULT,
+    RED,
     GREEN,
   };
 

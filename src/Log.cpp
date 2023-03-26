@@ -4,7 +4,7 @@
 #include <iostream>
 
 const std::string Log::FOOTER_SUFFIX = " Success";
-const std::string Log::COLORS[] = {"\033[0m", "\033[0;32m"};
+const std::string Log::COLORS[] = {"\033[0m", "\033[0;31m", "\033[0;32m"};
 
 void Log::pad(const std::string& msg, const std::string& color) {
   int left_padding = (WIDTH + msg.size()) / 2;
