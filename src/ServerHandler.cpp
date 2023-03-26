@@ -23,10 +23,10 @@ ServerHandler &ServerHandler::operator=(const ServerHandler &src) {
 void ServerHandler::configureServer(const Config &config) {
   const std::vector<ServerBlock> &serv_blocks = config.getServerBlocks();
 
-  for (size_t i = 0; i < serv_blocks.size(); ++i) {
+  for (std::size_t i = 0; i < serv_blocks.size(); ++i) {
     const std::vector<Listen> &listens = serv_blocks[i].getListens();
 
-    for (size_t i = 0; i < listens.size(); ++i) {
+    for (std::size_t i = 0; i < listens.size(); ++i) {
       if (server_blocks_.find(listens[i].socket_key) == server_blocks_.end()) {
         std::vector<ServerBlock> in(1, serv_blocks[i]);
 
@@ -41,7 +41,7 @@ void ServerHandler::configureServer(const Config &config) {
 void ServerHandler::createServers() {
   for (server_blocks_type::const_iterator it = server_blocks_.begin();
        it != server_blocks_.end(); ++it) {
-    size_t pos = it->first.find(':');
+    std::size_t pos = it->first.find(':');
     std::string ip = it->first.substr(0, pos);
     std::string port = it->first.substr(pos + 1);
 
@@ -55,7 +55,7 @@ void ServerHandler::createServers() {
 
 void ServerHandler::acceptConnections() {
   if (server_selector_.select() > 0) {
-    for (size_t i = 0; i < server_sockets_.size(); ++i) {
+    for (std::size_t i = 0; i < server_sockets_.size(); ++i) {
       if (server_selector_.isReadable(server_sockets_[i].getFD())) {
         try {
           SocketAddress address = server_sockets_[i].getAddress();
@@ -181,7 +181,7 @@ const ServerBlock &ServerHandler::findServerBlock(
   const std::vector<ServerBlock> &server_blocks_of_key =
       server_blocks_[socket_key];
 
-  for (size_t i = 0; i < server_blocks_of_key.size(); ++i) {
+  for (std::size_t i = 0; i < server_blocks_of_key.size(); ++i) {
     const std::set<std::string> &server_names =
         server_blocks_of_key[i].getServerNames();
 
@@ -201,7 +201,7 @@ void ServerHandler::closeConnection(Client &client) {
 }
 
 void ServerHandler::deleteClients(const std::vector<int> &delete_clients) {
-  for (size_t i = 0; i < delete_clients.size(); ++i) {
+  for (std::size_t i = 0; i < delete_clients.size(); ++i) {
     clients_.erase(delete_clients[i]);
     client_selector_.clear(delete_clients[i]);
   }

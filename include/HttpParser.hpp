@@ -22,16 +22,14 @@ class HttpParser {
   void clear(void);
 
  private:
-  static HttpRequest parseHeader(const std::string& request);
-  static void parseRequestLine(HttpRequest& http_request,
-                               const std::string& request);
-  static void parseHeaders(HttpRequest& http_request, std::string headers);
-  static void unchunkMessage(HttpRequest& http_request, std::string body);
-  static std::vector<std::string> splitByCRLF(const std::string& content);
-
   bool isHeaderSet(void) const;
   void setHeader(void);
   void handlePost(void);
+  void parseHeader(const std::string& header_part);
+  void parseRequestLine(const std::string& request_line);
+  void parseHeaders(const std::string& header_part);
+  void unchunkMessage(const std::string& body_part);
+  std::vector<std::string> splitByCRLF(const std::string& content);
 
   HttpRequest request_;
   std::string buffer_;

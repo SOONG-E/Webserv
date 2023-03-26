@@ -45,7 +45,7 @@ std::string Client::receive() const {
     throw SocketReceiveException(strerror(errno));
   }
 
-  std::string ret(buf, static_cast<size_t>(read_bytes));
+  std::string ret(buf, static_cast<std::size_t>(read_bytes));
   if (read_bytes) {
     logReceiveInfo(ret);
   }
@@ -57,9 +57,9 @@ void Client::send() {
   if (!isPartialWritten())
     buf_ = response_obj_.generate(parser_.getRequestObj());
 
-  size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
+  std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
 
-  if (write_bytes == static_cast<size_t>(-1)) {
+  if (write_bytes == static_cast<std::size_t>(-1)) {
     throw SocketSendException(strerror(errno));
   }
 

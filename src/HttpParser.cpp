@@ -64,7 +64,7 @@ void HttpParser::setHeader(void) {
   if (bound_pos_ > HEADER_MAX_SIZE) {
     throw ResponseException(C413);
   }
-  request_ = HttpParser::parseHeader(buffer_.substr(0, bound_pos_));
+  parseHeader(buffer_.substr(0, bound_pos_));
   bound_pos_ += DOUBLE_CRLF.size();
 }
 
@@ -85,37 +85,33 @@ void HttpParser::handlePost(void) {
     throw ResponseException(C411);
   }
   if (buffer_.find(DOUBLE_CRLF, bound_pos_) == std::string::npos) return;
-  unchunkMessage(request_, buffer_.substr(bound_pos_));
+  unchunkMessage(buffer_.substr(bound_pos_));
 }
 
-HttpRequest HttpParser::parseHeader(const std::string& request) {
-  HttpRequest request2;
-  std::size_t boundary = request.find(CRLF);
-  std::string request_line = request.substr(0, boundary);
-  parseRequestLine(request2, request_line);
-  std::string headers = request.substr(boundary + CRLF.length());
-  parseHeaders(request2, headers);
-
-  return request2;
+void HttpParser::parseHeader(const std::string& header_part) {
+  std::size_t boundary = header_part.find(CRLF);
+  std::string request_line = header_part.substr(0, boundary);
+  parseRequestLine(request_line);
+  std::string headers = header_part.substr(boundary + CRLF.length());
+  parseHeaders(headers);
 }
 
-void HttpParser::parseRequestLine(HttpRequest& request_,
-                                  const std::string& request) {
-  std::vector<std::string> request_line = split(request);
+void HttpParser::parseRequestLine(const std::string& request_line) {
+  std::vector<std::string> request_words = split(request_line);
 
-  if (request_line.size() < 3 || request_line[2].length() < 6 ||
-      request_line[2].substr(0, 4) != "HTTP") {
+  if (request_words.size() < 3 || request_words[2].length() < 6 ||
+      request_words[2].substr(0, 4) != "HTTP") {
     throw ResponseException(C400);
   }
-  if (request_line[2].substr(0, 5) != "HTTP/" ||
-      request_line[2].substr(5) != "1.1") {
+  if (request_words[2].substr(0, 5) != "HTTP/" ||
+      request_words[2].substr(5) != "1.1") {
     throw ResponseException(C505);
   }
-  request_.setMethod(request_line[0]);
-  request_.setUri(request_line[1]);
+  request_.setMethod(request_words[0]);
+  request_.setUri(request_words[1]);
 }
 
-void HttpParser::parseHeaders(HttpRequest& request_, std::string header_part) {
+void HttpParser::parseHeaders(const std::string& header_part) {
   std::vector<std::string> headers = splitByCRLF(header_part);
   std::vector<std::string> line;
   for (std::vector<std::string>::iterator header = headers.begin();
@@ -127,16 +123,17 @@ void HttpParser::parseHeaders(HttpRequest& request_, std::string header_part) {
   }
   request_.setHost(request_.getHeader("Host"));
   if (request_.getHost().empty()) throw ResponseException(C400);
-  if (request_.getHeader("Content-Type").empty())
+  if (request_.getHeader("Content-Type").empty()) {
     request_.addHeader("Content-Type", "application/octet-stream");
+  }
 }
 
-void HttpParser::unchunkMessage(HttpRequest& request_, std::string body) {
+void HttpParser::unchunkMessage(const std::string& body_part) {
   std::string content;
   std::size_t content_length = 0;
   std::size_t chunk_size = 0;
 
-  std::vector<std::string> chunks = splitByCRLF(body);
+  std::vector<std::string> chunks = splitByCRLF(body_part);
   if (chunks.size() < 1) throw ResponseException(C400);
   chunk_size = hexToInt(chunks[0]);
   std::size_t idx = 1;
