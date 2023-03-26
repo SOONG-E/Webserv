@@ -1,6 +1,6 @@
 #include "HttpResponse.hpp"
 
-#include <stdexcept>
+#include "exception.hpp"
 
 const std::string HttpResponse::DEFAULT_ERROR_PAGE = "html/error.html";
 
@@ -63,7 +63,7 @@ std::string HttpResponse::generate(const HttpRequest& request) {
   }
   try {
     body = rootUri(request.getUri());
-  } catch (std::runtime_error& e) {
+  } catch (FileOpenException& e) {
     code_ = "404";
     reason_ = ResponseStatus::REASONS[C404];
     body = readFile(server_block_->getErrorPage(code_));
@@ -80,7 +80,7 @@ std::string HttpResponse::generateResponse(const HttpRequest& request,
   header += "Content-Type: text/html" + CRLF;
   header += "Connection: ";
   if (request.getHeader("Connection").empty()) {
-    header += "Keep-Alive" + DOUBLE_CRLF;
+    header += "keep-alive" + DOUBLE_CRLF;
     return header + body;
   }
   header += request.getHeader("Connection") + DOUBLE_CRLF;
@@ -112,7 +112,7 @@ std::string HttpResponse::readIndexFile(const std::set<std::string>& index,
        iter != index.end(); ++iter) {
     try {
       return readFile(filename + *iter);
-    } catch (std::runtime_error& e) {
+    } catch (FileOpenException& e) {
       continue;
     }
   }
