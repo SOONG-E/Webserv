@@ -26,6 +26,7 @@ const std::size_t HEADER_MAX_SIZE = 8192;
 
 const std::string BASE10 = "0123456789";
 const std::string CRLF = "\r\n";
+const std::string DEFAULT_PATH = "conf/tester.conf";
 const std::string DOUBLE_CRLF = "\r\n\r\n";
 const std::string WHITESPACE = " \t\n\v\f\r";
 const std::string ERRORS[] = {"Error: ", "Invalid argument", "File open failed",

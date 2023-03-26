@@ -4,13 +4,17 @@
 #include "ServerHandler.hpp"
 #include "constant.hpp"
 
+// temp
+#define EXIT_SUCCESS 0
+#define EXIT_FAILURE 1
+
 int main(int argc, char* argv[]) {
   if (argc > 2) {
     std::cerr << ERRORS[PREFIX] << ERRORS[ARG] << std::endl;
     return EXIT_FAILURE;
   }
 
-  const char* filename = (argc == 2) ? argv[1] : "conf/default.conf";
+  const char* filename = (argc == 2) ? argv[1] : DEFAULT_PATH;
 
   try {
     ConfigParser conf(filename);
