@@ -1,15 +1,9 @@
 #include "utility.hpp"
 
 #include <fstream>
+#include <stdexcept>
 
 #include "exception.hpp"
-
-std::string trim(std::string str) {
-  std::size_t start = str.find_first_not_of(WHITESPACE);
-  std::size_t end = str.find_last_not_of(WHITESPACE);
-  if (start == std::string::npos) return "";
-  return (str.substr(start, end - start + 1));
-}
 
 bool isNumber(const std::string& str) {
   return str.find_first_not_of(BASE10) == std::string::npos;
@@ -52,7 +46,7 @@ std::size_t stoi(const std::string& value) {
   std::size_t num;
   iss >> num;
   if (iss.fail()) {
-    // throw;
+    throw std::invalid_argument("stoi");
   }
   return num;
 }
@@ -62,4 +56,11 @@ std::size_t hexToInt(const std::string& value) {
   std::istringstream iss(value);
   iss >> std::hex >> out;
   return out;
+}
+
+std::string trim(const std::string& str) {
+  std::size_t start = str.find_first_not_of(WHITESPACE);
+  std::size_t end = str.find_last_not_of(WHITESPACE);
+  if (start == std::string::npos) return "";
+  return (str.substr(start, end - start + 1));
 }

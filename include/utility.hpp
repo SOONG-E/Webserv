@@ -14,7 +14,7 @@ std::vector<std::string> split(const std::string& content,
                                const std::string& delim = WHITESPACE);
 std::size_t stoi(const std::string& value);
 std::size_t hexToInt(const std::string& value);
-std::string trim(std::string str);
+std::string trim(const std::string& str);
 
 template <typename T>
 std::string toString(T value) {
