@@ -12,33 +12,36 @@
 class HttpRequest {
  public:
   HttpRequest();
-  HttpRequest(const HttpRequest &origin);
-  HttpRequest operator=(const HttpRequest &origin);
+  HttpRequest(const HttpRequest& origin);
+  HttpRequest operator=(const HttpRequest& origin);
   ~HttpRequest();
 
-  void setMethod(std::string method);
-  void setUri(std::string uri);
-  void setHost(std::string host);
-  void setBody(std::string body);
+  const std::string& getMethod(void) const;
+  std::string& getUri(void);
+  const std::string& getUri(void) const;
+  const std::string& getHost(void) const;
+  std::size_t getContentLength(void) const;
+  std::string getHeader(const std::string& key) const;
+  const std::string& getBody(void) const;
+
+  void setMethod(const std::string& method);
+  void setUri(const std::string& uri);
+  void setHost(const std::string& host);
   void setContentLength(std::size_t content_length);
-  void addheader(std::string key, std::string value);
-  void addheader(std::string key, std::vector<std::string> values);
-  std::string getHeader(std::string name) const;
-  const std::string &getMethod() const;
-  const std::string &getUri() const;
-  const std::string &getHost() const;
-  const std::string &getBody() const;
-  std::size_t getContentLength() const;
+  void addHeader(const std::string& key, const std::string& value);
+  void addHeader(const std::string& key,
+                 const std::vector<std::string>& values);
+  void setBody(const std::string& body);
 
  private:
-  typedef std::map<std::string, std::vector<std::string> > header_type;
+  typedef std::map<std::string, std::vector<std::string> > headers_type;
 
   std::string method_;
   std::string uri_;
   std::string host_;
-  std::string body_;
   std::size_t content_length_;
-  header_type headers_;
+  headers_type headers_;
+  std::string body_;
 };
 
 #endif
