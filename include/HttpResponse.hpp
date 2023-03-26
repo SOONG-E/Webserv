@@ -8,8 +8,9 @@
 #include "ServerBlock.hpp"
 
 class HttpResponse {
- public:
   static const int DEFAULT_INDEX = C200;
+
+ public:
   static const std::string DEFAULT_ERROR_PAGE;
 
   explicit HttpResponse(const ServerBlock& default_server);
