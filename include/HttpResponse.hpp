@@ -25,15 +25,15 @@ class HttpResponse {
 
   void clear(void);
   bool isSuccessCode(void) const;
-  std::string generate(const HttpRequest& request);
+  std::string generate(HttpRequest& request);
 
  private:
   std::string generateResponse(const HttpRequest& request,
                                const std::string& body) const;
   std::string currentTime(void) const;
-  std::string rootUri(const std::string& request_uri) const;
-  std::string readIndexFile(const std::set<std::string>& index,
-                            const std::string& filename) const;
+  std::string rootUri(std::string& request_uri) const;
+  std::string readIndexFile(const std::string& filename,
+                            const std::set<std::string>& index) const;
 
   std::string code_;
   std::string reason_;

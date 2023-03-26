@@ -52,7 +52,7 @@ bool HttpResponse::isSuccessCode(void) const {
   return code_.size() == 3 && code_[0] == '2';
 }
 
-std::string HttpResponse::generate(const HttpRequest& request) {
+std::string HttpResponse::generate(HttpRequest& request) {
   std::string body;
   if (!isSuccessCode()) {
     if (!server_block_) {
@@ -64,7 +64,7 @@ std::string HttpResponse::generate(const HttpRequest& request) {
   try {
     body = rootUri(request.getUri());
   } catch (FileOpenException& e) {
-    code_ = "404";
+    code_ = ResponseStatus::CODES[C404];
     reason_ = ResponseStatus::REASONS[C404];
     body = readFile(server_block_->getErrorPage(code_));
   }
@@ -95,19 +95,21 @@ std::string HttpResponse::currentTime(void) const {
   return std::string(buf);
 }
 
-std::string HttpResponse::rootUri(const std::string& request_uri) const {
+std::string HttpResponse::rootUri(std::string& request_uri) const {
+  std::string root = location_block_->root;
+  if (root.back() != '/') {
+    root += '/';
+  }
   std::string filename =
-      location_block_->root +
-      request_uri.substr(request_uri.find(location_block_->uri) +
-                         location_block_->uri.size() - 1);
+      request_uri.replace(0, location_block_->uri.size(), root);
   if (filename.back() == '/') {
-    return readIndexFile(location_block_->index, filename);
+    return readIndexFile(filename, location_block_->index);
   }
   return readFile(filename);
 }
 
-std::string HttpResponse::readIndexFile(const std::set<std::string>& index,
-                                        const std::string& filename) const {
+std::string HttpResponse::readIndexFile(
+    const std::string& filename, const std::set<std::string>& index) const {
   for (std::set<std::string>::const_iterator iter = index.begin();
        iter != index.end(); ++iter) {
     try {
