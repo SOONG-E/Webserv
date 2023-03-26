@@ -76,13 +76,12 @@ const LocationBlock& ServerBlock::findLocationBlock(
     if (end_pos == std::string::npos) {
       throw ResponseException(C404);
     }
-    std::string rooted_uri = request_uri.substr(0, end_pos + 1);
+    std::string partial_uri = request_uri.substr(0, end_pos + 1);
     for (std::size_t i = 0; i < location_blocks_.size(); ++i) {
-      if (rooted_uri == location_blocks_[i].getUri()) {
+      if (partial_uri == location_blocks_[i].getUri()) {
         return redirect(location_blocks_[i]);
       }
     }
-    throw ResponseException(C404);
   }
 }
 
