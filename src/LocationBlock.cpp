@@ -14,8 +14,8 @@ const std::string LocationBlock::DEFAULTS[] = {"1m", "html", "off",
 LocationBlock::LocationBlock()
     : root_(DEFAULTS[ROOT]), autoindex_(DEFAULTS[AUTOINDEX]) {
   setBodyLimit(DEFAULTS[CLIENT_MAX_BODY_SIZE]);
-  addAllowedMethod("GET");
-  addAllowedMethod("POST");
+  addAllowedMethod(METHODS[GET]);
+  addAllowedMethod(METHODS[POST]);
   addIndex(DEFAULTS[INDEX]);
 }
 

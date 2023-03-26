@@ -39,13 +39,13 @@ void HttpParser::appendRequest(const std::string& socket_buffer) {
   if (!isHeaderSet()) {
     setHeader();
   }
-  if (request_.getMethod() == "POST") {
+  if (request_.getMethod() == METHODS[POST]) {
     handlePost();
   }
 }
 
 bool HttpParser::isCompleted(void) const {
-  if (!request_.getMethod().empty() && request_.getMethod() != "POST")
+  if (!request_.getMethod().empty() && request_.getMethod() != METHODS[POST])
     return true;
   return request_.getBody().size() == request_.getContentLength();
 }

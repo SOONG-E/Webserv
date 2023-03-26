@@ -73,7 +73,7 @@ std::string HttpResponse::generate(HttpRequest& request) {
 
 std::string HttpResponse::generateResponse(const HttpRequest& request,
                                            const std::string& body) const {
-  if (request.getMethod() == "HEAD") {
+  if (request.getMethod() == METHODS[HEAD]) {
     return combine(request, "");
   }
   return combine(request, body);
