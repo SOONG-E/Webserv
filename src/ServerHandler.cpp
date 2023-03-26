@@ -171,7 +171,7 @@ void ServerHandler::validateRequest(const HttpRequest &request_obj,
   } else if (!location_block.isAllowedMethod(request_method)) {
     throw ResponseException(C405);
   } else if (request_method == "POST" &&
-             location_block.body_limit < request_obj.getContentLength()) {
+             location_block.getBodyLimit() < request_obj.getContentLength()) {
     throw ResponseException(C413);
   }
 }

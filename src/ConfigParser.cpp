@@ -56,6 +56,7 @@ void ConfigParser::parseServerBlock(void) {
     } else if (token == "error_page") {
       parseErrorPage();
     } else if (token == "location") {
+      location_block_.clear();
       parseLocationBlock();
       server_block_.addLocationBlock(location_block_);
     } else {
@@ -101,7 +102,7 @@ void ConfigParser::parseClientMaxBodySize(void) {
 
 void ConfigParser::parseLocationBlock(void) {
   expect("location");
-  location_block_.uri = expect();
+  location_block_.setUri(expect());
   expect("{");
   while (true) {
     std::string token = peek();
@@ -128,33 +129,33 @@ void ConfigParser::parseLocationBlock(void) {
 void ConfigParser::parseAllowedMethods(void) {
   expect("allowed_methods");
   while (peek() != ";") {
-    location_block_.allowed_methods.insert(expect());
+    location_block_.addAllowedMethod(expect());
   }
   expect(";");
 }
 
 void ConfigParser::parseReturn(void) {
   expect("return");
-  location_block_.return_url = expect();
+  location_block_.setReturnUrl(expect());
   expect(";");
 }
 
 void ConfigParser::parseRoot(void) {
   expect("root");
-  location_block_.root = expect();
+  location_block_.setRoot(expect());
   expect(";");
 }
 
 void ConfigParser::parseAutoindex(void) {
   expect("autoindex");
-  location_block_.autoindex = expect();
+  location_block_.setAutoindex(expect());
   expect(";");
 }
 
 void ConfigParser::parseIndex(void) {
   expect("index");
   while (peek() != ";") {
-    location_block_.index.insert(expect());
+    location_block_.addIndex(expect());
   }
   expect(";");
 }

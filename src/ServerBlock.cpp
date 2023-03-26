@@ -66,7 +66,7 @@ void ServerBlock::addLocationBlock(const LocationBlock& location_block) {
 const LocationBlock& ServerBlock::findLocationBlock(
     const std::string& request_uri) const {
   for (std::size_t i = 0; i < location_blocks_.size(); ++i) {
-    if (request_uri == location_blocks_[i].uri) {
+    if (request_uri == location_blocks_[i].getUri()) {
       return redirect(location_blocks_[i]);
     }
   }
@@ -78,7 +78,7 @@ const LocationBlock& ServerBlock::findLocationBlock(
     }
     std::string rooted_uri = request_uri.substr(0, end_pos + 1);
     for (std::size_t i = 0; i < location_blocks_.size(); ++i) {
-      if (rooted_uri == location_blocks_[i].uri) {
+      if (rooted_uri == location_blocks_[i].getUri()) {
         return redirect(location_blocks_[i]);
       }
     }
@@ -88,10 +88,10 @@ const LocationBlock& ServerBlock::findLocationBlock(
 
 const LocationBlock& ServerBlock::redirect(
     const LocationBlock& location) const {
-  if (location.return_url.empty()) {
+  if (location.getReturnUrl().empty()) {
     return location;
   }
-  return findLocationBlock(location.return_url);
+  return findLocationBlock(location.getReturnUrl());
 }
 
 std::set<std::string> ServerBlock::keys(void) const {
