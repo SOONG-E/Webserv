@@ -28,6 +28,8 @@ std::size_t HttpParser::getContentLength(void) {
   return request_.getContentLength();
 }
 
+HttpRequest& HttpParser::getRequestObj(void) { return request_; }
+
 const HttpRequest& HttpParser::getRequestObj(void) const { return request_; }
 
 const std::string& HttpParser::getBuffer(void) const { return buffer_; }
@@ -121,12 +123,12 @@ void HttpParser::parseHeaders(HttpRequest& request_, std::string header_part) {
     if (header->length() == 0) break;
     line = split(*header, ":");
     if (line.size() < 2) throw ResponseException(C400);
-    request_.addheader(trim(line[0]), trim(line[1]));
+    request_.addHeader(trim(line[0]), trim(line[1]));
   }
   request_.setHost(request_.getHeader("Host"));
   if (request_.getHost().empty()) throw ResponseException(C400);
   if (request_.getHeader("Content-Type").empty())
-    request_.addheader("Content-Type", "application/octet-stream");
+    request_.addHeader("Content-Type", "application/octet-stream");
 }
 
 void HttpParser::unchunkMessage(HttpRequest& request_, std::string body) {

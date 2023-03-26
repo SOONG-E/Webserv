@@ -13,6 +13,7 @@ class HttpParser {
   ~HttpParser();
 
   std::size_t getContentLength(void);
+  HttpRequest& getRequestObj(void);
   const HttpRequest& getRequestObj(void) const;
   const std::string& getBuffer(void) const;
 
