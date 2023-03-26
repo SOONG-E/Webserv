@@ -100,7 +100,7 @@ std::string HttpResponse::currentTime(void) const {
   time_t timestamp = time(NULL);
   struct tm* time_info = localtime(&timestamp);
   strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", time_info);
-  return std::string(buf);
+  return buf;
 }
 
 std::string HttpResponse::rootUri(std::string& request_uri) const {
@@ -110,7 +110,8 @@ std::string HttpResponse::rootUri(std::string& request_uri) const {
   }
   std::string filename =
       request_uri.replace(0, location_block_->getUri().size(), root);
-  if (*filename.rbegin() == '/') {
+  if (isDirectory(filename)) {
+    filename = (*filename.rbegin() == '/') ? filename : filename + '/';
     return readIndexFile(filename, location_block_->getIndex());
   }
   return readFile(filename);

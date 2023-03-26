@@ -1,12 +1,21 @@
 #include "utility.hpp"
 
+#include <sys/stat.h>
+
 #include <fstream>
-#include <stdexcept>
 
 #include "exception.hpp"
 
 bool isNumber(const std::string& str) {
   return str.find_first_not_of(BASE10) == std::string::npos;
+}
+
+bool isDirectory(const std::string& path) {
+  struct stat statbuf;
+  if (stat(path.c_str(), &statbuf) < 0) {
+    return false;
+  }
+  return S_ISDIR(statbuf.st_mode);
 }
 
 std::string readFile(const std::string& filename) {

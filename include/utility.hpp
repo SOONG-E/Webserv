@@ -8,6 +8,7 @@
 #include "constant.hpp"
 
 bool isNumber(const std::string& str);
+bool isDirectory(const std::string& path);
 std::string readFile(const std::string& filename);
 std::vector<std::string> split(const std::string& content,
                                const std::string& delim = WHITESPACE);
