@@ -30,6 +30,8 @@ class HttpResponse {
  private:
   std::string generateResponse(const HttpRequest& request,
                                const std::string& body) const;
+  std::string combine(const HttpRequest& request,
+                      const std::string& body) const;
   std::string currentTime(void) const;
   std::string rootUri(std::string& request_uri) const;
   std::string readIndexFile(const std::string& filename,
