@@ -34,7 +34,7 @@ bool LocationBlock::isImplementedMethod(std::string method) const {
 }
 
 void LocationBlock::setBodyLimit(const std::string& raw) {
-  static ByteUnits units;
+  static const ByteUnits UNITS;
   char* unit;
   body_limit = std::strtoul(raw.c_str(), &unit, 10);
   if (errno == ERANGE) {
@@ -42,8 +42,8 @@ void LocationBlock::setBodyLimit(const std::string& raw) {
   }
   if (*unit == '\0') return;
   try {
-    body_limit *= units.size.at(unit);
-  } catch (const std::out_of_range& e) {
+    body_limit *= UNITS.size.at(unit);
+  } catch (std::out_of_range& e) {
     throw ConfigException(ERRORS[TOKEN]);
   }
 }
