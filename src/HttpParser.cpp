@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "ResponseException.hpp"
 #include "constant.hpp"
+#include "exception.hpp"
 
 HttpParser::HttpParser(const std::string& socket_buffer)
     : buffer_(socket_buffer), bound_pos_(std::string::npos) {}

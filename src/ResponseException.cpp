@@ -1,8 +1,8 @@
-#include "ResponseException.hpp"
+#include "exception/ResponseException.hpp"
 
 #include "ResponseStatus.hpp"
 
-static ResponseStatus status;
+static const ResponseStatus STATUS;
 
 ResponseException::ResponseException(const int idx)
-    : ExceptionTemplate(status.reason.at(idx)), index(idx) {}
+    : ExceptionTemplate(STATUS.reason.at(idx)), index(idx) {}

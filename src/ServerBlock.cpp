@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "HttpResponse.hpp"
-#include "ResponseException.hpp"
+#include "exception.hpp"
 
 ServerBlock::ServerBlock() {}
 

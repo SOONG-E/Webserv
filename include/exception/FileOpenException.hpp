@@ -1,7 +1,7 @@
 #ifndef FILE_OPEN_EXCEPTION_HPP_
 #define FILE_OPEN_EXCEPTION_HPP_
 
-#include "exception/ExceptionTemplate.hpp"
+#include "ExceptionTemplate.hpp"
 #include "constant.hpp"
 
 class FileOpenException : public ExceptionTemplate {

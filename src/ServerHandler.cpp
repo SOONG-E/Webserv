@@ -1,7 +1,7 @@
 #include "ServerHandler.hpp"
 
-#include "ResponseException.hpp"
 #include "ResponseStatus.hpp"
+#include "exception.hpp"
 
 ServerHandler::ServerHandler() {}
 

@@ -3,5 +3,6 @@
 
 #include "exception/ConfigException.hpp"
 #include "exception/FileOpenException.hpp"
+#include "exception/ResponseException.hpp"
 
 #endif
