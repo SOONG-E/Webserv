@@ -105,12 +105,12 @@ std::string HttpResponse::currentTime(void) const {
 
 std::string HttpResponse::rootUri(std::string& request_uri) const {
   std::string root = location_block_->root;
-  if (root.back() != '/') {
+  if (*root.rbegin() != '/') {
     root += '/';
   }
   std::string filename =
       request_uri.replace(0, location_block_->uri.size(), root);
-  if (filename.back() == '/') {
+  if (*filename.rbegin() == '/') {
     return readIndexFile(filename, location_block_->index);
   }
   return readFile(filename);
