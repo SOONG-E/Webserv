@@ -33,7 +33,7 @@ ConfigParser::~ConfigParser() {}
 
 const Config& ConfigParser::parse(void) {
   while (peek() == "server") {
-    server_block_.reset();
+    server_block_.clear();
     parseServerBlock();
     config_.addServerBlock(server_block_);
   }
@@ -41,12 +41,6 @@ const Config& ConfigParser::parse(void) {
     throw ConfigException(ERRORS[TOKEN]);
   }
   return config_;
-}
-
-void ConfigParser::print(void) const {
-  for (std::size_t i = 0; i < config_.getServerBlocks().size(); ++i) {
-    config_.getServerBlocks()[i].print(i + 1);
-  }
 }
 
 void ConfigParser::parseServerBlock(void) {
@@ -141,7 +135,6 @@ void ConfigParser::parseAllowedMethods(void) {
 
 void ConfigParser::parseReturn(void) {
   expect("return");
-  location_block_.return_code = expect();
   location_block_.return_url = expect();
   expect(";");
 }

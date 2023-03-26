@@ -23,7 +23,6 @@ struct LocationBlock {
   std::string uri;
   std::size_t body_limit;
   std::set<std::string> allowed_methods;
-  std::string return_code;
   std::string return_url;
   std::string root;
   std::string autoindex;

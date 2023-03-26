@@ -22,16 +22,15 @@ class ServerBlock {
   const std::string& getErrorPage(const std::string& code) const;
   const std::vector<LocationBlock>& getLocationBlocks(void) const;
 
-  const LocationBlock& findLocationBlock(const std::string& request_uri) const;
-
   void addListen(const std::string& socket_key);
   void addServerName(const std::string& name);
   void addErrorPage(const std::string& code, const std::string& page);
   void addLocationBlock(const LocationBlock& location_block);
 
-  void reset(void);
+  const LocationBlock& findLocationBlock(const std::string& request_uri) const;
+  const LocationBlock& redirect(const LocationBlock& location) const;
   std::set<std::string> keys(void) const;
-  void print(const int index) const;
+  void clear(void);
 
  private:
   std::vector<Listen> listens_;

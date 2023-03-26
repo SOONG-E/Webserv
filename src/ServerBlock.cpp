@@ -46,27 +46,6 @@ const std::vector<LocationBlock>& ServerBlock::getLocationBlocks(void) const {
   return location_blocks_;
 }
 
-const LocationBlock& ServerBlock::findLocationBlock(
-    const std::string& request_uri) const {
-  std::size_t end_pos = request_uri.size();
-
-  while (true) {
-    end_pos = request_uri.rfind("/", end_pos - 1);
-    if (end_pos == std::string::npos) {
-      throw ResponseException(C404);
-    }
-
-    std::string rooted_uri = request_uri.substr(0, end_pos + 1);
-
-    for (std::size_t i = 0; i < location_blocks_.size(); ++i) {
-      if (rooted_uri == location_blocks_[i].uri) {
-        return location_blocks_[i];
-      }
-    }
-    throw ResponseException(C404);
-  }
-}
-
 void ServerBlock::addListen(const std::string& socket_key) {
   listens_.push_back(Listen(socket_key));
 }
@@ -84,11 +63,35 @@ void ServerBlock::addLocationBlock(const LocationBlock& location_block) {
   location_blocks_.push_back(location_block);
 }
 
-void ServerBlock::reset(void) {
-  listens_.clear();
-  server_names_.clear();
-  error_pages_.clear();
-  location_blocks_.clear();
+const LocationBlock& ServerBlock::findLocationBlock(
+    const std::string& request_uri) const {
+  for (std::size_t i = 0; i < location_blocks_.size(); ++i) {
+    if (request_uri == location_blocks_[i].uri) {
+      return redirect(location_blocks_[i]);
+    }
+  }
+  std::size_t end_pos = request_uri.size();
+  while (true) {
+    end_pos = request_uri.rfind("/", end_pos - 1);
+    if (end_pos == std::string::npos) {
+      throw ResponseException(C404);
+    }
+    std::string rooted_uri = request_uri.substr(0, end_pos + 1);
+    for (std::size_t i = 0; i < location_blocks_.size(); ++i) {
+      if (rooted_uri == location_blocks_[i].uri) {
+        return redirect(location_blocks_[i]);
+      }
+    }
+    throw ResponseException(C404);
+  }
+}
+
+const LocationBlock& ServerBlock::redirect(
+    const LocationBlock& location) const {
+  if (location.return_url.empty()) {
+    return location;
+  }
+  return findLocationBlock(location.return_url);
 }
 
 std::set<std::string> ServerBlock::keys(void) const {
@@ -103,20 +106,9 @@ std::set<std::string> ServerBlock::keys(void) const {
   return keys;
 }
 
-void ServerBlock::print(const int index) const {
-  std::cout << "[ server block " << index << " ]\n";
-  for (std::size_t i = 0; i < listens_.size(); ++i) {
-    std::cout << "listen: " << listens_[i].socket_key << "\n";
-  }
-  std::cout << "server name: ";
-  for (std::set<std::string>::const_iterator it = server_names_.begin();
-       it != server_names_.end(); ++it) {
-    std::cout << *it << " ";
-  }
-  std::cout << "\n";
-  for (std::map<std::string, std::string>::const_iterator it =
-           error_pages_.begin();
-       it != error_pages_.end(); ++it) {
-    std::cout << "error page: " << it->first << " " << it->second << "\n";
-  }
+void ServerBlock::clear(void) {
+  listens_.clear();
+  server_names_.clear();
+  error_pages_.clear();
+  location_blocks_.clear();
 }
