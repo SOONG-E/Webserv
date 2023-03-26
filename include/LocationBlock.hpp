@@ -24,8 +24,10 @@ class LocationBlock {
 
   const std::string& getUri(void) const;
   std::size_t getBodyLimit(void) const;
+  std::set<std::string>& getAllowedMethods(void);
   const std::string& getReturnUrl(void) const;
   const std::string& getRoot(void) const;
+  std::set<std::string>& getIndex(void);
   const std::set<std::string>& getIndex(void) const;
 
   void setUri(const std::string& uri);

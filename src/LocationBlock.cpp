@@ -14,7 +14,9 @@ const std::string LocationBlock::DEFAULTS[] = {"1m", "html", "off",
 LocationBlock::LocationBlock()
     : root_(DEFAULTS[ROOT]), autoindex_(DEFAULTS[AUTOINDEX]) {
   setBodyLimit(DEFAULTS[CLIENT_MAX_BODY_SIZE]);
-  index_.insert(DEFAULTS[INDEX]);
+  addAllowedMethod("GET");
+  addAllowedMethod("POST");
+  addIndex(DEFAULTS[INDEX]);
 }
 
 LocationBlock::LocationBlock(const LocationBlock& origin)
@@ -54,11 +56,17 @@ const std::string& LocationBlock::getUri(void) const { return uri_; }
 
 std::size_t LocationBlock::getBodyLimit(void) const { return body_limit_; }
 
+std::set<std::string>& LocationBlock::getAllowedMethods(void) {
+  return allowed_methods_;
+}
+
 const std::string& LocationBlock::getReturnUrl(void) const {
   return return_url_;
 }
 
 const std::string& LocationBlock::getRoot(void) const { return root_; }
+
+std::set<std::string>& LocationBlock::getIndex(void) { return index_; }
 
 const std::set<std::string>& LocationBlock::getIndex(void) const {
   return index_;

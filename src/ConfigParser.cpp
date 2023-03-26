@@ -128,6 +128,7 @@ void ConfigParser::parseLocationBlock(void) {
 
 void ConfigParser::parseAllowedMethods(void) {
   expect("allowed_methods");
+  location_block_.getAllowedMethods().clear();
   while (peek() != ";") {
     location_block_.addAllowedMethod(expect());
   }
@@ -154,6 +155,7 @@ void ConfigParser::parseAutoindex(void) {
 
 void ConfigParser::parseIndex(void) {
   expect("index");
+  location_block_.getIndex().clear();
   while (peek() != ";") {
     location_block_.addIndex(expect());
   }
