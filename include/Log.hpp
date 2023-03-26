@@ -15,7 +15,8 @@ struct Log {
   static const std::string FOOTER_SUFFIX;
   static const std::string COLORS[];
 
-  static void pad(const std::string& msg, const std::string& color = "");
+  static void pad(const std::string& msg,
+                  const std::string& color = COLORS[DEFAULT]);
   static void header(const std::string& msg);
   static void footer(const std::string& msg = "");
 };
