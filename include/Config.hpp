@@ -8,7 +8,7 @@ class Config {
   Config();
   Config(const Config& origin);
   Config& operator=(const Config& origin);
-  virtual ~Config();
+  ~Config();
 
   const std::vector<ServerBlock>& getServerBlocks(void) const;
 

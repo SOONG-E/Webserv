@@ -16,7 +16,7 @@ class ServerSocket {
  public:
   ServerSocket();
   ServerSocket(const ServerSocket& src);
-  virtual ~ServerSocket();
+  ~ServerSocket();
 
   ServerSocket& operator=(const ServerSocket& src);
 

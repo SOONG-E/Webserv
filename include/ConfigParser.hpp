@@ -8,7 +8,7 @@ class ConfigParser {
   explicit ConfigParser(const char* filename);
   ConfigParser(const ConfigParser& origin);
   ConfigParser& operator=(const ConfigParser& origin);
-  virtual ~ConfigParser();
+  ~ConfigParser();
 
   const Config& parse(void);
 
