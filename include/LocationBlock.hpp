@@ -16,9 +16,9 @@ struct LocationBlock {
 
   LocationBlock();
 
-  bool isAllowedMethod(std::string method) const;
   void setBodyLimit(const std::string& raw);
-  bool isImplementedMethod(std::string method) const;
+  bool isAllowedMethod(const std::string& method) const;
+  bool isImplementedMethod(const std::string& method) const;
 
   std::string uri;
   std::size_t body_limit;
