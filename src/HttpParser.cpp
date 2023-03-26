@@ -70,8 +70,13 @@ void HttpParser::setHeader(void) {
 
 void HttpParser::handlePost(void) {
   if (!request_.getHeader("Content-Length").empty()) {
-    if (request_.getContentLength() == static_cast<std::size_t>(-1))
-      request_.setContentLength(::stoi(request_.getHeader("Content-Length")));
+    if (request_.getContentLength() == static_cast<std::size_t>(-1)) {
+      try {
+        request_.setContentLength(::stoi(request_.getHeader("Content-Length")));
+      } catch (std::invalid_argument& e) {
+        throw ResponseException(C400);
+      }
+    }
     std::size_t content_length = request_.getContentLength();
     if (content_length < buffer_.size() - bound_pos_) {
       throw ResponseException(C413);
@@ -98,7 +103,6 @@ void HttpParser::parseHeader(const std::string& header_part) {
 
 void HttpParser::parseRequestLine(const std::string& request_line) {
   std::vector<std::string> request_words = split(request_line);
-
   if (request_words.size() < 3 || request_words[2].length() < 6 ||
       request_words[2].substr(0, 4) != "HTTP") {
     throw ResponseException(C400);
@@ -132,7 +136,6 @@ void HttpParser::unchunkMessage(const std::string& body_part) {
   std::string content;
   std::size_t content_length = 0;
   std::size_t chunk_size = 0;
-
   std::vector<std::string> chunks = splitByCRLF(body_part);
   if (chunks.size() < 1) throw ResponseException(C400);
   chunk_size = hexToInt(chunks[0]);
@@ -151,7 +154,6 @@ std::vector<std::string> HttpParser::splitByCRLF(const std::string& content) {
   std::vector<std::string> substrings;
   std::size_t start = 0;
   std::size_t end;
-
   while (start != content.size()) {
     end = content.find(CRLF, start);
     if (end == std::string::npos) {
