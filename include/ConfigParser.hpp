@@ -5,7 +5,7 @@
 
 class ConfigParser {
  public:
-  explicit ConfigParser(const char* filename);
+  explicit ConfigParser(const std::string& filename);
   ConfigParser(const ConfigParser& origin);
   ConfigParser& operator=(const ConfigParser& origin);
   ~ConfigParser();

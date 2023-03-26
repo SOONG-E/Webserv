@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
     return EXIT_FAILURE;
   }
 
-  const char* filename = (argc == 2) ? argv[1] : DEFAULT_PATH;
+  const std::string& filename = (argc == 2) ? argv[1] : DEFAULT_PATH;
 
   try {
     ConfigParser conf(filename);

@@ -7,7 +7,7 @@
 #include "exception.hpp"
 #include "utility.hpp"
 
-ConfigParser::ConfigParser(const char* filename) : pos_(0) {
+ConfigParser::ConfigParser(const std::string& filename) : pos_(0) {
   content_ = readFile(filename);
 }
 
