@@ -1,8 +1,7 @@
 #ifndef LISTEN_HPP_
 #define LISTEN_HPP_
 
-#include "exception.hpp"
-#include "utility.hpp"
+#include <string>
 
 struct Listen {
   enum Index {

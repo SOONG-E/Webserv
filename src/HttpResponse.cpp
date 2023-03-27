@@ -1,6 +1,10 @@
 #include "HttpResponse.hpp"
 
+#include <ctime>
+
+#include "constant.hpp"
 #include "exception.hpp"
+#include "utility.hpp"
 
 const std::string HttpResponse::DEFAULT_ERROR_PAGE = "html/error.html";
 
@@ -52,13 +56,19 @@ bool HttpResponse::isSuccessCode(void) const {
   return code_.size() == 3 && code_[0] == '2';
 }
 
-std::string HttpResponse::generate(HttpRequest& request) {
+std::string HttpResponse::generate(const HttpRequest& request) {
   std::string body;
   if (!isSuccessCode()) {
     if (!server_block_) {
       server_block_ = &default_server_;
     }
     body = readFile(server_block_->getErrorPage(code_));
+    // test
+    if (request.getMethod() == METHODS[PUT]) {
+      code_ = ResponseStatus::CODES[C200];
+      reason_ = ResponseStatus::REASONS[C200];
+    }
+    //
     return generateResponse(request, body);
   }
   try {
@@ -97,32 +107,30 @@ std::string HttpResponse::combine(const HttpRequest& request,
 
 std::string HttpResponse::currentTime(void) const {
   char buf[30];
-  time_t timestamp = time(NULL);
-  struct tm* time_info = localtime(&timestamp);
-  strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", time_info);
+  time_t timestamp = std::time(NULL);
+  struct tm* time_info = std::localtime(&timestamp);
+  std::strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", time_info);
   return buf;
 }
 
-std::string HttpResponse::rootUri(std::string& request_uri) const {
+std::string HttpResponse::rootUri(std::string uri) const {
   std::string root = location_block_->getRoot();
   if (*root.rbegin() != '/') {
     root += '/';
   }
-  std::string filename =
-      request_uri.replace(0, location_block_->getUri().size(), root);
-  if (isDirectory(filename)) {
-    filename = (*filename.rbegin() == '/') ? filename : filename + '/';
-    return readIndexFile(filename, location_block_->getIndex());
+  uri.replace(0, location_block_->getUri().size(), root);
+  if (isDirectory(uri)) {
+    uri = (*uri.rbegin() == '/') ? uri : uri + '/';
+    return readIndexFile(uri, location_block_->getIndex());
   }
-  return readFile(filename);
+  return readFile(uri);
 }
 
 std::string HttpResponse::readIndexFile(
-    const std::string& filename, const std::set<std::string>& index) const {
-  for (std::set<std::string>::const_iterator iter = index.begin();
-       iter != index.end(); ++iter) {
+    const std::string& uri, const std::vector<std::string>& index) const {
+  for (std::size_t i = 0; i < index.size(); ++i) {
     try {
-      return readFile(filename + *iter);
+      return readFile(uri + index[i]);
     } catch (FileOpenException& e) {
       continue;
     }

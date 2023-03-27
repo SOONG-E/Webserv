@@ -5,10 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "ResponseStatus.hpp"
-#include "constant.hpp"
-#include "exception.hpp"
-
 class HttpRequest {
  public:
   HttpRequest();
@@ -17,7 +13,6 @@ class HttpRequest {
   ~HttpRequest();
 
   const std::string& getMethod(void) const;
-  std::string& getUri(void);
   const std::string& getUri(void) const;
   const std::string& getHost(void) const;
   std::size_t getContentLength(void) const;
@@ -29,8 +24,6 @@ class HttpRequest {
   void setHost(const std::string& host);
   void setContentLength(std::size_t content_length);
   void addHeader(const std::string& key, const std::string& value);
-  void addHeader(const std::string& key,
-                 const std::vector<std::string>& values);
   void setBody(const std::string& body);
 
  private:

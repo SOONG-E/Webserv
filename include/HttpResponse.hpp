@@ -1,9 +1,10 @@
-#ifndef HTTP_RESPONSE_HPP
-#define HTTP_RESPONSE_HPP
+#ifndef HTTP_RESPONSE_HPP_
+#define HTTP_RESPONSE_HPP_
 
 #include <string>
 
 #include "HttpRequest.hpp"
+#include "LocationBlock.hpp"
 #include "ResponseStatus.hpp"
 #include "ServerBlock.hpp"
 
@@ -26,7 +27,7 @@ class HttpResponse {
 
   void clear(void);
   bool isSuccessCode(void) const;
-  std::string generate(HttpRequest& request);
+  std::string generate(const HttpRequest& request);
 
  private:
   std::string generateResponse(const HttpRequest& request,
@@ -34,9 +35,9 @@ class HttpResponse {
   std::string combine(const HttpRequest& request,
                       const std::string& body) const;
   std::string currentTime(void) const;
-  std::string rootUri(std::string& request_uri) const;
-  std::string readIndexFile(const std::string& filename,
-                            const std::set<std::string>& index) const;
+  std::string rootUri(std::string uri) const;
+  std::string readIndexFile(const std::string& uri,
+                            const std::vector<std::string>& index) const;
 
   std::string code_;
   std::string reason_;

@@ -1,24 +1,18 @@
-#ifndef SERVER_SOCKET_HPP
-#define SERVER_SOCKET_HPP
+#ifndef SERVER_SOCKET_HPP_
+#define SERVER_SOCKET_HPP_
 
-#include <fcntl.h>
-#include <sys/socket.h>
-#include <unistd.h>
-
-#include <cerrno>
+#include <exception>
 
 #include "Client.hpp"
 #include "ServerBlock.hpp"
 #include "SocketAddress.hpp"
-#include "constant.hpp"
 
 class ServerSocket {
  public:
   ServerSocket();
   ServerSocket(const ServerSocket& src);
-  ~ServerSocket();
-
   ServerSocket& operator=(const ServerSocket& src);
+  ~ServerSocket();
 
   void open();
   void bind(const SocketAddress& address, int backlog);

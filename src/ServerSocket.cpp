@@ -1,17 +1,24 @@
 #include "ServerSocket.hpp"
 
+#include <fcntl.h>
+#include <unistd.h>
+
+#include <cerrno>
+#include <cstring>
+
+#include "constant.hpp"
+
 ServerSocket::ServerSocket() : fd_(-1) {}
 
 ServerSocket::ServerSocket(const ServerSocket& src) { *this = src; }
 
-ServerSocket::~ServerSocket() {}
-
 ServerSocket& ServerSocket::operator=(const ServerSocket& src) {
   fd_ = src.fd_;
   address_ = src.address_;
-
   return *this;
 }
+
+ServerSocket::~ServerSocket() {}
 
 void ServerSocket::open() {
   if (fd_ != -1) throw SocketOpenException("already open");
@@ -58,7 +65,6 @@ int ServerSocket::getFD() const { return fd_; }
 
 const SocketAddress& ServerSocket::getAddress() const { return address_; }
 
-// exception
 ServerSocket::SocketOpenException::SocketOpenException(const char* cause)
     : cause(cause) {}
 

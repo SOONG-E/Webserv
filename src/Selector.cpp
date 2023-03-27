@@ -1,16 +1,17 @@
 #include "Selector.hpp"
 
+#include <cerrno>
+#include <cstring>
+
 Selector::Selector() : max_fd_(-1) {
   FD_ZERO(&fds_);
   tm_.tv_sec = 0;
   tm_.tv_usec = 0;
 }
 
-Selector::Selector(const Selector &src) { *this = src; }
+Selector::Selector(const Selector& src) { *this = src; }
 
-Selector::~Selector() {}
-
-Selector &Selector::operator=(const Selector &src) {
+Selector& Selector::operator=(const Selector& src) {
   if (this != &src) {
     max_fd_ = src.max_fd_;
     fds_ = src.fds_;
@@ -19,6 +20,8 @@ Selector &Selector::operator=(const Selector &src) {
   }
   return *this;
 }
+
+Selector::~Selector() {}
 
 int Selector::select() {
   read_fds_ = fds_;
@@ -37,9 +40,9 @@ void Selector::clear(int fd) { FD_CLR(fd, &fds_); }
 bool Selector::isReadable(int fd) const { return FD_ISSET(fd, &read_fds_); }
 bool Selector::isWritable(int fd) const { return FD_ISSET(fd, &write_fds_); }
 
-Selector::SelectFailedException::SelectFailedException(const char *cause)
+Selector::SelectFailedException::SelectFailedException(const char* cause)
     : cause(cause) {}
 
-const char *Selector::SelectFailedException::what() const throw() {
+const char* Selector::SelectFailedException::what() const throw() {
   return cause;
 }

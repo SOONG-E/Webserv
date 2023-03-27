@@ -1,19 +1,16 @@
-#ifndef SELECTOR_HPP
-#define SELECTOR_HPP
+#ifndef SELECTOR_HPP_
+#define SELECTOR_HPP_
 
 #include <sys/select.h>
 
-#include <cerrno>
-#include <cstring>
 #include <exception>
 
 class Selector {
  public:
   Selector();
   Selector(const Selector& src);
-  ~Selector();
-
   Selector& operator=(const Selector& src);
+  ~Selector();
 
   int select();
   void registerFD(int fd);
@@ -28,7 +25,6 @@ class Selector {
   fd_set read_fds_;
   fd_set write_fds_;
 
-  // exception
  public:
   class SelectFailedException : public std::exception {
    public:

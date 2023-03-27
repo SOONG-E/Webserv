@@ -1,15 +1,18 @@
 #include "ServerHandler.hpp"
 
+#include <unistd.h>
+
+#include <iostream>
+
+#include "Log.hpp"
 #include "ResponseStatus.hpp"
 #include "exception.hpp"
 
 ServerHandler::ServerHandler() {}
 
-ServerHandler::ServerHandler(const ServerHandler &src) { *this = src; }
+ServerHandler::ServerHandler(const ServerHandler& src) { *this = src; }
 
-ServerHandler::~ServerHandler() {}
-
-ServerHandler &ServerHandler::operator=(const ServerHandler &src) {
+ServerHandler& ServerHandler::operator=(const ServerHandler& src) {
   if (this != &src) {
     server_blocks_ = src.server_blocks_;
     server_sockets_ = src.server_sockets_;
@@ -20,16 +23,18 @@ ServerHandler &ServerHandler::operator=(const ServerHandler &src) {
   return *this;
 }
 
-void ServerHandler::configureServer(const Config &config) {
-  const std::vector<ServerBlock> &serv_blocks = config.getServerBlocks();
+ServerHandler::~ServerHandler() {}
+
+void ServerHandler::configureServer(const Config& config) {
+  const std::vector<ServerBlock>& serv_blocks = config.getServerBlocks();
 
   for (std::size_t i = 0; i < serv_blocks.size(); ++i) {
-    const std::vector<Listen> &listens = serv_blocks[i].getListens();
+    const std::vector<Listen>& listens = serv_blocks[i].getListens();
 
     for (std::size_t i = 0; i < listens.size(); ++i) {
       try {
         server_blocks_.at(listens[i].socket_key).push_back(serv_blocks[i]);
-      } catch (std::out_of_range &e) {
+      } catch (std::out_of_range& e) {
         std::vector<ServerBlock> in(1, serv_blocks[i]);
         server_blocks_[listens[i].socket_key] = in;
       }
@@ -59,9 +64,9 @@ void ServerHandler::acceptConnections() {
         try {
           SocketAddress address = server_sockets_[i].getAddress();
           std::string socket_key = address.getIP() + ":" + address.getPort();
-          const std::vector<ServerBlock> &server_blocks_of_key =
+          const std::vector<ServerBlock>& server_blocks_of_key =
               server_blocks_[socket_key];
-          const ServerBlock &default_server = server_blocks_of_key.front();
+          const ServerBlock& default_server = server_blocks_of_key.front();
 
           Client new_client = server_sockets_[i].accept(default_server);
 
@@ -69,7 +74,7 @@ void ServerHandler::acceptConnections() {
 
           client_selector_.registerFD(client_fd);
           clients_.insert(std::make_pair(client_fd, new_client));
-        } catch (const std::exception &e) {
+        } catch (const std::exception& e) {
           std::cerr << "[Error] Connection failed: " << e.what() << '\n';
         }
       }
@@ -79,7 +84,7 @@ void ServerHandler::acceptConnections() {
 
 void ServerHandler::respondToClients() {
   if (client_selector_.select() > 0) {
-    Client *client;
+    Client* client;
     std::vector<int> delete_clients;
 
     delete_clients.reserve(clients_.size());
@@ -105,8 +110,8 @@ void ServerHandler::respondToClients() {
   }
 }
 
-void ServerHandler::receiveRequest(Client &client,
-                                   std::vector<int> &delete_clients) {
+void ServerHandler::receiveRequest(Client& client,
+                                   std::vector<int>& delete_clients) {
   try {
     std::string request = client.receive();
 
@@ -116,35 +121,35 @@ void ServerHandler::receiveRequest(Client &client,
       return;
     }
 
-    HttpParser &parser = client.getParser();
+    HttpParser& parser = client.getParser();
     parser.appendRequest(request);
 
     if (parser.isCompleted()) {
-      const HttpRequest &request_obj = client.getRequestObj();
-      const ServerBlock &server_block =
+      const HttpRequest& request_obj = client.getRequestObj();
+      const ServerBlock& server_block =
           findServerBlock(client.getSocketKey(), request_obj.getHeader("Host"));
-      const LocationBlock &location_block =
+      const LocationBlock& location_block =
           server_block.findLocationBlock(request_obj.getUri());
 
-      HttpResponse &response_obj = client.getResponseObj();
+      HttpResponse& response_obj = client.getResponseObj();
       response_obj.setServerBlock(&server_block);
       response_obj.setLocationBlock(&location_block);
 
       validateRequest(request_obj, location_block);
     }
-  } catch (const ResponseException &e) {
+  } catch (const ResponseException& e) {
     client.getResponseObj().setStatus(e.index);
   }
 }
 
-void ServerHandler::sendResponse(Client &client,
-                                 std::vector<int> &delete_clients) {
+void ServerHandler::sendResponse(Client& client,
+                                 std::vector<int>& delete_clients) {
   try {
     client.send();
     if (!client.isPartialWritten()) {
-      const HttpRequest &request_obj = client.getRequestObj();
-      HttpResponse &response_obj = client.getResponseObj();
-      HttpParser &parser = client.getParser();
+      const HttpRequest& request_obj = client.getRequestObj();
+      HttpResponse& response_obj = client.getResponseObj();
+      HttpParser& parser = client.getParser();
 
       if (request_obj.getHeader("Connection") == "close" ||
           !response_obj.isSuccessCode()) {
@@ -155,16 +160,16 @@ void ServerHandler::sendResponse(Client &client,
       parser.clear();
       response_obj.clear();
     }
-  } catch (const std::exception &e) {
+  } catch (const std::exception& e) {
     client.getResponseObj().setStatus(C500);
     client.clearBuffer();
     std::cerr << "[Error] Send failed: " << e.what() << '\n';
   }
 }
 
-void ServerHandler::validateRequest(const HttpRequest &request_obj,
-                                    const LocationBlock &location_block) {
-  const std::string &request_method = request_obj.getMethod();
+void ServerHandler::validateRequest(const HttpRequest& request_obj,
+                                    const LocationBlock& location_block) {
+  const std::string& request_method = request_obj.getMethod();
   if (!location_block.isImplementedMethod(request_method)) {
     throw ResponseException(C501);
   } else if (!location_block.isAllowedMethod(request_method)) {
@@ -175,13 +180,13 @@ void ServerHandler::validateRequest(const HttpRequest &request_obj,
   }
 }
 
-const ServerBlock &ServerHandler::findServerBlock(
-    const std::string &socket_key, const std::string &server_name) {
-  const std::vector<ServerBlock> &server_blocks_of_key =
+const ServerBlock& ServerHandler::findServerBlock(
+    const std::string& socket_key, const std::string& server_name) {
+  const std::vector<ServerBlock>& server_blocks_of_key =
       server_blocks_[socket_key];
 
   for (std::size_t i = 0; i < server_blocks_of_key.size(); ++i) {
-    const std::set<std::string> &server_names =
+    const std::set<std::string>& server_names =
         server_blocks_of_key[i].getServerNames();
 
     if (server_names.find(server_name) != server_names.end()) {
@@ -191,7 +196,7 @@ const ServerBlock &ServerHandler::findServerBlock(
   return server_blocks_of_key[0];
 }
 
-void ServerHandler::closeConnection(Client &client) {
+void ServerHandler::closeConnection(Client& client) {
   close(client.getFD());
 
   Log::header("Close Connection Information");
@@ -199,7 +204,7 @@ void ServerHandler::closeConnection(Client &client) {
   Log::footer("Close Connection");
 }
 
-void ServerHandler::deleteClients(const std::vector<int> &delete_clients) {
+void ServerHandler::deleteClients(const std::vector<int>& delete_clients) {
   for (std::size_t i = 0; i < delete_clients.size(); ++i) {
     clients_.erase(delete_clients[i]);
     client_selector_.clear(delete_clients[i]);

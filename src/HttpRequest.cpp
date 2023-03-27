@@ -1,5 +1,9 @@
 #include "HttpRequest.hpp"
 
+#include <stdexcept>
+
+#include "ResponseStatus.hpp"
+
 HttpRequest::HttpRequest() : content_length_(-1) {}
 
 HttpRequest::HttpRequest(const HttpRequest& origin)
@@ -25,8 +29,6 @@ HttpRequest HttpRequest::operator=(const HttpRequest& origin) {
 HttpRequest::~HttpRequest() {}
 
 const std::string& HttpRequest::getMethod(void) const { return method_; }
-
-std::string& HttpRequest::getUri(void) { return uri_; }
 
 const std::string& HttpRequest::getUri(void) const { return uri_; }
 
@@ -59,10 +61,9 @@ void HttpRequest::setContentLength(std::size_t content_length) {
 }
 
 void HttpRequest::addHeader(const std::string& key, const std::string& value) {
-  addHeader(key, std::vector<std::string>(1, value));
-}
-
-void HttpRequest::addHeader(const std::string& key,
-                            const std::vector<std::string>& values) {
-  headers_[key] = values;
+  try {
+    headers_.at(key).push_back(value);
+  } catch (std::out_of_range& e) {
+    headers_[key] = std::vector<std::string>(1, value);
+  }
 }

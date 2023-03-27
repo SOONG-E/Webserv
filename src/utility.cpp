@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 
 #include <fstream>
+#include <stdexcept>
 
 #include "exception.hpp"
 
