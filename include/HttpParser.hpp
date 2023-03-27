@@ -1,9 +1,10 @@
 #ifndef HTTP_PARSER_HPP_
 #define HTTP_PARSER_HPP_
 
+#include <string>
+#include <vector>
+
 #include "HttpRequest.hpp"
-#include "exception.hpp"
-#include "utility.hpp"
 
 class HttpParser {
  public:

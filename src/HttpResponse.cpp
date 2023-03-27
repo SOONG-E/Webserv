@@ -1,6 +1,10 @@
 #include "HttpResponse.hpp"
 
+#include <ctime>
+
+#include "constant.hpp"
 #include "exception.hpp"
+#include "utility.hpp"
 
 const std::string HttpResponse::DEFAULT_ERROR_PAGE = "html/error.html";
 
@@ -103,9 +107,9 @@ std::string HttpResponse::combine(const HttpRequest& request,
 
 std::string HttpResponse::currentTime(void) const {
   char buf[30];
-  time_t timestamp = time(NULL);
-  struct tm* time_info = localtime(&timestamp);
-  strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", time_info);
+  time_t timestamp = std::time(NULL);
+  struct tm* time_info = std::localtime(&timestamp);
+  std::strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", time_info);
   return buf;
 }
 

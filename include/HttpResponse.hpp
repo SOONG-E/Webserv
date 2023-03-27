@@ -1,9 +1,10 @@
-#ifndef HTTP_RESPONSE_HPP
-#define HTTP_RESPONSE_HPP
+#ifndef HTTP_RESPONSE_HPP_
+#define HTTP_RESPONSE_HPP_
 
 #include <string>
 
 #include "HttpRequest.hpp"
+#include "LocationBlock.hpp"
 #include "ResponseStatus.hpp"
 #include "ServerBlock.hpp"
 

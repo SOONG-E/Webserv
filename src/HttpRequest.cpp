@@ -1,5 +1,9 @@
 #include "HttpRequest.hpp"
 
+#include <stdexcept>
+
+#include "ResponseStatus.hpp"
+
 HttpRequest::HttpRequest() : content_length_(-1) {}
 
 HttpRequest::HttpRequest(const HttpRequest& origin)

@@ -1,6 +1,6 @@
 #include "ServerBlock.hpp"
 
-#include <iostream>
+#include <stdexcept>
 
 #include "HttpResponse.hpp"
 #include "exception.hpp"

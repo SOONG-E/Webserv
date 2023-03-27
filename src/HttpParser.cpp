@@ -1,9 +1,11 @@
 #include "HttpParser.hpp"
 
-#include <iostream>
+#include <stdexcept>
 
+#include "ResponseStatus.hpp"
 #include "constant.hpp"
 #include "exception.hpp"
+#include "utility.hpp"
 
 HttpParser::HttpParser(const std::string& socket_buffer)
     : buffer_(socket_buffer), bound_pos_(std::string::npos) {}

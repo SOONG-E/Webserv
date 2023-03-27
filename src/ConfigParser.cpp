@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 #include "constant.hpp"
 #include "exception.hpp"

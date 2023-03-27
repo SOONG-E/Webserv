@@ -1,16 +1,13 @@
-#ifndef CLIENT_HPP
-#define CLIENT_HPP
+#ifndef CLIENT_HPP_
+#define CLIENT_HPP_
 
 #define BUF_SIZE 65536
 
-#include <cerrno>
-#include <cstring>
-#include <iostream>
+#include <exception>
 #include <string>
 
 #include "HttpParser.hpp"
 #include "HttpResponse.hpp"
-#include "Log.hpp"
 #include "ServerBlock.hpp"
 #include "SocketAddress.hpp"
 

@@ -5,10 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "ResponseStatus.hpp"
-#include "constant.hpp"
-#include "exception.hpp"
-
 class HttpRequest {
  public:
   HttpRequest();

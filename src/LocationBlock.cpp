@@ -3,6 +3,7 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#include <stdexcept>
 
 #include "ByteUnits.hpp"
 #include "constant.hpp"

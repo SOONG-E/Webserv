@@ -1,6 +1,10 @@
 #ifndef CONFIG_HPP_
 #define CONFIG_HPP_
 
+#include <map>
+#include <string>
+#include <vector>
+
 #include "ServerBlock.hpp"
 
 class Config {

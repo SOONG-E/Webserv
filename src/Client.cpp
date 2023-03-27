@@ -1,5 +1,11 @@
 #include "Client.hpp"
 
+#include <cerrno>
+#include <cstring>
+#include <iostream>
+
+#include "Log.hpp"
+
 Client::Client(int fd, const ServerBlock& default_server,
                const SocketAddress& cli_addr, const SocketAddress& serv_addr)
     : fd_(fd),
