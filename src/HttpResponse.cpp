@@ -59,6 +59,12 @@ std::string HttpResponse::generate(HttpRequest& request) {
       server_block_ = &default_server_;
     }
     body = readFile(server_block_->getErrorPage(code_));
+    // test
+    if (request.getMethod() == METHODS[PUT]) {
+      code_ = ResponseStatus::CODES[C200];
+      reason_ = ResponseStatus::REASONS[C200];
+    }
+    //
     return generateResponse(request, body);
   }
   try {
@@ -108,7 +114,7 @@ std::string HttpResponse::rootUri(std::string& request_uri) const {
   if (*root.rbegin() != '/') {
     root += '/';
   }
-  std::string filename =
+  std::string& filename =
       request_uri.replace(0, location_block_->getUri().size(), root);
   if (isDirectory(filename)) {
     filename = (*filename.rbegin() == '/') ? filename : filename + '/';
