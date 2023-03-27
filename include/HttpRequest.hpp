@@ -17,7 +17,6 @@ class HttpRequest {
   ~HttpRequest();
 
   const std::string& getMethod(void) const;
-  std::string& getUri(void);
   const std::string& getUri(void) const;
   const std::string& getHost(void) const;
   std::size_t getContentLength(void) const;

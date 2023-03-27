@@ -26,8 +26,6 @@ HttpRequest::~HttpRequest() {}
 
 const std::string& HttpRequest::getMethod(void) const { return method_; }
 
-std::string& HttpRequest::getUri(void) { return uri_; }
-
 const std::string& HttpRequest::getUri(void) const { return uri_; }
 
 const std::string& HttpRequest::getHost(void) const { return host_; }

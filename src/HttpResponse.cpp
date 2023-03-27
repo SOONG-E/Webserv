@@ -52,7 +52,7 @@ bool HttpResponse::isSuccessCode(void) const {
   return code_.size() == 3 && code_[0] == '2';
 }
 
-std::string HttpResponse::generate(HttpRequest& request) {
+std::string HttpResponse::generate(const HttpRequest& request) {
   std::string body;
   if (!isSuccessCode()) {
     if (!server_block_) {
@@ -109,25 +109,24 @@ std::string HttpResponse::currentTime(void) const {
   return buf;
 }
 
-std::string HttpResponse::rootUri(std::string& request_uri) const {
+std::string HttpResponse::rootUri(std::string uri) const {
   std::string root = location_block_->getRoot();
   if (*root.rbegin() != '/') {
     root += '/';
   }
-  std::string& filename =
-      request_uri.replace(0, location_block_->getUri().size(), root);
-  if (isDirectory(filename)) {
-    filename = (*filename.rbegin() == '/') ? filename : filename + '/';
-    return readIndexFile(filename, location_block_->getIndex());
+  uri.replace(0, location_block_->getUri().size(), root);
+  if (isDirectory(uri)) {
+    uri = (*uri.rbegin() == '/') ? uri : uri + '/';
+    return readIndexFile(uri, location_block_->getIndex());
   }
-  return readFile(filename);
+  return readFile(uri);
 }
 
 std::string HttpResponse::readIndexFile(
-    const std::string& filename, const std::vector<std::string>& index) const {
+    const std::string& uri, const std::vector<std::string>& index) const {
   for (std::size_t i = 0; i < index.size(); ++i) {
     try {
-      return readFile(filename + index[i]);
+      return readFile(uri + index[i]);
     } catch (FileOpenException& e) {
       continue;
     }

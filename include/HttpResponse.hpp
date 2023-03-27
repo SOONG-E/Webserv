@@ -26,7 +26,7 @@ class HttpResponse {
 
   void clear(void);
   bool isSuccessCode(void) const;
-  std::string generate(HttpRequest& request);
+  std::string generate(const HttpRequest& request);
 
  private:
   std::string generateResponse(const HttpRequest& request,
@@ -34,8 +34,8 @@ class HttpResponse {
   std::string combine(const HttpRequest& request,
                       const std::string& body) const;
   std::string currentTime(void) const;
-  std::string rootUri(std::string& request_uri) const;
-  std::string readIndexFile(const std::string& filename,
+  std::string rootUri(std::string uri) const;
+  std::string readIndexFile(const std::string& uri,
                             const std::vector<std::string>& index) const;
 
   std::string code_;
