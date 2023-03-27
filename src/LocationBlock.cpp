@@ -8,7 +8,7 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-const std::string LocationBlock::DEFAULTS[] = {"1m", "html", "off",
+const std::string LocationBlock::DEFAULTS[] = {"100m", "html", "off",
                                                "index.html"};
 
 LocationBlock::LocationBlock()

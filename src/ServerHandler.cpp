@@ -27,12 +27,11 @@ void ServerHandler::configureServer(const Config &config) {
     const std::vector<Listen> &listens = serv_blocks[i].getListens();
 
     for (std::size_t i = 0; i < listens.size(); ++i) {
-      if (server_blocks_.find(listens[i].socket_key) == server_blocks_.end()) {
+      try {
+        server_blocks_.at(listens[i].socket_key).push_back(serv_blocks[i]);
+      } catch (std::out_of_range &e) {
         std::vector<ServerBlock> in(1, serv_blocks[i]);
-
         server_blocks_[listens[i].socket_key] = in;
-      } else {
-        server_blocks_[listens[i].socket_key].push_back(serv_blocks[i]);
       }
     }
   }

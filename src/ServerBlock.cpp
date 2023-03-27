@@ -34,12 +34,11 @@ const std::set<std::string>& ServerBlock::getServerNames(void) const {
 }
 
 const std::string& ServerBlock::getErrorPage(const std::string& code) const {
-  std::map<std::string, std::string>::const_iterator iter =
-      error_pages_.find(code);
-  if (iter == error_pages_.end()) {
+  try {
+    return error_pages_.at(code);
+  } catch (std::out_of_range& e) {
     return HttpResponse::DEFAULT_ERROR_PAGE;
   }
-  return iter->second;
 }
 
 const std::vector<LocationBlock>& ServerBlock::getLocationBlocks(void) const {
