@@ -116,9 +116,9 @@ void HttpParser::parseRequestLine(const std::string& request_line) {
 }
 
 void HttpParser::parseHeaderFields(const std::string& header_part) {
-  std::vector<std::string> header_fields = splitByCRLF(header_part);
+  std::vector<std::string> headers = splitByCRLF(header_part);
   std::vector<std::string> line;
-  for (std::vector<std::string>::iterator header_field = headers.begin();
+  for (std::vector<std::string>::iterator header = headers.begin();
        header != headers.end(); ++header) {
     if (header->length() == 0) break;
     line = split(*header, ":");
