@@ -27,7 +27,7 @@ class HttpParser {
   void handlePost(void);
   void parseHeader(const std::string& header_part);
   void parseRequestLine(const std::string& request_line);
-  void parseHeaders(const std::string& header_part);
+  void parseHeaderFields(const std::string& header_part);
   void unchunkMessage(const std::string& body_part);
   std::vector<std::string> splitByCRLF(const std::string& content);
 
