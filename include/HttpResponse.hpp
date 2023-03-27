@@ -36,7 +36,7 @@ class HttpResponse {
   std::string currentTime(void) const;
   std::string rootUri(std::string& request_uri) const;
   std::string readIndexFile(const std::string& filename,
-                            const std::set<std::string>& index) const;
+                            const std::vector<std::string>& index) const;
 
   std::string code_;
   std::string reason_;

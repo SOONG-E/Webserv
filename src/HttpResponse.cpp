@@ -124,11 +124,10 @@ std::string HttpResponse::rootUri(std::string& request_uri) const {
 }
 
 std::string HttpResponse::readIndexFile(
-    const std::string& filename, const std::set<std::string>& index) const {
-  for (std::set<std::string>::const_iterator iter = index.begin();
-       iter != index.end(); ++iter) {
+    const std::string& filename, const std::vector<std::string>& index) const {
+  for (std::size_t i = 0; i < index.size(); ++i) {
     try {
-      return readFile(filename + *iter);
+      return readFile(filename + index[i]);
     } catch (FileOpenException& e) {
       continue;
     }

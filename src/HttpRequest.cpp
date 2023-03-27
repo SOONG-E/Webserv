@@ -38,7 +38,7 @@ std::size_t HttpRequest::getContentLength(void) const {
 
 std::string HttpRequest::getHeader(const std::string& key) const {
   try {
-    return *headers_.at(key).begin();
+    return headers_.at(key).front();
   } catch (std::out_of_range& e) {
     return "";
   }
@@ -60,9 +60,8 @@ void HttpRequest::setContentLength(std::size_t content_length) {
 
 void HttpRequest::addHeader(const std::string& key, const std::string& value) {
   try {
-    headers_.at(key).insert(value);
+    headers_.at(key).push_back(value);
   } catch (std::out_of_range& e) {
-    headers_[key] = std::set<std::string>();
-    headers_[key].insert(value);
+    headers_[key] = std::vector<std::string>(1, value);
   }
 }

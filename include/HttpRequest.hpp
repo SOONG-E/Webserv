@@ -2,8 +2,8 @@
 #define HTTP_REQUEST_HPP_
 
 #include <map>
-#include <set>
 #include <string>
+#include <vector>
 
 #include "ResponseStatus.hpp"
 #include "constant.hpp"
@@ -32,7 +32,7 @@ class HttpRequest {
   void setBody(const std::string& body);
 
  private:
-  typedef std::map<std::string, std::set<std::string> > headers_type;
+  typedef std::map<std::string, std::vector<std::string> > headers_type;
 
   std::string method_;
   std::string uri_;

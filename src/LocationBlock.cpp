@@ -66,9 +66,9 @@ const std::string& LocationBlock::getReturnUrl(void) const {
 
 const std::string& LocationBlock::getRoot(void) const { return root_; }
 
-std::set<std::string>& LocationBlock::getIndex(void) { return index_; }
+std::vector<std::string>& LocationBlock::getIndex(void) { return index_; }
 
-const std::set<std::string>& LocationBlock::getIndex(void) const {
+const std::vector<std::string>& LocationBlock::getIndex(void) const {
   return index_;
 }
 
@@ -103,7 +103,9 @@ void LocationBlock::setAutoindex(const std::string& autoindex) {
   autoindex_ = autoindex;
 }
 
-void LocationBlock::addIndex(const std::string& index) { index_.insert(index); }
+void LocationBlock::addIndex(const std::string& index) {
+  index_.push_back(index);
+}
 
 bool LocationBlock::isAllowedMethod(const std::string& method) const {
   return allowed_methods_.find(method) != allowed_methods_.end();

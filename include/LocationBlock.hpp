@@ -3,6 +3,7 @@
 
 #include <set>
 #include <string>
+#include <vector>
 
 class LocationBlock {
   enum Index {
@@ -27,8 +28,8 @@ class LocationBlock {
   std::set<std::string>& getAllowedMethods(void);
   const std::string& getReturnUrl(void) const;
   const std::string& getRoot(void) const;
-  std::set<std::string>& getIndex(void);
-  const std::set<std::string>& getIndex(void) const;
+  std::vector<std::string>& getIndex(void);
+  const std::vector<std::string>& getIndex(void) const;
 
   void setUri(const std::string& uri);
   void setBodyLimit(const std::string& raw);
@@ -48,7 +49,7 @@ class LocationBlock {
   std::string return_url_;
   std::string root_;
   std::string autoindex_;
-  std::set<std::string> index_;
+  std::vector<std::string> index_;
 };
 
 #endif
