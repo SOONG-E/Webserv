@@ -9,15 +9,18 @@
 int main(int argc, char *argv[]) {
   std::map<std::string, std::string> map;
   map["REQUEST_METHOD"] = "GET";
+  map["REQUEST_SCHEME"] = "GET";
+  map["CONTENT_TYPE"] = "test/file";
+  map["QUERY_STRING"] = "asdfasdf";
   map["SERVER_PROTOCOL"] = "HTTP/1.1";
-  map["PATH_INFO"] = "/Users/yoson/Desktop/Webserv/cgi-bin/index.php";
-  map["REQUEST_URI"] = "/Users/yoson/Desktop/Webserv/cgi-bin/index.php";
-  map["SCRIPT_NAME"] = "/Users/yoson/Desktop/Webserv/cgi-bin/index.php";
-  map["NAME"] = "asdasd";
+  map["PATH_INFO"] = "/Users/son-yeong-won/webserv/YoupiBanane/youpi.bla";
+  map["REQUEST_URI"] = "/Users/son-yeong-won/webserv/YoupiBanane/youpi.bla";
+  map["SCRIPT_NAME"] = "/Users/son-yeong-won/webserv/YoupiBanane/youpi.bla";
+  map["CONTENT_LENGTH"] = "8";
 
-  char *pythonPath = "/usr/bin/python3";
-  char *pythonScriptPath = "./test.py";
-  char *args[] = {pythonPath, pythonScriptPath, "NAME=qwe;FIELD=qqqq", NULL};
+  char *pythonPath = "./cgi_tester";
+  char *pythonScriptPath = "./YoupiBanane/youpi.bla";
+  char *args[] = {pythonPath, pythonScriptPath, NULL};
 
   char **envp = new char *[map.size() + 1]();
   int i = 0;
@@ -28,13 +31,13 @@ int main(int argc, char *argv[]) {
     ++i;
   }
   envp[i] = NULL;
+  int status;
   pid_t pid = fork();
   if (pid == 0) {
-    std::cout << "FORK" << std::endl;
     execve(pythonPath, args, envp);
   } else {
-    std::cout << "qqq" << std::endl;
-    wait(0);
+    wait(&status);
+    std::cout << "\ncgi exit code = " << status << '\n';
   }
   return EXIT_SUCCESS;
 }
