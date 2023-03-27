@@ -37,11 +37,11 @@ std::size_t HttpRequest::getContentLength(void) const {
 }
 
 std::string HttpRequest::getHeader(const std::string& key) const {
-  headers_type::const_iterator iter = headers_.find(key);
-  if (iter == headers_.end()) {
+  try {
+    return headers_.at(key).front();
+  } catch (std::out_of_range& e) {
     return "";
   }
-  return iter->second.front();
 }
 
 const std::string& HttpRequest::getBody(void) const { return body_; }
@@ -59,9 +59,6 @@ void HttpRequest::setContentLength(std::size_t content_length) {
 }
 
 void HttpRequest::addHeader(const std::string& key, const std::string& value) {
-  if (0 < headers_.count(key)) {
-    throw std::exception();
-  }
   addHeader(key, std::vector<std::string>(1, value));
 }
 
