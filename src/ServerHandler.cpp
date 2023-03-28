@@ -19,6 +19,7 @@ ServerHandler& ServerHandler::operator=(const ServerHandler& src) {
     clients_ = src.clients_;
     server_selector_ = src.server_selector_;
     client_selector_ = src.client_selector_;
+    cgi_selector_ = src.cgi_selector_;
   }
   return *this;
 }
@@ -97,13 +98,50 @@ void ServerHandler::respondToClients() {
       if (client_selector_.isReadable(client_fd)) {
         receiveRequest(*client, delete_clients);
       }
-      if (client_selector_.isWritable(client_fd) &&
-          (client->getParser().isCompleted() ||
-           !client->getResponseObj().isSuccessCode())) {
+
+      const HttpRequest& request_obj = client->getRequestObj();
+      HttpResponse& response_obj = client->getResponseObj();
+      Cgi& cgi = client->getCgi();
+
+      try {
+        if (isCgi(request_obj.getUri())) {
+          int* pipe_fds = cgi.getPipeFds();
+          if (cgi.isCompleted()) {
+            cgi_selector_.clear(pipe_fds[READ]);
+            cgi_selector_.clear(pipe_fds[WRITE]);
+          } else {
+            if (cgi.isEmpty()) {
+              cgi.executeCgiScript(request_obj);
+
+              cgi_selector_.registerFD(pipe_fds[WRITE]);
+              cgi_selector_.registerFD(pipe_fds[READ]);
+            }
+            if (!cgi.isWriteCompleted() &&
+                cgi_selector_.isWritable(pipe_fds[WRITE])) {
+              cgi.writePipe();
+            }
+            if (cgi.isWriteCompleted() &&
+                cgi_selector_.isReadable(pipe_fds[READ])) {
+              cgi.readPipe();
+            }
+          }
+        }
+      } catch (...) {
+        response_obj.setStatus(C500);
+      }
+
+      const HttpParser& parser = client->getParser();
+
+      if (!response_obj.isSuccessCode() ||
+          (!isCgi(request_obj.getUri()) && parser.isCompleted()) ||
+          (isCgi(request_obj.getUri()) && cgi.isCompleted())) {
+        generateResponse(*client);
+      }
+      if (!client->getBuffer().empty() &&
+          client_selector_.isWritable(client_fd)) {
         sendResponse(*client, delete_clients);
       }
     }
-
     if (!delete_clients.empty()) {
       deleteClients(delete_clients);
     }
@@ -148,8 +186,8 @@ void ServerHandler::sendResponse(Client& client,
     client.send();
     if (!client.isPartialWritten()) {
       const HttpRequest& request_obj = client.getRequestObj();
-      HttpResponse& response_obj = client.getResponseObj();
       HttpParser& parser = client.getParser();
+      HttpResponse& response_obj = client.getResponseObj();
 
       if (request_obj.getHeader("Connection") == "close" ||
           !response_obj.isSuccessCode()) {
@@ -209,4 +247,26 @@ void ServerHandler::deleteClients(const std::vector<int>& delete_clients) {
     clients_.erase(delete_clients[i]);
     client_selector_.clear(delete_clients[i]);
   }
+}
+
+void ServerHandler::generateResponse(Client& client) {
+  const HttpRequest& request_obj = client.getRequestObj();
+  HttpResponse& response_obj = client.getResponseObj();
+  Cgi& cgi = client.getCgi();
+
+  if (isCgi(request_obj.getUri())) {
+    if (response_obj.isSuccessCode()) {
+      const std::string& response = cgi.getCgiResponse();
+      client.setBuffer(response_obj.generateCgi(response));
+      cgi.clear();
+      return;
+    }
+    cgi.clear();
+  }
+  client.setBuffer(response_obj.generate(request_obj));
+}
+
+bool ServerHandler::isCgi(const std::string& request_uri) const {
+  std::string cgi_path = "/cgi-bin/";
+  return !request_uri.compare(0, cgi_path.size(), cgi_path);
 }
