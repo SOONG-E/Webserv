@@ -1,11 +1,15 @@
-#ifndef CGI_HPP
-#define CGI_HPP
+#ifndef CGI_HPP_
+#define CGI_HPP_
 
 #include <unistd.h>
 
+#include <csignal>
 #include <map>
+#include <string>
 
 #include "HttpRequest.hpp"
+
+enum e_pipe_fd { READ = 0, WRITE = 1 };
 
 class Cgi {
  public:
@@ -15,13 +19,22 @@ class Cgi {
   ~Cgi();
 
   void executeCgiScript(const HttpRequest& request_obj);
+  void readPipe();
+  void writePipe();
+  bool isEmpty() const;
+  bool isCompleted() const;
+  bool isWriteCompleted() const;
+  std::string getCgiResponse() const;
+  int* getPipeFds();
+  void clear();
 
  private:
   char** makeEnvp(const HttpRequest& request_obj) const;
 
-  enum e_pipe_fd { READ_FD = 0, WRITE_FD = 1 };
-
-  std::string buf_;
+  bool is_completed_;
+  pid_t script_pid_;
+  std::string write_buf_;
+  std::string read_buf_;
   int pipe_fds_[2];
 };
 
