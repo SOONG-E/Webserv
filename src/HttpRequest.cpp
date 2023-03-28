@@ -4,7 +4,7 @@
 
 #include "ResponseStatus.hpp"
 
-HttpRequest::HttpRequest() : content_length_(-1), port_("80") {}
+HttpRequest::HttpRequest() : port_("80"), content_length_(-1) {}
 
 HttpRequest::HttpRequest(const HttpRequest& origin)
     : method_(origin.method_),
