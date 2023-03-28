@@ -5,7 +5,8 @@
 
 class ConfigException : public ExceptionTemplate {
  public:
-  ConfigException(const std::string& err_info) : ExceptionTemplate(err_info) {}
+  explicit ConfigException(const std::string& err_info)
+      : ExceptionTemplate(err_info) {}
 };
 
 #endif

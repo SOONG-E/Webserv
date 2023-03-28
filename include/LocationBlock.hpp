@@ -28,6 +28,7 @@ class LocationBlock {
   std::set<std::string>& getAllowedMethods(void);
   const std::string& getReturnUrl(void) const;
   const std::string& getRoot(void) const;
+  bool getAutoindex(void) const;
   std::vector<std::string>& getIndex(void);
   const std::vector<std::string>& getIndex(void) const;
 
@@ -36,7 +37,7 @@ class LocationBlock {
   void addAllowedMethod(const std::string& method);
   void setReturnUrl(const std::string& return_url);
   void setRoot(const std::string& root);
-  void setAutoindex(const std::string& autoindex);
+  void setAutoindex(const std::string& raw);
   void addIndex(const std::string& index);
 
   bool isAllowedMethod(const std::string& method) const;
@@ -48,7 +49,7 @@ class LocationBlock {
   std::set<std::string> allowed_methods_;
   std::string return_url_;
   std::string root_;
-  std::string autoindex_;
+  bool autoindex_;
   std::vector<std::string> index_;
 };
 

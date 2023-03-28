@@ -34,10 +34,9 @@ class HttpResponse {
                                const std::string& body) const;
   std::string combine(const HttpRequest& request,
                       const std::string& body) const;
-  std::string currentTime(void) const;
   std::string rootUri(std::string uri) const;
-  std::string readIndexFile(const std::string& uri,
-                            const std::vector<std::string>& index) const;
+  std::string readIndexFile(const std::string& url) const;
+  std::string directoryListing(const std::string& url) const;
 
   std::string code_;
   std::string reason_;

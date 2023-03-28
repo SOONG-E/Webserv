@@ -12,11 +12,11 @@
 const std::string LocationBlock::DEFAULTS[] = {"100m", "html", "off",
                                                "index.html"};
 
-LocationBlock::LocationBlock()
-    : root_(DEFAULTS[ROOT]), autoindex_(DEFAULTS[AUTOINDEX]) {
+LocationBlock::LocationBlock() : root_(DEFAULTS[ROOT]) {
   setBodyLimit(DEFAULTS[CLIENT_MAX_BODY_SIZE]);
   addAllowedMethod(METHODS[GET]);
   addAllowedMethod(METHODS[POST]);
+  setAutoindex(DEFAULTS[AUTOINDEX]);
   addIndex(DEFAULTS[INDEX]);
 }
 
@@ -67,6 +67,8 @@ const std::string& LocationBlock::getReturnUrl(void) const {
 
 const std::string& LocationBlock::getRoot(void) const { return root_; }
 
+bool LocationBlock::getAutoindex(void) const { return autoindex_; }
+
 std::vector<std::string>& LocationBlock::getIndex(void) { return index_; }
 
 const std::vector<std::string>& LocationBlock::getIndex(void) const {
@@ -100,8 +102,11 @@ void LocationBlock::setReturnUrl(const std::string& return_url) {
 
 void LocationBlock::setRoot(const std::string& root) { root_ = root; }
 
-void LocationBlock::setAutoindex(const std::string& autoindex) {
-  autoindex_ = autoindex;
+void LocationBlock::setAutoindex(const std::string& raw) {
+  if (raw != "on" && raw != "off") {
+    throw ConfigException(ERRORS[TOKEN]);
+  }
+  autoindex_ = (raw == "on");
 }
 
 void LocationBlock::addIndex(const std::string& index) {

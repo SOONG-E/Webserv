@@ -1,7 +1,14 @@
 #include "HttpResponse.hpp"
 
-#include <ctime>
+#include <dirent.h>
+#include <sys/stat.h>
 
+#include <cerrno>
+#include <cstring>
+#include <set>
+
+#include "DirectoryListingHtml.hpp"
+#include "File.hpp"
 #include "constant.hpp"
 #include "exception.hpp"
 #include "utility.hpp"
@@ -9,11 +16,11 @@
 const std::string HttpResponse::DEFAULT_ERROR_PAGE = "html/error.html";
 
 HttpResponse::HttpResponse(const ServerBlock& default_server)
-    : code_(ResponseStatus::CODES[DEFAULT_INDEX]),
-      reason_(ResponseStatus::REASONS[DEFAULT_INDEX]),
-      default_server_(default_server),
+    : default_server_(default_server),
       server_block_(NULL),
-      location_block_(NULL) {}
+      location_block_(NULL) {
+  setStatus(DEFAULT_INDEX);
+}
 
 HttpResponse::HttpResponse(const HttpResponse& origin)
     : code_(origin.code_),
@@ -46,8 +53,7 @@ void HttpResponse::setLocationBlock(const LocationBlock* location_block) {
 }
 
 void HttpResponse::clear(void) {
-  code_ = ResponseStatus::CODES[DEFAULT_INDEX];
-  reason_ = ResponseStatus::REASONS[DEFAULT_INDEX];
+  setStatus(DEFAULT_INDEX);
   server_block_ = NULL;
   location_block_ = NULL;
 }
@@ -65,8 +71,7 @@ std::string HttpResponse::generate(const HttpRequest& request) {
     body = readFile(server_block_->getErrorPage(code_));
     // test
     if (request.getMethod() == METHODS[PUT]) {
-      code_ = ResponseStatus::CODES[C200];
-      reason_ = ResponseStatus::REASONS[C200];
+      setStatus(C200);
     }
     //
     return generateResponse(request, body);
@@ -74,8 +79,7 @@ std::string HttpResponse::generate(const HttpRequest& request) {
   try {
     body = rootUri(request.getUri());
   } catch (FileOpenException& e) {
-    code_ = ResponseStatus::CODES[C404];
-    reason_ = ResponseStatus::REASONS[C404];
+    setStatus(C404);
     body = readFile(server_block_->getErrorPage(code_));
   }
   return generateResponse(request, body);
@@ -92,7 +96,7 @@ std::string HttpResponse::generateResponse(const HttpRequest& request,
 std::string HttpResponse::combine(const HttpRequest& request,
                                   const std::string& body) const {
   std::string header = "HTTP/1.1 " + code_ + " " + reason_ + CRLF;
-  header += "Date: " + currentTime() + CRLF;
+  header += "Date: " + formatTime("%a, %d %b %Y %H:%M:%S GMT") + CRLF;
   header += "Server: Webserv" + CRLF;
   header += "Content-Length: " + toString(body.size()) + CRLF;
   header += "Content-Type: text/html" + CRLF;
@@ -105,14 +109,6 @@ std::string HttpResponse::combine(const HttpRequest& request,
   return header + body;
 }
 
-std::string HttpResponse::currentTime(void) const {
-  char buf[30];
-  time_t timestamp = std::time(NULL);
-  struct tm* time_info = std::localtime(&timestamp);
-  std::strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", time_info);
-  return buf;
-}
-
 std::string HttpResponse::rootUri(std::string uri) const {
   std::string root = location_block_->getRoot();
   if (*root.rbegin() != '/') {
@@ -121,19 +117,42 @@ std::string HttpResponse::rootUri(std::string uri) const {
   uri.replace(0, location_block_->getUri().size(), root);
   if (isDirectory(uri)) {
     uri = (*uri.rbegin() == '/') ? uri : uri + '/';
-    return readIndexFile(uri, location_block_->getIndex());
+    return readIndexFile(uri);
   }
   return readFile(uri);
 }
 
-std::string HttpResponse::readIndexFile(
-    const std::string& uri, const std::vector<std::string>& index) const {
-  for (std::size_t i = 0; i < index.size(); ++i) {
+std::string HttpResponse::readIndexFile(const std::string& url) const {
+  for (std::size_t i = 0; i < location_block_->getIndex().size(); ++i) {
     try {
-      return readFile(uri + index[i]);
+      return readFile(url + location_block_->getIndex()[i]);
     } catch (FileOpenException& e) {
       continue;
     }
   }
-  throw FileOpenException();
+  if (location_block_->getAutoindex() == false) {
+    throw FileOpenException();
+  }
+  return directoryListing(url);
+}
+
+std::string HttpResponse::directoryListing(const std::string& url) const {
+  DIR* dir = opendir(url.c_str());
+  if (!dir) {
+    throw FileOpenException(strerror(errno));
+  }
+  std::set<File> entries;
+  struct dirent* entry;
+  while ((entry = readdir(dir))) {
+    std::string name = entry->d_name;
+    if (name == ".") continue;
+    struct stat statbuf;
+    if (stat((url + name).c_str(), &statbuf) < 0) {
+      throw FileOpenException(strerror(errno));
+    }
+    File file = {name, statbuf.st_mtime, statbuf.st_size};
+    entries.insert(file);
+  }
+  closedir(dir);
+  return DirectoryListingHtml::generate(url, entries);
 }

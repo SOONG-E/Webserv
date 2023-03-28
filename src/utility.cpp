@@ -7,8 +7,17 @@
 
 #include "exception.hpp"
 
-bool isNumber(const std::string& str) {
-  return str.find_first_not_of(BASE10) == std::string::npos;
+std::string formatTime(const char* format, std::time_t timestamp) {
+  char buf[80];
+  std::strftime(buf, sizeof(buf), format, std::localtime(&timestamp));
+  return buf;
+}
+
+std::size_t hexToInt(const std::string& value) {
+  std::size_t out;
+  std::istringstream iss(value);
+  iss >> std::hex >> out;
+  return out;
 }
 
 bool isDirectory(const std::string& path) {
@@ -17,6 +26,10 @@ bool isDirectory(const std::string& path) {
     return false;
   }
   return S_ISDIR(statbuf.st_mode);
+}
+
+bool isNumber(const std::string& str) {
+  return str.find_first_not_of(BASE10) == std::string::npos;
 }
 
 std::string readFile(const std::string& filename) {
@@ -55,13 +68,6 @@ std::size_t stoi(const std::string& value) {
     throw std::invalid_argument("stoi");
   }
   return num;
-}
-
-std::size_t hexToInt(const std::string& value) {
-  std::size_t out;
-  std::istringstream iss(value);
-  iss >> std::hex >> out;
-  return out;
 }
 
 std::string trim(const std::string& str) {
