@@ -4,7 +4,7 @@
 
 #include "ResponseStatus.hpp"
 
-HttpRequest::HttpRequest() : content_length_(-1) {}
+HttpRequest::HttpRequest() : port_("80"), content_length_(-1) {}
 
 HttpRequest::HttpRequest(const HttpRequest& origin)
     : method_(origin.method_),
@@ -32,7 +32,12 @@ const std::string& HttpRequest::getMethod(void) const { return method_; }
 
 const std::string& HttpRequest::getUri(void) const { return uri_; }
 
+const std::string& HttpRequest::getQueryString(void) const {
+  return query_string_;
+}
+
 const std::string& HttpRequest::getHost(void) const { return host_; }
+const std::string& HttpRequest::getPort(void) const { return port_; }
 
 std::size_t HttpRequest::getContentLength(void) const {
   return content_length_;
@@ -52,7 +57,21 @@ void HttpRequest::setMethod(const std::string& method) { method_ = method; }
 
 void HttpRequest::setUri(const std::string& uri) { uri_ = uri; }
 
-void HttpRequest::setHost(const std::string& host) { host_ = host; }
+void HttpRequest::setQueryString(const std::string& query_string) {
+  query_string_ = query_string;
+}
+
+void HttpRequest::setHost(const std::string& host) {
+  size_t colon = host.find(":");
+  if (colon == std::string::npos) {
+    host_ = host;
+    return;
+  }
+  host_ = host.substr(0, colon);
+  setPort(host.substr(colon));
+}
+
+void HttpRequest::setPort(const std::string& port) { port_ = port; }
 
 void HttpRequest::setBody(const std::string& body) { body_ = body; }
 

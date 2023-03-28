@@ -103,6 +103,22 @@ void HttpParser::parseHeader(const std::string& header_part) {
   parseHeaderFields(headers);
 }
 
+void HttpParser::parseQueryString(void) {
+  std::string method = request_.getMethod();
+  if (!(method == "GET" || method == "HEAD")) {
+    return;
+  }
+
+  std::string uri = request_.getUri();
+  size_t query = uri.find("?");
+  if (uri == "?" || query == std::string::npos) {
+    return;
+  }
+
+  request_.setUri(uri.substr(0, query));
+  request_.setQueryString(uri.substr(query));
+}
+
 void HttpParser::parseRequestLine(const std::string& request_line) {
   std::vector<std::string> request_words = split(request_line);
   if (request_words.size() < 3 || request_words[2].length() < 6 ||
@@ -115,6 +131,7 @@ void HttpParser::parseRequestLine(const std::string& request_line) {
   }
   request_.setMethod(request_words[0]);
   request_.setUri(request_words[1]);
+  parseQueryString();
 }
 
 void HttpParser::parseHeaderFields(const std::string& header_part) {
