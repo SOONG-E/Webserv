@@ -22,6 +22,7 @@ enum MethodIndex {
 };
 
 const int METHODS_COUNT = 8;
+const std::size_t BUF_SIZE = 65536;
 const std::size_t HEADER_MAX_SIZE = 8192;
 
 const std::string BASE10 = "0123456789";

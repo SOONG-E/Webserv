@@ -1,8 +1,6 @@
 #ifndef CLIENT_HPP_
 #define CLIENT_HPP_
 
-#define BUF_SIZE 65536
-
 #include <exception>
 #include <string>
 
