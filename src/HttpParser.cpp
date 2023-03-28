@@ -115,7 +115,7 @@ void HttpParser::parseQueryString(void) {
     return;
   }
 
-  request_.setUri(uri.substr(0, query - 1));
+  request_.setUri(uri.substr(0, query));
   request_.setQueryString(uri.substr(query));
 }
 
