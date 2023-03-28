@@ -32,6 +32,10 @@ const std::string& HttpRequest::getMethod(void) const { return method_; }
 
 const std::string& HttpRequest::getUri(void) const { return uri_; }
 
+const std::string& HttpRequest::getQueryString(void) const {
+  return query_string_;
+}
+
 const std::string& HttpRequest::getHost(void) const { return host_; }
 
 std::size_t HttpRequest::getContentLength(void) const {
@@ -51,6 +55,10 @@ const std::string& HttpRequest::getBody(void) const { return body_; }
 void HttpRequest::setMethod(const std::string& method) { method_ = method; }
 
 void HttpRequest::setUri(const std::string& uri) { uri_ = uri; }
+
+void HttpRequest::setQueryString(const std::string& query_string) {
+  query_string_ = query_string;
+}
 
 void HttpRequest::setHost(const std::string& host) { host_ = host; }
 

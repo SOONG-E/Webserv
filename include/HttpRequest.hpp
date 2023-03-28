@@ -14,6 +14,7 @@ class HttpRequest {
 
   const std::string& getMethod(void) const;
   const std::string& getUri(void) const;
+  const std::string& getQueryString(void) const;
   const std::string& getHost(void) const;
   std::size_t getContentLength(void) const;
   std::string getHeader(const std::string& key) const;
@@ -21,6 +22,7 @@ class HttpRequest {
 
   void setMethod(const std::string& method);
   void setUri(const std::string& uri);
+  void setQueryString(const std::string& query_string);
   void setHost(const std::string& host);
   void setContentLength(std::size_t content_length);
   void addHeader(const std::string& key, const std::string& value);
@@ -32,6 +34,7 @@ class HttpRequest {
   std::string method_;
   std::string uri_;
   std::string host_;
+  std::string query_string_;
   std::size_t content_length_;
   headers_type headers_;
   std::string body_;
