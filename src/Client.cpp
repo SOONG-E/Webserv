@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "Log.hpp"
+#include "constant.hpp"
 
 Client::Client(int fd, const ServerBlock& default_server,
                const SocketAddress& cli_addr, const SocketAddress& serv_addr)
@@ -21,6 +22,7 @@ Client::Client(const Client& src)
       serv_address_(src.serv_address_),
       parser_(src.parser_),
       response_obj_(src.response_obj_),
+      cgi_(src.cgi_),
       buf_(src.buf_) {}
 
 Client::~Client() {}
@@ -43,6 +45,14 @@ HttpResponse& Client::getResponseObj() { return response_obj_; }
 
 const HttpResponse& Client::getResponseObj() const { return response_obj_; }
 
+Cgi& Client::getCgi() { return cgi_; }
+
+const Cgi& Client::getCgi() const { return cgi_; }
+
+const std::string& Client::getBuffer() const { return buf_; }
+
+void Client::setBuffer(const std::string& buf) { buf_ = buf; }
+
 std::string Client::receive() const {
   char buf[BUF_SIZE] = {0};
 
@@ -60,9 +70,6 @@ std::string Client::receive() const {
 }
 
 void Client::send() {
-  if (!isPartialWritten())
-    buf_ = response_obj_.generate(parser_.getRequestObj());
-
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
 
   if (write_bytes == static_cast<std::size_t>(-1)) {

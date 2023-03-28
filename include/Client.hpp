@@ -4,6 +4,7 @@
 #include <exception>
 #include <string>
 
+#include "Cgi.hpp"
 #include "HttpParser.hpp"
 #include "HttpResponse.hpp"
 #include "ServerBlock.hpp"
@@ -23,6 +24,11 @@ class Client {
   const HttpRequest& getRequestObj() const;
   HttpResponse& getResponseObj();
   const HttpResponse& getResponseObj() const;
+  Cgi& getCgi();
+  const Cgi& getCgi() const;
+  const std::string& getBuffer() const;
+
+  void setBuffer(const std::string& buf);
   void clearBuffer();
 
   std::string receive() const;
@@ -40,6 +46,7 @@ class Client {
   SocketAddress serv_address_;
   HttpParser parser_;
   HttpResponse response_obj_;
+  Cgi cgi_;
   std::string buf_;
 
  public:
