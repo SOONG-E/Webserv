@@ -76,7 +76,8 @@ void Client::send() {
     if (!request_obj.isCgi() || !response_obj_.isSuccessCode())
       buf_ = response_obj_.generate(parser_.getRequestObj());
     else
-      buf_ = response_obj_.generate(cgi_.getCgiResponse());
+      buf_ = response_obj_.generate(parser_.getRequestObj(),
+                                    cgi_.getCgiResponse());
   }
 
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
