@@ -65,16 +65,7 @@ bool HttpResponse::isSuccessCode(void) const {
 std::string HttpResponse::generate(const HttpRequest& request) {
   std::string body;
   if (!isSuccessCode()) {
-    if (!server_block_) {
-      server_block_ = &default_server_;
-    }
-    body = readFile(server_block_->getErrorPage(code_));
-    // test
-    if (request.getMethod() == METHODS[PUT]) {
-      setStatus(C200);
-    }
-    //
-    return generateResponse(request, body);
+    return generateErrorPage(request);
   }
   try {
     body = rootUri(request.getUri());
@@ -82,6 +73,44 @@ std::string HttpResponse::generate(const HttpRequest& request) {
     setStatus(C404);
     body = readFile(server_block_->getErrorPage(code_));
   }
+  return generateResponse(request, body);
+}
+
+std::string HttpResponse::generate(const HttpRequest& request,
+                                   const std::string& cgi_response) {
+  // Status-Line
+  std::string header = "HTTP/1.1 " + code_ + " " + reason_ + CRLF;
+  // general-header
+  header += "Connection: ";
+  if (request.getHeader("CONNECTION").empty()) {
+    header += "keep-alive" + CRLF;
+    return header + body;
+  }
+  header += request.getHeader("CONNECTION") + CRLF;
+  header += "Date: " + formatTime("%a, %d %b %Y %H:%M:%S GMT") + CRLF;
+  if (!request.getHeader("Transfer-Encoding").empty()) {
+    header +=
+        "Transfer-Encoding: " + request.getHeader("Transfer-Encoding") + CRLF;
+  }
+  // response-header
+  header += "Server: Webserv" + CRLF;
+  // entity-header
+  std::size_t body_size =
+      cgi_response.size() - cgi_response.find(DOUBLE_CRLF) - DOUBLE_CRLF.size();
+  header += "Content-Length: " + toString(body_size) + CRLF;
+  return header + cgi_response;
+}
+
+std::string HttpResponse::generateErrorPage(const HttpRequest& request) {
+  if (!server_block_) {
+    server_block_ = &default_server_;
+  }
+  body = readFile(server_block_->getErrorPage(code_));
+  // test
+  if (request.getMethod() == METHODS[PUT]) {
+    setStatus(C200);
+  }
+  //
   return generateResponse(request, body);
 }
 
@@ -95,17 +124,25 @@ std::string HttpResponse::generateResponse(const HttpRequest& request,
 
 std::string HttpResponse::combine(const HttpRequest& request,
                                   const std::string& body) const {
+  // Status-Line
   std::string header = "HTTP/1.1 " + code_ + " " + reason_ + CRLF;
-  header += "Date: " + formatTime("%a, %d %b %Y %H:%M:%S GMT") + CRLF;
-  header += "Server: Webserv" + CRLF;
-  header += "Content-Length: " + toString(body.size()) + CRLF;
-  header += "Content-Type: text/html" + CRLF;
+  // general-header
   header += "Connection: ";
   if (request.getHeader("CONNECTION").empty()) {
-    header += "keep-alive" + DOUBLE_CRLF;
+    header += "keep-alive" + CRLF;
     return header + body;
   }
-  header += request.getHeader("CONNECTION") + DOUBLE_CRLF;
+  header += request.getHeader("CONNECTION") + CRLF;
+  header += "Date: " + formatTime("%a, %d %b %Y %H:%M:%S GMT") + CRLF;
+  if (!request.getHeader("Transfer-Encoding").empty()) {
+    header +=
+        "Transfer-Encoding: " + request.getHeader("Transfer-Encoding") + CRLF;
+  }
+  // response-header
+  header += "Server: Webserv" + CRLF;
+  // entity-header
+  header += "Content-Length: " + toString(body.size()) + CRLF;
+  header += "Content-Type: text/html" + DOUBLE_CRLF;
   return header + body;
 }
 
