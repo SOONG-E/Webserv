@@ -24,6 +24,7 @@ int main(int argc, char* argv[]) {
     const Config& config = conf.parse();
 
     ServerHandler handler;
+    handler.registerSignalHandlers();
     handler.configureServer(config);
     handler.createServers();
 
