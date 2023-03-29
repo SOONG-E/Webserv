@@ -1,5 +1,7 @@
 from os import environ
 from os.path import exists
+from os.path import isdir
+from os import mkdir
 import sys
 import cgi
 from validateEnviron import validateEnviron
@@ -38,13 +40,23 @@ def recreate_filename(filename):
 			return filename + suffix + extension
 	raise Exception("There are too many duplicated name.")
 
+def guaranteeDirectoryExistance(directory):
+	if isdir(directory) == False:
+		mkdir(directory)
+
 try:
 	validateEnviron()
 
 	form = cgi.FieldStorage()
 	validateRequest(form)
 	uploaded_file = form['upload_file']
-	filename = environ['PATH_INFO'] + uploaded_file.filename
+
+	path = "../upload_file/"
+	guaranteeDirectoryExistance(path)
+
+	assert isdir(path)
+
+	filename = path + uploaded_file.filename
 	filename = recreate_filename(filename)
 	
 	assert not exists(filename)
@@ -53,7 +65,7 @@ try:
 
 	save_file.write(uploaded_file.value)
 
-	print("Status:", "200", "OK")
+	print("Status:", "201", "Created")
 
 except Exception as e:
 	print("Status:", "400", "Bad Request")
