@@ -34,5 +34,6 @@ const std::string ERRORS[] = {"Error: ", "Invalid argument", "File open failed",
                               "Unexpected token"};
 const std::string METHODS[] = {"GET",     "POST", "DELETE", "HEAD",
                                "OPTIONS", "PUT",  "TRACE",  "CONNECT"};
+const std::string CGI_PATH = "/cgi-bin/";
 
 #endif
