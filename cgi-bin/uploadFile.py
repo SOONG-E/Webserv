@@ -16,8 +16,13 @@ def validateRequest(form):
 def split_filename(filename):
 	if filename.count(".") == 0:
 		return filename, ""
-	base_name = filename[:filename.rfind(".")]
-	extension = filename[filename.rfind("."):]
+	
+	boundary = filename.rfind(".")
+	if boundary == 0:
+		return filename, ""
+	
+	base_name = filename[:boundary]
+	extension = filename[boundary:]
 
 	return base_name, extension
 
