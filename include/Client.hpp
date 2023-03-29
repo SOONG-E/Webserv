@@ -30,12 +30,13 @@ class Client {
   const SocketAddress& getServerAddress() const;
   const SocketAddress& getClientAddress() const;
 
-  void clearBuffer();
-
   std::string receive() const;
   void send();
 
   void executeCgiIO();
+
+  void clearBuffer();
+  void clear();
 
   bool isPartialWritten() const;
   bool isReadyToSend() const;
@@ -43,8 +44,6 @@ class Client {
   void logAddressInfo() const;
   void logConnectionInfo() const;
   void logReceiveInfo(const std::string& request) const;
-
-  void clear() const;
 
  private:
   int fd_;

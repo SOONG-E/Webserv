@@ -114,7 +114,16 @@ void Client::executeCgiIO() {
     }
   } catch (const std::exception& e) {
     response_obj_.setStatus(C500);
+    std::cerr << "[Error] Cgi IO failed: " << e.what() << '\n';
   }
+}
+
+void Client::clearBuffer() { buf_.clear(); }
+
+void Client::clear() {
+  parser_.clear();
+  cgi_.clear();
+  response_obj_.clear();
 }
 
 bool Client::isPartialWritten() const { return !buf_.empty(); }
@@ -129,8 +138,6 @@ bool Client::isReadyToSend() const {
   }
   return false;
 }
-
-void Client::clearBuffer() { buf_.clear(); }
 
 void Client::logAddressInfo() const {
   std::cout << "[Client address]" << '\n'
