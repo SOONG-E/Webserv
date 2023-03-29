@@ -102,8 +102,7 @@ void ServerHandler::respondToClients() {
         client->executeCgiIO();
       }
 
-      if (client_selector_.isWritable(client_fd) &&
-          (client->isReadyToSend() || client->isPartialWritten())) {
+      if (client_selector_.isWritable(client_fd) && client->isReadyToSend()) {
         sendResponse(*client, delete_clients);
       }
     }
@@ -112,6 +111,11 @@ void ServerHandler::respondToClients() {
       deleteClients(delete_clients);
     }
   }
+}
+
+void ServerHandler::registerSignalHandlers() {
+  signal(SIGPIPE, SIG_IGN);
+  signal(SIGCHLD, SIG_IGN);
 }
 
 void ServerHandler::receiveRequest(Client& client,
@@ -159,6 +163,7 @@ void ServerHandler::sendResponse(Client& client,
       HttpParser& parser = client.getParser();
       const HttpRequest& request_obj = parser.getRequestObj();
       HttpResponse& response_obj = client.getResponseObj();
+      Cgi& cgi = client.getCgi();
 
       if (request_obj.getHeader("CONNECTION") == "close" ||
           !response_obj.isSuccessCode()) {
@@ -168,7 +173,7 @@ void ServerHandler::sendResponse(Client& client,
       }
       parser.clear();
       response_obj.clear();
-      client.getCgi().clear();
+      cgi.clear();
     }
   } catch (const std::exception& e) {
     client.getResponseObj().setStatus(C500);

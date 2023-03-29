@@ -24,6 +24,7 @@ class ServerHandler {
   void createServers();
   void acceptConnections();
   void respondToClients();
+  void registerSignalHandlers();
 
  private:
   typedef std::map<std::string, std::vector<ServerBlock> > server_blocks_type;
