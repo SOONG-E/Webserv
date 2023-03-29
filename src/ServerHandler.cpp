@@ -67,7 +67,7 @@ void ServerHandler::acceptConnections() {
     for (std::size_t i = 0; i < server_sockets_.size(); ++i) {
       if (server_selector_.isReadable(server_sockets_[i].getFD())) {
         try {
-          SocketAddress address = server_sockets_[i].getAddress();
+          const SocketAddress& address = server_sockets_[i].getAddress();
           std::string socket_key = address.getIP() + ":" + address.getPort();
           const std::vector<ServerBlock>& server_blocks_of_key =
               server_blocks_[socket_key];
@@ -102,11 +102,9 @@ void ServerHandler::respondToClients() {
       if (client_selector_.isReadable(client_fd)) {
         receiveRequest(*client, delete_clients);
       }
-
       if (client->getRequestObj().isCgi() && !client->getCgi().isCompleted()) {
         client->executeCgiIO();
       }
-
       if (client_selector_.isWritable(client_fd) && client->isReadyToSend()) {
         sendResponse(*client, delete_clients);
       }
@@ -163,6 +161,7 @@ void ServerHandler::sendResponse(Client& client,
                                  std::vector<int>& delete_clients) {
   try {
     client.send();
+
     if (!client.isPartialWritten()) {
       const HttpRequest& request_obj = client.getRequestObj();
       HttpResponse& response_obj = client.getResponseObj();
