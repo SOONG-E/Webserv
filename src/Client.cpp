@@ -54,19 +54,19 @@ const SocketAddress& Client::getServerAddress() const { return serv_address_; }
 const SocketAddress& Client::getClientAddress() const { return cli_address_; }
 
 std::string Client::receive() const {
-  char buf[BUF_SIZE] = {0};
+  char buf[BUF_SIZE];
 
-  ssize_t read_bytes = recv(fd_, &buf, BUF_SIZE, 0);
-  if (read_bytes == -1) {
+  size_t read_bytes = recv(fd_, &buf, BUF_SIZE, 0);
+
+  if (static_cast<ssize_t>(read_bytes) == -1) {
     throw SocketReceiveException(strerror(errno));
   }
 
-  std::string ret(buf, static_cast<std::size_t>(read_bytes));
+  std::string request(buf, read_bytes);
   if (read_bytes) {
-    logReceiveInfo(ret);
+    logReceiveInfo(request);
   }
-
-  return ret;
+  return request;
 }
 
 void Client::send() {
@@ -82,7 +82,7 @@ void Client::send() {
   }
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
 
-  if (write_bytes == static_cast<std::size_t>(-1)) {
+  if (write_bytes == static_cast<ssize_t>(-1)) {
     throw SocketSendException(strerror(errno));
   }
 
