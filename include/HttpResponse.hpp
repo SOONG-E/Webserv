@@ -28,8 +28,11 @@ class HttpResponse {
   void clear(void);
   bool isSuccessCode(void) const;
   std::string generate(const HttpRequest& request);
+  std::string generate(const HttpRequest& request,
+                       const std::string& cgi_response);
 
  private:
+  std::string generateErrorPage(const HttpRequest& request);
   std::string generateResponse(const HttpRequest& request,
                                const std::string& body) const;
   std::string combine(const HttpRequest& request,
