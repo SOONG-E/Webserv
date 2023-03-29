@@ -18,14 +18,14 @@ class Cgi {
   Cgi& operator=(const Cgi& src);
   ~Cgi();
 
-  void executeCgiScript(const HttpRequest& request_obj);
+  void runCgiScript(const HttpRequest& request_obj);
   void readPipe();
   void writePipe();
-  bool isEmpty() const;
   bool isCompleted() const;
   bool isWriteCompleted() const;
   std::string getCgiResponse() const;
-  int* getPipeFds();
+  int* getPipe();
+  const int* getPipe() const;
   void clear();
 
  private:

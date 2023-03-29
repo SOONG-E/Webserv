@@ -27,7 +27,7 @@ Cgi::~Cgi() {
   kill(script_pid_, SIGTERM);
 }
 
-void Cgi::executeCgiScript(const HttpRequest& request_obj) {
+void Cgi::runCgiScript(const HttpRequest& request_obj) {
   char* argv[2];
   char** envp;
   int pipe_fds1[2];
@@ -71,10 +71,6 @@ void Cgi::executeCgiScript(const HttpRequest& request_obj) {
 bool Cgi::isCompleted() const { return is_completed_; }
 
 bool Cgi::isWriteCompleted() const { return write_buf_.empty(); }
-
-bool Cgi::isEmpty() const {
-  return pipe_fds_[READ] == -1 && pipe_fds_[WRITE] == -1;
-}
 
 std::string Cgi::getCgiResponse() const { return read_buf_; }
 
@@ -146,7 +142,9 @@ void Cgi::writePipe() {
   }
 }
 
-int* Cgi::getPipeFds() { return pipe_fds_; }
+int* Cgi::getPipe() { return pipe_fds_; }
+
+const int* Cgi::getPipe() const { return pipe_fds_; }
 
 void Cgi::clear() {
   close(pipe_fds_[READ]);
