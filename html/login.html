@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>로그인</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      form {
+        margin: 20px auto;
+        max-width: 400px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      label {
+        display: block;
+        margin-bottom: 10px;
+      }
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+      input[type="submit"] {
+        background-color: #4caf50;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      input[type="submit"]:hover {
+        background-color: #3e8e41;
+      }
+    </style>
+  </head>
+  <body>
+    <form method="post">
+      <h2>로그인</h2>
+      <label for="username">사용자 id</label>
+      <input type="text" id="id" name="username" required>
+      <label for="password">비밀번호</label>
+      <input type="password" id="password" name="password" required>
+      <label for="password">아이디 기억하기</label>
+      <input type="checkbox" name="saveId" value="기억하기">
+      <input type="submit" value="로그인">
+    </form>
+  </body>
+</html>
