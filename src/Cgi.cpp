@@ -6,7 +6,7 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-Cgi::Cgi() : is_completed_(false), pid_(-1) {
+Cgi::Cgi() : is_completed_(false), is_write_completed_(false), pid_(-1) {
   pipe_fds_[READ] = -1;
   pipe_fds_[WRITE] = -1;
 }
@@ -16,6 +16,7 @@ Cgi::Cgi(const Cgi& src) { *this = src; }
 Cgi& Cgi::operator=(const Cgi& src) {
   if (this != &src) {
     is_completed_ = src.is_completed_;
+    is_write_completed_ = src.is_write_completed_;
     pipe_fds_[READ] = src.pipe_fds_[READ];
     pipe_fds_[WRITE] = src.pipe_fds_[WRITE];
     pid_ = src.pid_;
@@ -93,6 +94,7 @@ void Cgi::writePipe() {
   }
 
   if (write_bytes == buf_.size()) {
+    is_write_completed_ = true;
     buf_.clear();
   } else {
     buf_.erase(0, write_bytes);
@@ -122,6 +124,8 @@ const int* Cgi::getPipe() const { return pipe_fds_; }
 const std::string& Cgi::getCgiResponse() const { return buf_; }
 
 bool Cgi::isCompleted() const { return is_completed_; }
+
+bool Cgi::isWriteCompleted() const { return is_write_completed_; }
 
 void Cgi::clear() {
   is_completed_ = false;
