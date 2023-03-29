@@ -19,7 +19,6 @@ ServerHandler& ServerHandler::operator=(const ServerHandler& src) {
     clients_ = src.clients_;
     server_selector_ = src.server_selector_;
     client_selector_ = src.client_selector_;
-    cgi_selector_ = src.cgi_selector_;
   }
   return *this;
 }
@@ -99,49 +98,16 @@ void ServerHandler::respondToClients() {
         receiveRequest(*client, delete_clients);
       }
 
-      const HttpRequest& request_obj = client->getRequestObj();
-      HttpResponse& response_obj = client->getResponseObj();
-      Cgi& cgi = client->getCgi();
-
-      try {
-        if (isCgi(request_obj.getUri())) {
-          int* pipe_fds = cgi.getPipeFds();
-          if (cgi.isCompleted()) {
-            cgi_selector_.clear(pipe_fds[READ]);
-            cgi_selector_.clear(pipe_fds[WRITE]);
-          } else {
-            if (cgi.isEmpty()) {
-              cgi.executeCgiScript(request_obj);
-
-              cgi_selector_.registerFD(pipe_fds[WRITE]);
-              cgi_selector_.registerFD(pipe_fds[READ]);
-            }
-            if (!cgi.isWriteCompleted() &&
-                cgi_selector_.isWritable(pipe_fds[WRITE])) {
-              cgi.writePipe();
-            }
-            if (cgi.isWriteCompleted() &&
-                cgi_selector_.isReadable(pipe_fds[READ])) {
-              cgi.readPipe();
-            }
-          }
-        }
-      } catch (...) {
-        response_obj.setStatus(C500);
+      if (client->getRequestObj().isCgi() && !client->getCgi().isCompleted()) {
+        client->executeCgiIO();
       }
 
-      const HttpParser& parser = client->getParser();
-
-      if (!response_obj.isSuccessCode() ||
-          (!isCgi(request_obj.getUri()) && parser.isCompleted()) ||
-          (isCgi(request_obj.getUri()) && cgi.isCompleted())) {
-        generateResponse(*client);
-      }
-      if (!client->getBuffer().empty() &&
-          client_selector_.isWritable(client_fd)) {
+      if (client_selector_.isWritable(client_fd) &&
+          (client->isReadyToSend() || client->isPartialWritten())) {
         sendResponse(*client, delete_clients);
       }
     }
+
     if (!delete_clients.empty()) {
       deleteClients(delete_clients);
     }
@@ -170,10 +136,15 @@ void ServerHandler::receiveRequest(Client& client,
           server_block.findLocationBlock(request_obj.getUri());
 
       HttpResponse& response_obj = client.getResponseObj();
+
       response_obj.setServerBlock(&server_block);
       response_obj.setLocationBlock(&location_block);
 
       validateRequest(request_obj, location_block);
+
+      if (request_obj.isCgi()) {
+        client.getCgi().runCgiScript(request_obj);
+      }
     }
   } catch (const ResponseException& e) {
     client.getResponseObj().setStatus(e.index);
@@ -185,8 +156,8 @@ void ServerHandler::sendResponse(Client& client,
   try {
     client.send();
     if (!client.isPartialWritten()) {
-      const HttpRequest& request_obj = client.getRequestObj();
       HttpParser& parser = client.getParser();
+      const HttpRequest& request_obj = parser.getRequestObj();
       HttpResponse& response_obj = client.getResponseObj();
 
       if (request_obj.getHeader("CONNECTION") == "close" ||
@@ -197,6 +168,7 @@ void ServerHandler::sendResponse(Client& client,
       }
       parser.clear();
       response_obj.clear();
+      client.getCgi().clear();
     }
   } catch (const std::exception& e) {
     client.getResponseObj().setStatus(C500);
@@ -247,26 +219,4 @@ void ServerHandler::deleteClients(const std::vector<int>& delete_clients) {
     clients_.erase(delete_clients[i]);
     client_selector_.clear(delete_clients[i]);
   }
-}
-
-void ServerHandler::generateResponse(Client& client) {
-  const HttpRequest& request_obj = client.getRequestObj();
-  HttpResponse& response_obj = client.getResponseObj();
-  Cgi& cgi = client.getCgi();
-
-  if (isCgi(request_obj.getUri())) {
-    if (response_obj.isSuccessCode()) {
-      const std::string& response = cgi.getCgiResponse();
-      client.setBuffer(response_obj.generateCgi(response));
-      cgi.clear();
-      return;
-    }
-    cgi.clear();
-  }
-  client.setBuffer(response_obj.generate(request_obj));
-}
-
-bool ServerHandler::isCgi(const std::string& request_uri) const {
-  std::string cgi_path = "/cgi-bin/";
-  return !request_uri.compare(0, cgi_path.size(), cgi_path);
 }

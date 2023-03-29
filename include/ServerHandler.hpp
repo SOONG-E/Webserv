@@ -39,15 +39,12 @@ class ServerHandler {
   void deleteClients(const std::vector<int>& delete_clients);
   void validateRequest(const HttpRequest& request_obj,
                        const LocationBlock& location_block);
-  void generateResponse(Client& client);
-  bool isCgi(const std::string& request_uri) const;
 
   server_blocks_type server_blocks_;
   server_sockets_type server_sockets_;
   clients_type clients_;
   selector_type server_selector_;
   selector_type client_selector_;
-  selector_type cgi_selector_;
 };
 
 #endif
