@@ -70,6 +70,15 @@ std::string Client::receive() const {
 }
 
 void Client::send() {
+  if (!isPartialWritten()) {
+    const HttpRequest& request_obj = parser_.getRequestObj();
+
+    if (request_obj.isCgi())
+      buf_ = response_obj_.generate(cgi_.getCgiResponse());
+    else
+      buf_ = response_obj_.generate(parser_.getRequestObj());
+  }
+
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
 
   if (write_bytes == static_cast<std::size_t>(-1)) {
@@ -84,7 +93,36 @@ void Client::send() {
   buf_.erase(0, write_bytes);
 }
 
+void Client::executeCgiIO() {
+  Selector cgi_selector;
+
+  const int* pipe = cgi_.getPipe();
+
+  cgi_selector.registerFD(pipe[WRITE]);
+  cgi_selector.registerFD(pipe[READ]);
+
+  if (cgi_selector.select() > 0) {
+    if (!cgi_.isWriteCompleted() && cgi_selector.isWritable(pipe[WRITE])) {
+      cgi_.writePipe();
+    }
+    if (cgi_.isWriteCompleted() && cgi_selector.isReadable(pipe[READ])) {
+      cgi_.readPipe();
+    }
+  }
+}
+
 bool Client::isPartialWritten() const { return !buf_.empty(); }
+
+bool Client::isReadyToSend() const {
+  const HttpRequest& request_obj = parser_.getRequestObj();
+
+  if (!response_obj_.isSuccessCode() ||
+      (!request_obj.isCgi() && parser_.isCompleted()) ||
+      (request_obj.isCgi() && cgi_.isCompleted())) {
+    return true;
+  }
+  return false;
+}
 
 void Client::clearBuffer() { buf_.clear(); }
 

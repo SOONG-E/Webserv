@@ -7,6 +7,7 @@
 #include "Cgi.hpp"
 #include "HttpParser.hpp"
 #include "HttpResponse.hpp"
+#include "Selector.hpp"
 #include "ServerBlock.hpp"
 #include "SocketAddress.hpp"
 
@@ -34,7 +35,10 @@ class Client {
   std::string receive() const;
   void send();
 
+  void executeCgiIO();
+
   bool isPartialWritten() const;
+  bool isReadyToSend() const;
 
   void logAddressInfo() const;
   void logConnectionInfo() const;
