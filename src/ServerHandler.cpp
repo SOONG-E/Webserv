@@ -147,11 +147,12 @@ void ServerHandler::receiveRequest(Client& client,
       validateRequest(request_obj, location_block);
 
       if (request_obj.isCgi()) {
-        client.getCgi().runCgiScript(
-            client.getRequestObj(), client.getClientAddress(),
-            client.getServerAddress(),
-            client.getResponseObj().getLocationBlock()->getCgiParam(
-                "CGI_PATH"));
+        const SocketAddress& cli_addr = client.getClientAddress();
+        const SocketAddress& serv_addr = client.getServerAddress();
+        const std::string& cgi_path = location_block.getCgiParam("CGI_PATH");
+
+        client.getCgi().runCgiScript(request_obj, cli_addr, serv_addr,
+                                     cgi_path);
       }
     }
   } catch (const ResponseException& e) {
@@ -164,10 +165,8 @@ void ServerHandler::sendResponse(Client& client,
   try {
     client.send();
     if (!client.isPartialWritten()) {
-      HttpParser& parser = client.getParser();
-      const HttpRequest& request_obj = parser.getRequestObj();
+      const HttpRequest& request_obj = client.getRequestObj();
       HttpResponse& response_obj = client.getResponseObj();
-      Cgi& cgi = client.getCgi();
 
       if (request_obj.getHeader("CONNECTION") == "close" ||
           !response_obj.isSuccessCode()) {
@@ -175,9 +174,9 @@ void ServerHandler::sendResponse(Client& client,
         closeConnection(client);
         return;
       }
-      parser.clear();
+      client.getParser().clear();
+      client.getCgi().clear();
       response_obj.clear();
-      cgi.clear();
     }
   } catch (const std::exception& e) {
     client.getResponseObj().setStatus(C500);
