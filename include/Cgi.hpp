@@ -27,7 +27,6 @@ class Cgi {
   void writePipe();
   void readPipe();
   bool isCompleted() const;
-  bool isWriteCompleted() const;
   const std::string& getCgiResponse() const;
   const int* getPipe() const;
   void clear();
@@ -39,11 +38,10 @@ class Cgi {
   std::string getAbsolutePath(const std::string& uri) const;
   void deleteEnvp(char** envp) const;
 
-  int pipe_fds_[2];
-  std::string buf_;
-  pid_t pid_;
   bool is_completed_;
-  bool is_write_completed_;
+  int pipe_fds_[2];
+  pid_t pid_;
+  std::string buf_;
 };
 
 #endif

@@ -6,7 +6,7 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-Cgi::Cgi() : pid_(-1), is_completed_(false), is_write_completed_(false) {
+Cgi::Cgi() : is_completed_(false), pid_(-1) {
   pipe_fds_[READ] = -1;
   pipe_fds_[WRITE] = -1;
 }
@@ -15,12 +15,11 @@ Cgi::Cgi(const Cgi& src) { *this = src; }
 
 Cgi& Cgi::operator=(const Cgi& src) {
   if (this != &src) {
+    is_completed_ = src.is_completed_;
     pipe_fds_[READ] = src.pipe_fds_[READ];
     pipe_fds_[WRITE] = src.pipe_fds_[WRITE];
-    buf_ = src.buf_;
     pid_ = src.pid_;
-    is_completed_ = src.is_completed_;
-    is_write_completed_ = src.is_write_completed_;
+    buf_ = src.buf_;
   }
   return *this;
 }
@@ -92,11 +91,11 @@ void Cgi::writePipe() {
     kill(pid_, SIGTERM);
     throw ResponseException(C500);
   }
-  if (write_bytes < buf_.size()) {
-    buf_.erase(0, write_bytes);
-  } else {
-    is_write_completed_ = true;
+
+  if (write_bytes == buf_.size()) {
     buf_.clear();
+  } else {
+    buf_.erase(0, write_bytes);
   }
 }
 
@@ -115,7 +114,6 @@ void Cgi::readPipe() {
     is_completed_ = true;
     return;
   }
-
   buf_ += std::string(buf, read_bytes);
 }
 
@@ -125,17 +123,14 @@ const std::string& Cgi::getCgiResponse() const { return buf_; }
 
 bool Cgi::isCompleted() const { return is_completed_; }
 
-bool Cgi::isWriteCompleted() const { return is_write_completed_; }
-
 void Cgi::clear() {
+  is_completed_ = false;
   close(pipe_fds_[READ]);
   close(pipe_fds_[WRITE]);
   pipe_fds_[READ] = -1;
   pipe_fds_[WRITE] = -1;
-  buf_.clear();
   pid_ = -1;
-  is_completed_ = false;
-  is_write_completed_ = false;
+  buf_.clear();
 }
 
 char** Cgi::generateEnvp(const HttpRequest& request_obj,
