@@ -147,7 +147,7 @@ void ServerHandler::receiveRequest(Client& client,
       validateRequest(request_obj, location_block);
 
       if (request_obj.isCgi()) {
-        client.getCgi().runCgiScript(request_obj);
+        client.getCgi().runCgiScript(client);
       }
     }
   } catch (const ResponseException& e) {
