@@ -28,7 +28,13 @@ int Selector::select() {
   read_fds_ = fds_;
   write_fds_ = fds_;
 
-  return ::select(max_fd_ + 1, &read_fds_, &write_fds_, 0, &tm_);
+  int result = ::select(max_fd_ + 1, &read_fds_, &write_fds_, 0, &tm_);
+
+  if (result == -1) {
+    throw SelectFailedException(strerror(errno));
+  }
+
+  return result;
 }
 
 void Selector::registerFD(int fd) {
@@ -42,3 +48,10 @@ void Selector::clear(int fd) { FD_CLR(fd, &fds_); }
 
 bool Selector::isReadable(int fd) const { return FD_ISSET(fd, &read_fds_); }
 bool Selector::isWritable(int fd) const { return FD_ISSET(fd, &write_fds_); }
+
+Selector::SelectFailedException::SelectFailedException(const char* cause)
+    : cause(cause) {}
+
+const char* Selector::SelectFailedException::what() const throw() {
+  return cause;
+}
