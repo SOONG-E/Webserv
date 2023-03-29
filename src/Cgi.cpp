@@ -74,7 +74,6 @@ void Cgi::runCgiScript(const Client& client) {
   }
   delete[] envp;
 
-  throw ResponseException(C500);
   pipe_fds_[READ] = pipe_fds2[READ];
   pipe_fds_[WRITE] = pipe_fds1[WRITE];
   close(pipe_fds1[READ]);
