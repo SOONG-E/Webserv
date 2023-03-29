@@ -33,14 +33,14 @@ Cgi::~Cgi() {
 
 void Cgi::runCgiScript(const Client& client) {
   char* argv[2];
-  char** envp;
   int pipe_fds1[2];
   int pipe_fds2[2];
+
   const HttpRequest& request_obj = client.getRequestObj();
   char** envp = generateEnvp(request_obj, client.getClientAddress(),
                              client.getServerAddress());
   const std::string& cgi_path =
-      client.getResponseObj().getLocationBlock().getCgiParam("CGI_PATH");
+      client.getResponseObj().getLocationBlock()->getCgiParam("CGI_PATH");
 
   argv[0] = const_cast<char*>(cgi_path.c_str());
   argv[1] = NULL;
