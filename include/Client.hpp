@@ -28,6 +28,8 @@ class Client {
   Cgi& getCgi();
   const Cgi& getCgi() const;
   const std::string& getBuffer() const;
+  const SocketAddress& getServerAddress() const;
+  const SocketAddress& getClientAddress() const;
 
   void setBuffer(const std::string& buf);
   void clearBuffer();

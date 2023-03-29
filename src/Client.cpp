@@ -53,6 +53,10 @@ const std::string& Client::getBuffer() const { return buf_; }
 
 void Client::setBuffer(const std::string& buf) { buf_ = buf; }
 
+const SocketAddress& Client::getServerAddress() const { return serv_address_; }
+
+const SocketAddress& Client::getClientAddress() const { return cli_address_; }
+
 std::string Client::receive() const {
   char buf[BUF_SIZE] = {0};
 
@@ -94,20 +98,24 @@ void Client::send() {
 }
 
 void Client::executeCgiIO() {
-  Selector cgi_selector;
+  try {
+    Selector cgi_selector;
 
-  const int* pipe = cgi_.getPipe();
+    const int* pipe = cgi_.getPipe();
 
-  cgi_selector.registerFD(pipe[WRITE]);
-  cgi_selector.registerFD(pipe[READ]);
+    cgi_selector.registerFD(pipe[WRITE]);
+    cgi_selector.registerFD(pipe[READ]);
 
-  if (cgi_selector.select() > 0) {
-    if (!cgi_.isWriteCompleted() && cgi_selector.isWritable(pipe[WRITE])) {
-      cgi_.writePipe();
+    if (cgi_selector.select() > 0) {
+      if (!cgi_.isWriteCompleted() && cgi_selector.isWritable(pipe[WRITE])) {
+        cgi_.writePipe();
+      }
+      if (cgi_.isWriteCompleted() && cgi_selector.isReadable(pipe[READ])) {
+        cgi_.readPipe();
+      }
     }
-    if (cgi_.isWriteCompleted() && cgi_selector.isReadable(pipe[READ])) {
-      cgi_.readPipe();
-    }
+  } catch (const std::exception& e) {
+    response_obj_.setStatus(C500);
   }
 }
 
