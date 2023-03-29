@@ -21,25 +21,33 @@ ServerSocket& ServerSocket::operator=(const ServerSocket& src) {
 ServerSocket::~ServerSocket() {}
 
 void ServerSocket::open() {
-  if (fd_ != -1) throw SocketOpenException("already open");
+  if (fd_ != -1) {
+    throw SocketOpenException("already open");
+  }
   fd_ = socket(AF_INET, SOCK_STREAM, 0);
-  if (fd_ == -1) throw SocketOpenException(strerror(errno));
+  if (fd_ == -1) {
+    throw SocketOpenException(strerror(errno));
+  }
 }
 
 void ServerSocket::bind(const SocketAddress& address, int backlog) {
   const int enable = 1;
-  if (setsockopt(fd_, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+  if (setsockopt(fd_, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
     throw SocketBindException(strerror(errno));
+  }
 
   if (::bind(fd_, (sockaddr*)&address.getAddress(), address.getAddressLen()) ==
-      -1)
+      -1) {
     throw SocketBindException(strerror(errno));
+  }
 
-  if (fcntl(fd_, F_SETFL, O_NONBLOCK) == -1)
+  if (fcntl(fd_, F_SETFL, O_NONBLOCK) == -1) {
     throw SocketBindException(strerror(errno));
+  }
 
-  if (listen(fd_, backlog) == -1) throw SocketBindException(strerror(errno));
-
+  if (listen(fd_, backlog) == -1) {
+    throw SocketBindException(strerror(errno));
+  }
   address_ = address;
 }
 
