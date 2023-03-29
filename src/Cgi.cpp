@@ -31,16 +31,15 @@ Cgi::~Cgi() {
   kill(pid_, SIGTERM);
 }
 
-void Cgi::runCgiScript(const Client& client) {
+void Cgi::runCgiScript(const HttpRequest& request_obj,
+                       const SocketAddress& cli_addr,
+                       const SocketAddress& serv_addr,
+                       const std::string& cgi_path) {
   char* argv[2];
   int pipe_fds1[2];
   int pipe_fds2[2];
 
-  const HttpRequest& request_obj = client.getRequestObj();
-  char** envp = generateEnvp(request_obj, client.getClientAddress(),
-                             client.getServerAddress());
-  const std::string& cgi_path =
-      client.getResponseObj().getLocationBlock()->getCgiParam("CGI_PATH");
+  char** envp = generateEnvp(request_obj, cli_addr, serv_addr);
 
   argv[0] = const_cast<char*>(cgi_path.c_str());
   argv[1] = NULL;

@@ -63,10 +63,10 @@ bool HttpResponse::isSuccessCode(void) const {
 }
 
 std::string HttpResponse::generate(const HttpRequest& request) {
-  std::string body;
   if (!isSuccessCode()) {
     return generateErrorPage(request);
   }
+  std::string body;
   try {
     body = rootUri(request.getUri());
   } catch (FileOpenException& e) {
@@ -84,7 +84,6 @@ std::string HttpResponse::generate(const HttpRequest& request,
   header += "Connection: ";
   if (request.getHeader("CONNECTION").empty()) {
     header += "keep-alive" + CRLF;
-    return header + body;
   }
   header += request.getHeader("CONNECTION") + CRLF;
   header += "Date: " + formatTime("%a, %d %b %Y %H:%M:%S GMT") + CRLF;
@@ -105,7 +104,7 @@ std::string HttpResponse::generateErrorPage(const HttpRequest& request) {
   if (!server_block_) {
     server_block_ = &default_server_;
   }
-  body = readFile(server_block_->getErrorPage(code_));
+  std::string body = readFile(server_block_->getErrorPage(code_));
   // test
   if (request.getMethod() == METHODS[PUT]) {
     setStatus(C200);

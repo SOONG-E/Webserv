@@ -76,7 +76,7 @@ const std::vector<std::string>& LocationBlock::getIndex(void) const {
 }
 
 const std::string& LocationBlock::getCgiParam(const std::string& key) const {
-  return cgi_param_[key];
+  return cgi_param_.at(key);
 }
 
 void LocationBlock::setUri(const std::string& uri) { uri_ = uri; }

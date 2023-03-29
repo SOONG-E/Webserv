@@ -7,7 +7,6 @@
 #include <map>
 #include <string>
 
-#include "Client.hpp"
 #include "HttpRequest.hpp"
 #include "SocketAddress.hpp"
 #include "utility.hpp"
@@ -21,7 +20,10 @@ class Cgi {
   Cgi& operator=(const Cgi& src);
   ~Cgi();
 
-  void runCgiScript(const Client& client);
+  void runCgiScript(const HttpRequest& request_obj,
+                       const SocketAddress& cli_addr,
+                       const SocketAddress& serv_addr,
+                       const std::string& cgi_path);
   void readPipe();
   void writePipe();
   bool isCompleted() const;
