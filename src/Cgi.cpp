@@ -84,7 +84,7 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
 }
 
 void Cgi::writePipe() {
-  size_t write_bytes = write(pipe_fds_[WRITE], buf_.c_str(), buf_.size());
+  std::size_t write_bytes = write(pipe_fds_[WRITE], buf_.c_str(), buf_.size());
 
   if (static_cast<ssize_t>(write_bytes) == -1) {
     close(pipe_fds_[WRITE]);
@@ -103,7 +103,7 @@ void Cgi::writePipe() {
 void Cgi::readPipe() {
   char buf[BUF_SIZE];
 
-  size_t read_bytes = read(pipe_fds_[READ], buf, BUF_SIZE);
+  std::size_t read_bytes = read(pipe_fds_[READ], buf, BUF_SIZE);
 
   if (static_cast<ssize_t>(read_bytes) == -1) {
     close(pipe_fds_[WRITE]);
