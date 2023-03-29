@@ -63,10 +63,10 @@ void ServerHandler::createServers() {
 }
 
 void ServerHandler::acceptConnections() {
-  if (server_selector_.select() > 0) {
-    for (std::size_t i = 0; i < server_sockets_.size(); ++i) {
-      if (server_selector_.isReadable(server_sockets_[i].getFD())) {
-        try {
+  try {
+    if (server_selector_.select() > 0) {
+      for (std::size_t i = 0; i < server_sockets_.size(); ++i) {
+        if (server_selector_.isReadable(server_sockets_[i].getFD())) {
           const SocketAddress& address = server_sockets_[i].getAddress();
           std::string socket_key = address.getIP() + ":" + address.getPort();
           const std::vector<ServerBlock>& server_blocks_of_key =
@@ -79,40 +79,45 @@ void ServerHandler::acceptConnections() {
 
           client_selector_.registerFD(client_fd);
           clients_.insert(std::make_pair(client_fd, new_client));
-        } catch (const std::exception& e) {
-          std::cerr << "[Error] Connection failed: " << e.what() << '\n';
         }
       }
     }
+  } catch (const std::exception& e) {
+    std::cerr << "[Error] Connection failed: " << e.what() << '\n';
   }
 }
 
 void ServerHandler::respondToClients() {
-  if (client_selector_.select() > 0) {
-    Client* client;
-    std::vector<int> delete_clients;
+  try {
+    if (client_selector_.select() > 0) {
+      Client* client;
+      std::vector<int> delete_clients;
 
-    delete_clients.reserve(clients_.size());
+      delete_clients.reserve(clients_.size());
 
-    for (clients_type::iterator it = clients_.begin(); it != clients_.end();
-         ++it) {
-      client = &it->second;
-      int client_fd = client->getFD();
+      for (clients_type::iterator it = clients_.begin(); it != clients_.end();
+           ++it) {
+        client = &it->second;
+        int client_fd = client->getFD();
 
-      if (client_selector_.isReadable(client_fd)) {
-        receiveRequest(*client, delete_clients);
+        if (client_selector_.isReadable(client_fd)) {
+          receiveRequest(*client, delete_clients);
+        }
+        if (client->getRequestObj().isCgi() &&
+            !client->getCgi().isCompleted()) {
+          client->executeCgiIO();
+        }
+        if (client_selector_.isWritable(client_fd) && client->isReadyToSend()) {
+          sendResponse(*client, delete_clients);
+        }
       }
-      if (client->getRequestObj().isCgi() && !client->getCgi().isCompleted()) {
-        client->executeCgiIO();
-      }
-      if (client_selector_.isWritable(client_fd) && client->isReadyToSend()) {
-        sendResponse(*client, delete_clients);
+
+      if (!delete_clients.empty()) {
+        deleteClients(delete_clients);
       }
     }
-
-    if (!delete_clients.empty()) {
-      deleteClients(delete_clients);
-    }
+  } catch (const std::exception& e) {
+    std::cerr << "[Error] Select failed: " << e.what() << '\n';
   }
 }
 
