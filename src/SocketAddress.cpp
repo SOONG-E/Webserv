@@ -20,12 +20,12 @@ SocketAddress::SocketAddress(const std::string& ip, const std::string& port) {
   hints.ai_socktype = SOCK_STREAM;
 
   int result = getaddrinfo(ip.c_str(), port.c_str(), &hints, &addr_info);
-
-  if (result != 0) throw std::invalid_argument(gai_strerror(result));
+  if (result != 0) {
+    throw std::invalid_argument(gai_strerror(result));
+  }
 
   address_ = *(addr_info->ai_addr);
   address_len_ = addr_info->ai_addrlen;
-
   ip_ = ip;
   port_ = port;
 
@@ -41,7 +41,9 @@ SocketAddress::SocketAddress(const sockaddr& address,
 
   for (int i = 3; i >= 0; --i) {
     ip_ += toString((ntohl(addr_in.sin_addr.s_addr) >> (i * 8)) & 0xFF);
-    if (i == 0) break;
+    if (i == 0) {
+      break;
+    }
     ip_ += ".";
   }
   port_ = toString(ntohs(addr_in.sin_port));
