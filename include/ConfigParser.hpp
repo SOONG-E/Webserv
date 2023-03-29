@@ -27,6 +27,7 @@ class ConfigParser {
   void parseRoot(void);
   void parseAutoindex(void);
   void parseIndex(void);
+  void parseCgiParams(void);
 
   std::string expect(const std::string& expected = "");
   std::string peek(void);

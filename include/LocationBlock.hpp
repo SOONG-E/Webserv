@@ -1,6 +1,7 @@
 #ifndef LOCATION_BLOCK_HPP_
 #define LOCATION_BLOCK_HPP_
 
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -31,6 +32,7 @@ class LocationBlock {
   bool getAutoindex(void) const;
   std::vector<std::string>& getIndex(void);
   const std::vector<std::string>& getIndex(void) const;
+  const std::string& getCgiParam(const std::string& key) const;
 
   void setUri(const std::string& uri);
   void setBodyLimit(const std::string& raw);
@@ -39,6 +41,7 @@ class LocationBlock {
   void setRoot(const std::string& root);
   void setAutoindex(const std::string& raw);
   void addIndex(const std::string& index);
+  void addCgiParam(const std::string& key, const std::string& value);
 
   bool isAllowedMethod(const std::string& method) const;
   void clear(void);
@@ -51,6 +54,7 @@ class LocationBlock {
   std::string root_;
   bool autoindex_;
   std::vector<std::string> index_;
+  std::map<std::string, std::string> cgi_param_;
 };
 
 #endif

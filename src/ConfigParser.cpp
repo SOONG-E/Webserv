@@ -120,6 +120,8 @@ void ConfigParser::parseLocationBlock(void) {
       parseAutoindex();
     } else if (token == "index") {
       parseIndex();
+    } else if (token.compare(0, 4, "CGI_") == 0) {
+      parseCgiParams();
     } else {
       throw ConfigException(ERRORS[TOKEN]);
     }
@@ -160,6 +162,11 @@ void ConfigParser::parseIndex(void) {
   while (peek() != ";") {
     location_block_.addIndex(expect());
   }
+  expect(";");
+}
+
+void ConfigParser::parseCgiParams(void) {
+  location_block_.addCgiParam(expect(), expect());
   expect(";");
 }
 

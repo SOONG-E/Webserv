@@ -75,6 +75,10 @@ const std::vector<std::string>& LocationBlock::getIndex(void) const {
   return index_;
 }
 
+const std::string& LocationBlock::getCgiParam(const std::string& key) const {
+  return cgi_param_[key];
+}
+
 void LocationBlock::setUri(const std::string& uri) { uri_ = uri; }
 
 void LocationBlock::setBodyLimit(const std::string& raw) {
@@ -111,6 +115,11 @@ void LocationBlock::setAutoindex(const std::string& raw) {
 
 void LocationBlock::addIndex(const std::string& index) {
   index_.push_back(index);
+}
+
+void LocationBlock::addCgiParam(const std::string& key,
+                                const std::string& value) {
+  cgi_param_[key] = value;
 }
 
 bool LocationBlock::isAllowedMethod(const std::string& method) const {
