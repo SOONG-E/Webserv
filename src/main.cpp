@@ -7,10 +7,6 @@
 #include "ServerHandler.hpp"
 #include "constant.hpp"
 
-// temp
-#define EXIT_SUCCESS 0
-#define EXIT_FAILURE 1
-
 int main(int argc, char* argv[]) {
   if (argc > 2) {
     std::cerr << ERRORS[PREFIX] << ERRORS[ARG] << std::endl;
@@ -20,8 +16,8 @@ int main(int argc, char* argv[]) {
   const std::string& filename = (argc == 2) ? argv[1] : DEFAULT_PATH;
 
   try {
-    ConfigParser conf(filename);
-    const Config& config = conf.parse();
+    ConfigParser config_parser(filename);
+    const Config& config = config_parser.parse();
 
     ServerHandler handler;
     handler.registerSignalHandlers();
