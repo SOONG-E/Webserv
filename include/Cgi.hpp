@@ -21,15 +21,14 @@ class Cgi {
   ~Cgi();
 
   void runCgiScript(const HttpRequest& request_obj,
-                       const SocketAddress& cli_addr,
-                       const SocketAddress& serv_addr,
-                       const std::string& cgi_path);
-  void readPipe();
+                    const SocketAddress& cli_addr,
+                    const SocketAddress& serv_addr,
+                    const std::string& cgi_path);
   void writePipe();
+  void readPipe();
   bool isCompleted() const;
   bool isWriteCompleted() const;
   const std::string& getCgiResponse() const;
-  int* getPipe();
   const int* getPipe() const;
   void clear();
 
@@ -38,12 +37,13 @@ class Cgi {
                       const SocketAddress& cli_addr,
                       const SocketAddress& serv_addr) const;
   std::string getAbsolutePath(const std::string& uri) const;
+  void deleteEnvp(char** envp) const;
 
-  bool is_completed_;
-  pid_t pid_;
-  std::string write_buf_;
-  std::string read_buf_;
   int pipe_fds_[2];
+  std::string buf_;
+  pid_t pid_;
+  bool is_completed_;
+  bool is_write_completed_;
 };
 
 #endif

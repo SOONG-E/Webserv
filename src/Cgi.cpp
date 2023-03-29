@@ -6,7 +6,7 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-Cgi::Cgi() : is_completed_(false), pid_(-1) {
+Cgi::Cgi() : pid_(-1), is_completed_(false), is_write_completed_(false) {
   pipe_fds_[READ] = -1;
   pipe_fds_[WRITE] = -1;
 }
@@ -15,12 +15,12 @@ Cgi::Cgi(const Cgi& src) { *this = src; }
 
 Cgi& Cgi::operator=(const Cgi& src) {
   if (this != &src) {
-    write_buf_ = src.write_buf_;
-    read_buf_ = src.read_buf_;
     pipe_fds_[READ] = src.pipe_fds_[READ];
     pipe_fds_[WRITE] = src.pipe_fds_[WRITE];
+    buf_ = src.buf_;
     pid_ = src.pid_;
     is_completed_ = src.is_completed_;
+    is_write_completed_ = src.is_write_completed_;
   }
   return *this;
 }
@@ -34,14 +34,9 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
                        const SocketAddress& cli_addr,
                        const SocketAddress& serv_addr,
                        const std::string& cgi_path) {
-  char* argv[2];
   int pipe_fds1[2];
   int pipe_fds2[2];
 
-  char** envp = generateEnvp(request_obj, cli_addr, serv_addr);
-
-  argv[0] = const_cast<char*>(cgi_path.c_str());
-  argv[1] = NULL;
   if (pipe(pipe_fds1) == -1) {
     throw ResponseException(C500);
   }
@@ -50,45 +45,98 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
     close(pipe_fds1[WRITE]);
     throw ResponseException(C500);
   }
+
+  char* argv[2] = {const_cast<char*>(cgi_path.c_str()), NULL};
+  char** envp = generateEnvp(request_obj, cli_addr, serv_addr);
+
   pid_ = fork();
+
   if (pid_ == -1) {
+    deleteEnvp(envp);
     close(pipe_fds1[READ]);
     close(pipe_fds1[WRITE]);
     close(pipe_fds2[READ]);
     close(pipe_fds2[WRITE]);
     throw ResponseException(C500);
   } else if (pid_ == 0) {
-    dup2(pipe_fds1[READ], STDIN_FILENO);
-    dup2(pipe_fds2[WRITE], STDOUT_FILENO);
     close(pipe_fds1[WRITE]);
     close(pipe_fds2[READ]);
-    if (execve(argv[0], argv, envp) == -1) {
-      exit(EXIT_FAILURE);
-    }
+    dup2(pipe_fds1[READ], STDIN_FILENO);
+    dup2(pipe_fds2[WRITE], STDOUT_FILENO);
+
+    execve(argv[0], argv, envp);
+
+    exit(EXIT_FAILURE);
   }
 
-  for (int i = 0; envp[i]; ++i) {
-    delete[] envp[i];
-  }
-  delete[] envp;
+  deleteEnvp(envp);
+  close(pipe_fds1[READ]);
+  close(pipe_fds2[WRITE]);
 
   pipe_fds_[READ] = pipe_fds2[READ];
   pipe_fds_[WRITE] = pipe_fds1[WRITE];
-  close(pipe_fds1[READ]);
-  close(pipe_fds2[WRITE]);
 
   if (request_obj.getMethod() == "GET") {
     close(pipe_fds_[WRITE]);
   } else {
-    write_buf_ = request_obj.getBody();
+    buf_ = request_obj.getBody();
   }
 }
 
+void Cgi::writePipe() {
+  size_t write_bytes = write(pipe_fds_[WRITE], buf_.c_str(), buf_.size());
+
+  if (static_cast<ssize_t>(write_bytes) == -1) {
+    close(pipe_fds_[WRITE]);
+    close(pipe_fds_[READ]);
+    kill(pid_, SIGTERM);
+    throw ResponseException(C500);
+  }
+  if (write_bytes < buf_.size()) {
+    buf_.erase(0, write_bytes);
+  } else {
+    is_write_completed_ = true;
+    buf_.clear();
+  }
+}
+
+void Cgi::readPipe() {
+  char buf[BUF_SIZE];
+
+  size_t read_bytes = read(pipe_fds_[READ], buf, BUF_SIZE);
+
+  if (static_cast<ssize_t>(read_bytes) == -1) {
+    close(pipe_fds_[WRITE]);
+    close(pipe_fds_[READ]);
+    kill(pid_, SIGTERM);
+    throw ResponseException(C500);
+  }
+  if (read_bytes == 0) {
+    is_completed_ = true;
+    return;
+  }
+
+  buf_ += std::string(buf, read_bytes);
+}
+
+const int* Cgi::getPipe() const { return pipe_fds_; }
+
+const std::string& Cgi::getCgiResponse() const { return buf_; }
+
 bool Cgi::isCompleted() const { return is_completed_; }
 
-bool Cgi::isWriteCompleted() const { return write_buf_.empty(); }
+bool Cgi::isWriteCompleted() const { return is_write_completed_; }
 
-const std::string& Cgi::getCgiResponse() const { return read_buf_; }
+void Cgi::clear() {
+  close(pipe_fds_[READ]);
+  close(pipe_fds_[WRITE]);
+  pipe_fds_[READ] = -1;
+  pipe_fds_[WRITE] = -1;
+  buf_.clear();
+  pid_ = -1;
+  is_completed_ = false;
+  is_write_completed_ = false;
+}
 
 char** Cgi::generateEnvp(const HttpRequest& request_obj,
                          const SocketAddress& cli_addr,
@@ -121,10 +169,7 @@ char** Cgi::generateEnvp(const HttpRequest& request_obj,
        it != env_map.end(); ++it, ++i) {
     envp[i] = strdup((it->first + "=" + it->second).c_str());
     if (envp[i] == NULL) {
-      for (int j = 0; j < i; ++j) {
-        delete[] envp[j];
-      }
-      delete[] envp;
+      deleteEnvp(envp);
       throw ResponseException(C500);
     }
   }
@@ -132,57 +177,17 @@ char** Cgi::generateEnvp(const HttpRequest& request_obj,
   return envp;
 }
 
-void Cgi::readPipe() {
-  char buf[BUF_SIZE + 1];
-
-  size_t read_bytes = read(pipe_fds_[READ], buf, BUF_SIZE);
-  if (static_cast<ssize_t>(read_bytes) == -1) {
-    close(pipe_fds_[WRITE]);
-    close(pipe_fds_[READ]);
-    kill(pid_, SIGTERM);
-    throw ResponseException(C500);
-  }
-  if (read_bytes == 0) {
-    is_completed_ = true;
-    return;
-  }
-  read_buf_ += std::string(buf, read_bytes);
-}
-
-void Cgi::writePipe() {
-  size_t write_bytes =
-      write(pipe_fds_[WRITE], write_buf_.c_str(), write_buf_.size());
-  if (static_cast<ssize_t>(write_bytes) == -1) {
-    close(pipe_fds_[WRITE]);
-    close(pipe_fds_[READ]);
-    kill(pid_, SIGTERM);
-    throw ResponseException(C500);
-  }
-  if (write_bytes < write_buf_.size()) {
-    write_buf_.erase(0, write_bytes);
-  }
-}
-
-int* Cgi::getPipe() { return pipe_fds_; }
-
-const int* Cgi::getPipe() const { return pipe_fds_; }
-
-void Cgi::clear() {
-  close(pipe_fds_[READ]);
-  close(pipe_fds_[WRITE]);
-  write_buf_.clear();
-  read_buf_.clear();
-  is_completed_ = false;
-  pid_ = -1;
-  pipe_fds_[READ] = -1;
-  pipe_fds_[WRITE] = -1;
-}
-
 std::string Cgi::getAbsolutePath(const std::string& uri) const {
   char buf[FILENAME_MAX];
   if (!getcwd(buf, FILENAME_MAX)) {
     throw ResponseException(C500);
   }
-  std::string pwd(buf);
-  return pwd + uri;
+  return buf + uri;
+}
+
+void Cgi::deleteEnvp(char** envp) const {
+  for (int i = 0; envp[i]; ++i) {
+    delete[] envp[i];
+  }
+  delete[] envp;
 }
