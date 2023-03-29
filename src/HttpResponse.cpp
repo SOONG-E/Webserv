@@ -101,11 +101,11 @@ std::string HttpResponse::combine(const HttpRequest& request,
   header += "Content-Length: " + toString(body.size()) + CRLF;
   header += "Content-Type: text/html" + CRLF;
   header += "Connection: ";
-  if (request.getHeader("Connection").empty()) {
+  if (request.getHeader("CONNECTION").empty()) {
     header += "keep-alive" + DOUBLE_CRLF;
     return header + body;
   }
-  header += request.getHeader("Connection") + DOUBLE_CRLF;
+  header += request.getHeader("CONNECTION") + DOUBLE_CRLF;
   return header + body;
 }
 

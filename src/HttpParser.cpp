@@ -71,10 +71,10 @@ void HttpParser::setHeader(void) {
 }
 
 void HttpParser::handlePost(void) {
-  if (!request_.getHeader("Content-Length").empty()) {
+  if (!request_.getHeader("CONTENT-LENGTH").empty()) {
     if (request_.getContentLength() == static_cast<std::size_t>(-1)) {
       try {
-        request_.setContentLength(::stoi(request_.getHeader("Content-Length")));
+        request_.setContentLength(::stoi(request_.getHeader("CONTENT-LENGTH")));
       } catch (std::invalid_argument& e) {
         throw ResponseException(C400);
       }
@@ -88,7 +88,7 @@ void HttpParser::handlePost(void) {
     }
     return;
   }
-  if (request_.getHeader("Transfer-Encoding") != "chunked") {
+  if (request_.getHeader("TRANSFER-ENCODING") != "chunked") {
     throw ResponseException(C411);
   }
   if (buffer_.find(DOUBLE_CRLF, bound_pos_) == std::string::npos) return;
@@ -142,12 +142,14 @@ void HttpParser::parseHeaderFields(const std::string& header_part) {
     if (header->length() == 0) break;
     line = split(*header, ":");
     if (line.size() < 2) throw ResponseException(C400);
+    std::transform(line[0].begin(), line[0].end(), line[0].begin(), ::toupper);
     request_.addHeader(trim(line[0]), trim(line[1]));
   }
+
   request_.setHost(request_.getHeader("Host"));
   if (request_.getHost().empty()) throw ResponseException(C400);
-  if (request_.getHeader("Content-Type").empty()) {
-    request_.addHeader("Content-Type", "application/octet-stream");
+  if (request_.getHeader("CONTENT-TYPE").empty()) {
+    request_.addHeader("CONTENT-TYPE", "application/octet-stream");
   }
 }
 

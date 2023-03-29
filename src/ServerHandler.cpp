@@ -165,7 +165,7 @@ void ServerHandler::receiveRequest(Client& client,
     if (parser.isCompleted()) {
       const HttpRequest& request_obj = client.getRequestObj();
       const ServerBlock& server_block =
-          findServerBlock(client.getSocketKey(), request_obj.getHeader("Host"));
+          findServerBlock(client.getSocketKey(), request_obj.getHeader("HOST"));
       const LocationBlock& location_block =
           server_block.findLocationBlock(request_obj.getUri());
 
@@ -189,7 +189,7 @@ void ServerHandler::sendResponse(Client& client,
       HttpParser& parser = client.getParser();
       HttpResponse& response_obj = client.getResponseObj();
 
-      if (request_obj.getHeader("Connection") == "close" ||
+      if (request_obj.getHeader("CONNECTION") == "close" ||
           !response_obj.isSuccessCode()) {
         delete_clients.push_back(client.getFD());
         closeConnection(client);

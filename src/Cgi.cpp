@@ -2,7 +2,7 @@
 
 #include "constant.hpp"
 
-Cgi::Cgi() : script_pid_(-1), is_completed_(false) {
+Cgi::Cgi() : is_completed_(false), script_pid_(-1) {
   pipe_fds_[READ] = -1;
   pipe_fds_[WRITE] = -1;
 }
@@ -83,7 +83,7 @@ char** Cgi::makeEnvp(const HttpRequest& request_obj) const {
 
   env_map["AUTH_TYPE"] = "";
   env_map["CONTENT_LENGTH"] = request_obj.getContentLength();
-  env_map["CONTENT_TYPE"] = request_obj.getHeader("Content-Type");
+  env_map["CONTENT_TYPE"] = request_obj.getHeader("CONTENT-TYPE");
   env_map["GATEWAY_INTERFACE"] = "CGI/1.1";
   env_map["PATH_INFO"] = request_obj.getUri();
   // env_map["PATH_TRANSLATED"] = pull_path
