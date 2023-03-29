@@ -28,7 +28,6 @@ Cgi& Cgi::operator=(const Cgi& src) {
 Cgi::~Cgi() {
   close(pipe_fds_[READ]);
   close(pipe_fds_[WRITE]);
-  kill(pid_, SIGTERM);
 }
 
 void Cgi::runCgiScript(const HttpRequest& request_obj,
