@@ -20,11 +20,11 @@ class ServerHandler {
   ServerHandler& operator=(const ServerHandler& src);
   ~ServerHandler();
 
+  void registerSignalHandlers() const;
   void configureServer(const Config& config);
   void createServers();
   void acceptConnections();
   void respondToClients();
-  void registerSignalHandlers();
 
  private:
   typedef std::map<std::string, std::vector<ServerBlock> > server_blocks_type;
@@ -32,14 +32,14 @@ class ServerHandler {
   typedef std::map<int, Client> clients_type;
   typedef Selector selector_type;
 
-  const ServerBlock& findServerBlock(const std::string& socket_key,
-                                     const std::string& server_name);
   void receiveRequest(Client& client, std::vector<int>& delete_clients);
   void sendResponse(Client& client, std::vector<int>& delete_clients);
-  void closeConnection(Client& client);
-  void deleteClients(const std::vector<int>& delete_clients);
+  const ServerBlock& findServerBlock(const std::string& socket_key,
+                                     const std::string& server_name);
   void validateRequest(const HttpRequest& request_obj,
                        const LocationBlock& location_block);
+  void closeConnection(Client& client);
+  void deleteClients(const std::vector<int>& delete_clients);
 
   server_blocks_type server_blocks_;
   server_sockets_type server_sockets_;

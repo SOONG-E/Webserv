@@ -25,6 +25,11 @@ ServerHandler& ServerHandler::operator=(const ServerHandler& src) {
 
 ServerHandler::~ServerHandler() {}
 
+void ServerHandler::registerSignalHandlers() const {
+  signal(SIGPIPE, SIG_IGN);
+  signal(SIGCHLD, SIG_IGN);
+}
+
 void ServerHandler::configureServer(const Config& config) {
   const std::vector<ServerBlock>& serv_blocks = config.getServerBlocks();
 
@@ -113,11 +118,6 @@ void ServerHandler::respondToClients() {
   }
 }
 
-void ServerHandler::registerSignalHandlers() {
-  signal(SIGPIPE, SIG_IGN);
-  signal(SIGCHLD, SIG_IGN);
-}
-
 void ServerHandler::receiveRequest(Client& client,
                                    std::vector<int>& delete_clients) {
   try {
@@ -140,7 +140,6 @@ void ServerHandler::receiveRequest(Client& client,
           server_block.findLocationBlock(request_obj.getUri());
 
       HttpResponse& response_obj = client.getResponseObj();
-
       response_obj.setServerBlock(&server_block);
       response_obj.setLocationBlock(&location_block);
 
@@ -174,27 +173,12 @@ void ServerHandler::sendResponse(Client& client,
         closeConnection(client);
         return;
       }
-      client.getParser().clear();
-      client.getCgi().clear();
-      response_obj.clear();
+      client.clear();
     }
   } catch (const std::exception& e) {
     client.getResponseObj().setStatus(C500);
     client.clearBuffer();
     std::cerr << "[Error] Send failed: " << e.what() << '\n';
-  }
-}
-
-void ServerHandler::validateRequest(const HttpRequest& request_obj,
-                                    const LocationBlock& location_block) {
-  const std::string& request_method = request_obj.getMethod();
-  if (!location_block.isImplementedMethod(request_method)) {
-    throw ResponseException(C501);
-  } else if (!location_block.isAllowedMethod(request_method)) {
-    throw ResponseException(C405);
-  } else if (request_method == METHODS[POST] &&
-             location_block.getBodyLimit() < request_obj.getContentLength()) {
-    throw ResponseException(C413);
   }
 }
 
@@ -212,6 +196,19 @@ const ServerBlock& ServerHandler::findServerBlock(
     }
   }
   return server_blocks_of_key[0];
+}
+
+void ServerHandler::validateRequest(const HttpRequest& request_obj,
+                                    const LocationBlock& location_block) {
+  const std::string& request_method = request_obj.getMethod();
+  if (!location_block.isImplementedMethod(request_method)) {
+    throw ResponseException(C501);
+  } else if (!location_block.isAllowedMethod(request_method)) {
+    throw ResponseException(C405);
+  } else if (request_method == METHODS[POST] &&
+             location_block.getBodyLimit() < request_obj.getContentLength()) {
+    throw ResponseException(C413);
+  }
 }
 
 void ServerHandler::closeConnection(Client& client) {
