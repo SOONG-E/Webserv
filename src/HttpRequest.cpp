@@ -75,6 +75,10 @@ void HttpRequest::setContentLength(std::size_t content_length) {
   content_length_ = content_length;
 }
 
+bool HttpRequest::isCgi() const {
+  return !uri_.compare(0, CGI_PATH.size(), CGI_PATH);
+}
+
 void HttpRequest::addHeader(const std::string& key, const std::string& value) {
   try {
     headers_.at(key).push_back(value);
