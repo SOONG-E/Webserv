@@ -49,10 +49,6 @@ Cgi& Client::getCgi() { return cgi_; }
 
 const Cgi& Client::getCgi() const { return cgi_; }
 
-const std::string& Client::getBuffer() const { return buf_; }
-
-void Client::setBuffer(const std::string& buf) { buf_ = buf; }
-
 const SocketAddress& Client::getServerAddress() const { return serv_address_; }
 
 const SocketAddress& Client::getClientAddress() const { return cli_address_; }

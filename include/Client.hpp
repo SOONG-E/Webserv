@@ -27,11 +27,9 @@ class Client {
   const HttpResponse& getResponseObj() const;
   Cgi& getCgi();
   const Cgi& getCgi() const;
-  const std::string& getBuffer() const;
   const SocketAddress& getServerAddress() const;
   const SocketAddress& getClientAddress() const;
 
-  void setBuffer(const std::string& buf);
   void clearBuffer();
 
   std::string receive() const;
@@ -45,6 +43,8 @@ class Client {
   void logAddressInfo() const;
   void logConnectionInfo() const;
   void logReceiveInfo(const std::string& request) const;
+
+  void clear() const;
 
  private:
   int fd_;
