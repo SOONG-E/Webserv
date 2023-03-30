@@ -96,13 +96,12 @@ void Client::executeCgiIO() {
     cgi_selector.registerFD(pipe_fds[WRITE]);
     cgi_selector.registerFD(pipe_fds[READ]);
 
-    if (cgi_selector.select() > 0) {
-      if (cgi_.hasBody() && cgi_selector.isWritable(pipe_fds[WRITE])) {
-        cgi_.writeToPipe();
-      }
-      if (cgi_selector.isReadable(pipe_fds[READ])) {
-        cgi_.readToPipe();
-      }
+    cgi_selector.select();
+    if (cgi_.hasBody() && cgi_selector.isWritable(pipe_fds[WRITE])) {
+      cgi_.writeToPipe();
+    }
+    if (cgi_selector.isReadable(pipe_fds[READ])) {
+      cgi_.readToPipe();
     }
   } catch (const std::exception& e) {
     response_obj_.setStatus(C500);

@@ -27,11 +27,13 @@ class ServerBlock {
   void addLocationBlock(const LocationBlock& location_block);
 
   const LocationBlock& findLocationBlock(const std::string& request_uri) const;
-  const LocationBlock& redirect(const LocationBlock& location) const;
   std::set<std::string> keys(void) const;
   void clear(void);
 
  private:
+  std::size_t find(const std::string& uri) const;
+  const LocationBlock& redirect(const LocationBlock& location) const;
+
   std::vector<Listen> listens_;
   std::set<std::string> server_names_;
   std::map<std::string, std::string> error_pages_;

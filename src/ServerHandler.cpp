@@ -59,22 +59,21 @@ void ServerHandler::createServers() {
 
 void ServerHandler::acceptConnections() {
   try {
-    if (server_selector_.select() > 0) {
-      for (std::size_t i = 0; i < server_sockets_.size(); ++i) {
-        if (server_selector_.isReadable(server_sockets_[i].getFD())) {
-          const SocketAddress& address = server_sockets_[i].getAddress();
-          std::string socket_key = address.getIP() + ":" + address.getPort();
-          const std::vector<ServerBlock>& server_blocks_of_key =
-              server_blocks_[socket_key];
-          const ServerBlock& default_server = server_blocks_of_key.front();
+    server_selector_.select();
+    for (std::size_t i = 0; i < server_sockets_.size(); ++i) {
+      if (server_selector_.isReadable(server_sockets_[i].getFD())) {
+        const SocketAddress& address = server_sockets_[i].getAddress();
+        std::string socket_key = address.getIP() + ":" + address.getPort();
+        const std::vector<ServerBlock>& server_blocks_of_key =
+            server_blocks_[socket_key];
+        const ServerBlock& default_server = server_blocks_of_key.front();
 
-          Client new_client = server_sockets_[i].accept(default_server);
+        Client new_client = server_sockets_[i].accept(default_server);
 
-          int client_fd = new_client.getFD();
+        int client_fd = new_client.getFD();
 
-          client_selector_.registerFD(client_fd);
-          clients_.insert(std::make_pair(client_fd, new_client));
-        }
+        client_selector_.registerFD(client_fd);
+        clients_.insert(std::make_pair(client_fd, new_client));
       }
     }
   } catch (const std::exception& e) {
@@ -84,33 +83,32 @@ void ServerHandler::acceptConnections() {
 
 void ServerHandler::respondToClients() {
   try {
-    if (client_selector_.select() > 0) {
-      Client* client;
-      std::vector<int> delete_clients;
+    client_selector_.select();
+    Client* client;
+    std::vector<int> delete_clients;
 
-      delete_clients.reserve(clients_.size());
+    delete_clients.reserve(clients_.size());
 
-      for (clients_type::iterator it = clients_.begin(); it != clients_.end();
-           ++it) {
-        client = &it->second;
-        int client_fd = client->getFD();
+    for (clients_type::iterator it = clients_.begin(); it != clients_.end();
+         ++it) {
+      client = &it->second;
+      int client_fd = client->getFD();
 
-        if (client_selector_.isReadable(client_fd)) {
-          receiveRequest(*client, delete_clients);
-        }
-        if (client->isReadyToCgiIO()) {
-          client->executeCgiIO();
-        }
-        if (client_selector_.isWritable(client_fd) && client->isReadyToSend()) {
-          sendResponse(*client, delete_clients);
-        }
+      if (client_selector_.isReadable(client_fd)) {
+        receiveRequest(*client, delete_clients);
       }
-
-      if (!delete_clients.empty()) {
-        deleteClients(delete_clients);
+      if (client->isReadyToCgiIO()) {
+        client->executeCgiIO();
+      }
+      if (client_selector_.isWritable(client_fd) && client->isReadyToSend()) {
+        sendResponse(*client, delete_clients);
       }
     }
-  } catch (const std::exception& e) {
+
+    if (!delete_clients.empty()) {
+      deleteClients(delete_clients);
+    }
+   } catch (const std::exception& e) {
     std::cerr << "[Error] Select failed: " << e.what() << '\n';
   }
 }
