@@ -28,8 +28,8 @@ class Cgi {
   void writePipe();
   void readPipe();
   bool isCompleted() const;
-  bool isWriteCompleted() const;
-  const std::string& getCgiResponse() const;
+  bool hasBody() const;
+  const std::string& getResponse() const;
   const int* getPipe() const;
   void clear();
 
@@ -41,9 +41,9 @@ class Cgi {
   void deleteEnvp(char** envp) const;
 
   bool is_completed_;
-  bool is_write_completed_;
   int pipe_fds_[2];
-  std::string buf_;
+  std::string body_;
+  std::string response_;
   pid_t pid_;
 };
 

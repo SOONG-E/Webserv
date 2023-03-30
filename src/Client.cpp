@@ -72,7 +72,7 @@ std::string Client::receive() const {
 void Client::send() {
   if (!isPartialWritten()) {
     buf_ = response_obj_.generate(parser_.getRequestObj(), isCgi(),
-                                  cgi_.getCgiResponse());
+                                  cgi_.getResponse());
   }
 
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
@@ -91,17 +91,16 @@ void Client::send() {
 void Client::executeCgiIO() {
   try {
     Selector cgi_selector;
-
     const int* pipe = cgi_.getPipe();
 
     cgi_selector.registerFD(pipe[WRITE]);
     cgi_selector.registerFD(pipe[READ]);
 
     if (cgi_selector.select() > 0) {
-      if (!cgi_.isWriteCompleted() && cgi_selector.isWritable(pipe[WRITE])) {
+      if (cgi_.hasBody() && cgi_selector.isWritable(pipe[WRITE])) {
         cgi_.writePipe();
       }
-      if (cgi_.isWriteCompleted() && cgi_selector.isReadable(pipe[READ])) {
+      if (cgi_selector.isReadable(pipe[READ])) {
         cgi_.readPipe();
       }
     }

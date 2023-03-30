@@ -8,7 +8,7 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-Cgi::Cgi() : is_completed_(false), is_write_completed_(false), pid_(-1) {
+Cgi::Cgi() : is_completed_(false), pid_(-1) {
   pipe_fds_[READ] = -1;
   pipe_fds_[WRITE] = -1;
 }
@@ -18,11 +18,11 @@ Cgi::Cgi(const Cgi& src) { *this = src; }
 Cgi& Cgi::operator=(const Cgi& src) {
   if (this != &src) {
     is_completed_ = src.is_completed_;
-    is_write_completed_ = src.is_write_completed_;
     pipe_fds_[READ] = src.pipe_fds_[READ];
     pipe_fds_[WRITE] = src.pipe_fds_[WRITE];
+    body_ = src.body_;
+    response_ = src.response_;
     pid_ = src.pid_;
-    buf_ = src.buf_;
   }
   return *this;
 }
@@ -83,14 +83,15 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
     throw ResponseException(C500);
   }
 
-  if (request_obj.getMethod() == "GET") {
+  if (request_obj.getMethod() != "POST") {
     close(pipe_fds_[WRITE]);
   }
-  buf_ = request_obj.getBody();
+  body_ = request_obj.getBody();
 }
 
 void Cgi::writePipe() {
-  std::size_t write_bytes = write(pipe_fds_[WRITE], buf_.c_str(), buf_.size());
+  std::size_t write_bytes =
+      write(pipe_fds_[WRITE], body_.c_str(), body_.size());
 
   if (static_cast<ssize_t>(write_bytes) == -1) {
     close(pipe_fds_[READ]);
@@ -98,11 +99,10 @@ void Cgi::writePipe() {
     kill(pid_, SIGTERM);
     throw ResponseException(C500);
   }
-  if (write_bytes == buf_.size()) {
-    is_write_completed_ = true;
+  if (write_bytes == body_.size()) {
     close(pipe_fds_[WRITE]);
   }
-  buf_.erase(0, write_bytes);
+  body_.erase(0, write_bytes);
 }
 
 void Cgi::readPipe() {
@@ -119,24 +119,24 @@ void Cgi::readPipe() {
     is_completed_ = true;
     close(pipe_fds_[READ]);
   }
-  buf_ += std::string(buf, read_bytes);
+  response_ += std::string(buf, read_bytes);
 }
 
 const int* Cgi::getPipe() const { return pipe_fds_; }
 
-const std::string& Cgi::getCgiResponse() const { return buf_; }
+const std::string& Cgi::getResponse() const { return response_; }
 
 bool Cgi::isCompleted() const { return is_completed_; }
 
-bool Cgi::isWriteCompleted() const { return is_write_completed_; }
+bool Cgi::hasBody() const { return !body_.empty(); }
 
 void Cgi::clear() {
   is_completed_ = false;
-  is_write_completed_ = false;
   pipe_fds_[READ] = -1;
   pipe_fds_[WRITE] = -1;
   pid_ = -1;
-  buf_.clear();
+  body_.clear();
+  response_.clear();
 }
 
 char** Cgi::generateEnvp(const HttpRequest& request_obj,
