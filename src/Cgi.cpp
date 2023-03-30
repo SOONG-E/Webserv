@@ -27,10 +27,7 @@ Cgi& Cgi::operator=(const Cgi& src) {
   return *this;
 }
 
-Cgi::~Cgi() {
-  close(pipe_fds_[READ]);
-  close(pipe_fds_[WRITE]);
-}
+Cgi::~Cgi() {}
 
 void Cgi::runCgiScript(const HttpRequest& request_obj,
                        const SocketAddress& cli_addr,
@@ -80,33 +77,32 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
 
   if (fcntl(pipe_fds_[READ], F_SETFL, O_NONBLOCK) == -1 ||
       fcntl(pipe_fds_[WRITE], F_SETFL, O_NONBLOCK) == -1) {
+    close(pipe_fds_[READ]);
+    close(pipe_fds_[WRITE]);
+    kill(pid_, SIGTERM);
     throw ResponseException(C500);
   }
 
   if (request_obj.getMethod() == "GET") {
     close(pipe_fds_[WRITE]);
-  } else {
-    buf_ = request_obj.getBody();
   }
+  buf_ = request_obj.getBody();
 }
 
 void Cgi::writePipe() {
   std::size_t write_bytes = write(pipe_fds_[WRITE], buf_.c_str(), buf_.size());
 
   if (static_cast<ssize_t>(write_bytes) == -1) {
-    close(pipe_fds_[WRITE]);
     close(pipe_fds_[READ]);
+    close(pipe_fds_[WRITE]);
     kill(pid_, SIGTERM);
     throw ResponseException(C500);
   }
-
   if (write_bytes == buf_.size()) {
     is_write_completed_ = true;
     close(pipe_fds_[WRITE]);
-    buf_.clear();
-  } else {
-    buf_.erase(0, write_bytes);
   }
+  buf_.erase(0, write_bytes);
 }
 
 void Cgi::readPipe() {
@@ -115,14 +111,13 @@ void Cgi::readPipe() {
   std::size_t read_bytes = read(pipe_fds_[READ], buf, BUF_SIZE);
 
   if (static_cast<ssize_t>(read_bytes) == -1) {
-    close(pipe_fds_[WRITE]);
     close(pipe_fds_[READ]);
     kill(pid_, SIGTERM);
     throw ResponseException(C500);
   }
   if (read_bytes == 0) {
     is_completed_ = true;
-    return;
+    close(pipe_fds_[READ]);
   }
   buf_ += std::string(buf, read_bytes);
 }
@@ -137,8 +132,7 @@ bool Cgi::isWriteCompleted() const { return is_write_completed_; }
 
 void Cgi::clear() {
   is_completed_ = false;
-  close(pipe_fds_[READ]);
-  close(pipe_fds_[WRITE]);
+  is_write_completed_ = false;
   pipe_fds_[READ] = -1;
   pipe_fds_[WRITE] = -1;
   pid_ = -1;
