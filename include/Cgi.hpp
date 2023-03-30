@@ -1,6 +1,7 @@
 #ifndef CGI_HPP_
 #define CGI_HPP_
 
+#include <fcntl.h>
 #include <unistd.h>
 
 #include <csignal>
