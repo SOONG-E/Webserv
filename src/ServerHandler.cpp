@@ -161,7 +161,6 @@ void ServerHandler::sendResponse(Client& client,
                                  std::vector<int>& delete_clients) {
   try {
     client.send();
-
     if (!client.isPartialWritten()) {
       const HttpRequest& request_obj = client.getRequestObj();
       HttpResponse& response_obj = client.getResponseObj();
