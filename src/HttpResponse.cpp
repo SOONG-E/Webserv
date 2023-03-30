@@ -55,9 +55,13 @@ void HttpResponse::clear(void) {
 
 bool HttpResponse::isSuccessCode(void) const { return status_ <= C200; }
 
-std::string HttpResponse::generate(const HttpRequest& request) {
+std::string HttpResponse::generate(const HttpRequest& request,
+                                   const std::string& cgi_response) {
   if (!isSuccessCode()) {
     return generateErrorPage(request);
+  }
+  if (request.isCgi()) {
+    return combineCgiResponse(request, cgi_response);
   }
   std::string body;
   try {
@@ -68,16 +72,6 @@ std::string HttpResponse::generate(const HttpRequest& request) {
         readFile(server_block_->getErrorPage(ResponseStatus::CODES[status_]));
   }
   return generateResponse(request, body);
-}
-
-std::string HttpResponse::generate(const HttpRequest& request,
-                                   const std::string& cgi_response) {
-  std::string header = commonHeader(request);
-  // entity-header
-  std::size_t body_size =
-      cgi_response.size() - cgi_response.find(DOUBLE_CRLF) - DOUBLE_CRLF.size();
-  header += "Content-Length: " + toString(body_size) + CRLF;
-  return header + cgi_response;
 }
 
 std::string HttpResponse::generateErrorPage(const HttpRequest& request) {
@@ -109,6 +103,16 @@ std::string HttpResponse::combine(const HttpRequest& request,
   header += "Content-Length: " + toString(body.size()) + CRLF;
   header += "Content-Type: text/html" + DOUBLE_CRLF;
   return header + body;
+}
+
+std::string HttpResponse::combineCgiResponse(
+    const HttpRequest& request, const std::string& cgi_response) const {
+  std::string header = commonHeader(request);
+  // entity-header
+  std::size_t body_size =
+      cgi_response.size() - cgi_response.find(DOUBLE_CRLF) - DOUBLE_CRLF.size();
+  header += "Content-Length: " + toString(body_size) + CRLF;
+  return header + cgi_response;
 }
 
 std::string HttpResponse::commonHeader(const HttpRequest& request) const {

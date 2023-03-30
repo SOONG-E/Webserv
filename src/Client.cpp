@@ -71,17 +71,11 @@ std::string Client::receive() const {
 
 void Client::send() {
   if (!isPartialWritten()) {
-    const HttpRequest& request_obj = parser_.getRequestObj();
-
-    if (request_obj.isCgi() && response_obj_.isSuccessCode()) {
-      buf_ = response_obj_.generate(parser_.getRequestObj(),
-                                    cgi_.getCgiResponse());
-    } else {
-      buf_ = response_obj_.generate(parser_.getRequestObj());
-    }
+    buf_ =
+        response_obj_.generate(parser_.getRequestObj(), cgi_.getCgiResponse());
   }
-  std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
 
+  std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
   if (write_bytes == static_cast<std::size_t>(-1)) {
     throw SocketSendException(strerror(errno));
   }

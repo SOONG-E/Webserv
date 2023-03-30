@@ -28,7 +28,6 @@ class HttpResponse {
 
   void clear(void);
   bool isSuccessCode(void) const;
-  std::string generate(const HttpRequest& request);
   std::string generate(const HttpRequest& request,
                        const std::string& cgi_response);
 
@@ -38,6 +37,8 @@ class HttpResponse {
                                const std::string& body) const;
   std::string combine(const HttpRequest& request,
                       const std::string& body) const;
+  std::string combineCgiResponse(const HttpRequest& request,
+                                 const std::string& cgi_response) const;
   std::string commonHeader(const HttpRequest& request) const;
   std::string rootUri(std::string uri) const;
   std::string readIndexFile(const std::string& url) const;
