@@ -128,4 +128,24 @@ bool LocationBlock::isAllowedMethod(const std::string& method) const {
   return allowed_methods_.find(method) != allowed_methods_.end();
 }
 
+bool LocationBlock::isCgi(const std::string& request_uri,
+                          const std::string& request_method,
+                          const std::string& request_query) const {
+  std::map<std::string, std::string>::const_iterator iter =
+      cgi_param_.find("CGI_EXTENSION");
+  if (iter == cgi_param_.end()) {
+    return false;
+  }
+  const std::string& extension = iter->second.substr(1);
+  std::size_t index = request_uri.rfind(extension);
+  if (index == std::string::npos ||
+      index != request_uri.size() - extension.size()) {
+    return false;
+  }
+  if (request_method == METHODS[POST] || !request_query.empty()) {
+    return true;
+  }
+  return false;
+}
+
 void LocationBlock::clear(void) { *this = LocationBlock(); }

@@ -121,7 +121,9 @@ void Client::clear() {
 bool Client::isCgi() const {
   const LocationBlock* location_block = response_obj_.getLocationBlock();
   if (!location_block) return false;
-  return !location_block->getCgiParam("CGI_PATH").empty();
+  const HttpRequest& request_obj = parser_.getRequestObj();
+  return location_block->isCgi(request_obj.getUri(), request_obj.getMethod(),
+                               request_obj.getQueryString());
 }
 
 bool Client::isPartialWritten() const { return !buf_.empty(); }
