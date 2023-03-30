@@ -16,15 +16,13 @@
 const std::string HttpResponse::DEFAULT_ERROR_PAGE = "html/error.html";
 
 HttpResponse::HttpResponse(const ServerBlock& default_server)
-    : default_server_(default_server),
+    : status_(DEFAULT_STATUS),
+      default_server_(default_server),
       server_block_(NULL),
-      location_block_(NULL) {
-  setStatus(DEFAULT_INDEX);
-}
+      location_block_(NULL) {}
 
 HttpResponse::HttpResponse(const HttpResponse& origin)
-    : code_(origin.code_),
-      reason_(origin.reason_),
+    : status_(origin.status_),
       default_server_(origin.default_server_),
       server_block_(origin.server_block_),
       location_block_(origin.location_block_) {}
@@ -39,10 +37,7 @@ const LocationBlock* HttpResponse::getLocationBlock(void) const {
   return location_block_;
 }
 
-void HttpResponse::setStatus(const int index) {
-  code_ = ResponseStatus::CODES[index];
-  reason_ = ResponseStatus::REASONS[index];
-}
+void HttpResponse::setStatus(const int status) { status_ = status; }
 
 void HttpResponse::setServerBlock(const ServerBlock* server_block) {
   server_block_ = server_block;
@@ -53,14 +48,12 @@ void HttpResponse::setLocationBlock(const LocationBlock* location_block) {
 }
 
 void HttpResponse::clear(void) {
-  setStatus(DEFAULT_INDEX);
+  status_ = DEFAULT_STATUS;
   server_block_ = NULL;
   location_block_ = NULL;
 }
 
-bool HttpResponse::isSuccessCode(void) const {
-  return code_.size() == 3 && code_[0] == '2';
-}
+bool HttpResponse::isSuccessCode(void) const { return status_ <= C200; }
 
 std::string HttpResponse::generate(const HttpRequest& request) {
   if (!isSuccessCode()) {
@@ -71,28 +64,15 @@ std::string HttpResponse::generate(const HttpRequest& request) {
     body = rootUri(request.getUri());
   } catch (FileOpenException& e) {
     setStatus(C404);
-    body = readFile(server_block_->getErrorPage(code_));
+    body =
+        readFile(server_block_->getErrorPage(ResponseStatus::CODES[status_]));
   }
   return generateResponse(request, body);
 }
 
 std::string HttpResponse::generate(const HttpRequest& request,
                                    const std::string& cgi_response) {
-  // Status-Line
-  std::string header = "HTTP/1.1 " + code_ + " " + reason_ + CRLF;
-  // general-header
-  header += "Connection: ";
-  if (request.getHeader("CONNECTION").empty()) {
-    header += "keep-alive" + CRLF;
-  }
-  header += request.getHeader("CONNECTION") + CRLF;
-  header += "Date: " + formatTime("%a, %d %b %Y %H:%M:%S GMT") + CRLF;
-  if (!request.getHeader("Transfer-Encoding").empty()) {
-    header +=
-        "Transfer-Encoding: " + request.getHeader("Transfer-Encoding") + CRLF;
-  }
-  // response-header
-  header += "Server: Webserv" + CRLF;
+  std::string header = commonHeader(request);
   // entity-header
   std::size_t body_size =
       cgi_response.size() - cgi_response.find(DOUBLE_CRLF) - DOUBLE_CRLF.size();
@@ -104,7 +84,8 @@ std::string HttpResponse::generateErrorPage(const HttpRequest& request) {
   if (!server_block_) {
     server_block_ = &default_server_;
   }
-  std::string body = readFile(server_block_->getErrorPage(code_));
+  std::string body =
+      readFile(server_block_->getErrorPage(ResponseStatus::CODES[status_]));
   // test
   if (request.getMethod() == METHODS[PUT]) {
     setStatus(C200);
@@ -123,15 +104,26 @@ std::string HttpResponse::generateResponse(const HttpRequest& request,
 
 std::string HttpResponse::combine(const HttpRequest& request,
                                   const std::string& body) const {
+  std::string header = commonHeader(request);
+  // entity-header
+  header += "Content-Length: " + toString(body.size()) + CRLF;
+  header += "Content-Type: text/html" + DOUBLE_CRLF;
+  return header + body;
+}
+
+std::string HttpResponse::commonHeader(const HttpRequest& request) const {
   // Status-Line
-  std::string header = "HTTP/1.1 " + code_ + " " + reason_ + CRLF;
+  std::string header = "HTTP/1.1 " + ResponseStatus::CODES[status_] + " " +
+                       ResponseStatus::REASONS[status_] + CRLF;
   // general-header
   header += "Connection: ";
-  if (request.getHeader("CONNECTION").empty()) {
+  if (!isSuccessCode()) {
+    header += "close" + CRLF;
+  } else if (!request.getHeader("CONNECTION").empty()) {
+    header += request.getHeader("CONNECTION") + CRLF;
+  } else {
     header += "keep-alive" + CRLF;
-    return header + body;
   }
-  header += request.getHeader("CONNECTION") + CRLF;
   header += "Date: " + formatTime("%a, %d %b %Y %H:%M:%S GMT") + CRLF;
   if (!request.getHeader("Transfer-Encoding").empty()) {
     header +=
@@ -139,10 +131,7 @@ std::string HttpResponse::combine(const HttpRequest& request,
   }
   // response-header
   header += "Server: Webserv" + CRLF;
-  // entity-header
-  header += "Content-Length: " + toString(body.size()) + CRLF;
-  header += "Content-Type: text/html" + DOUBLE_CRLF;
-  return header + body;
+  return header;
 }
 
 std::string HttpResponse::rootUri(std::string uri) const {
