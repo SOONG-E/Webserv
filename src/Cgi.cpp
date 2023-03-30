@@ -78,6 +78,11 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
   pipe_fds_[READ] = pipe_fds2[READ];
   pipe_fds_[WRITE] = pipe_fds1[WRITE];
 
+  if (fcntl(pipe_fds_[READ], F_SETFL, O_NONBLOCK) == -1 ||
+      fcntl(pipe_fds_[WRITE], F_SETFL, O_NONBLOCK) == -1) {
+    throw ResponseException(C500);
+  }
+
   if (request_obj.getMethod() == "GET") {
     close(pipe_fds_[WRITE]);
   } else {
