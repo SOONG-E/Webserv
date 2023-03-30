@@ -1,5 +1,6 @@
 #include "HttpParser.hpp"
 
+#include <algorithm>
 #include <stdexcept>
 
 #include "ResponseStatus.hpp"

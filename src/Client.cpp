@@ -82,7 +82,7 @@ void Client::send() {
   }
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
 
-  if (write_bytes == static_cast<ssize_t>(-1)) {
+  if (write_bytes == static_cast<std::size_t>(-1)) {
     throw SocketSendException(strerror(errno));
   }
 
