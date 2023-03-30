@@ -7,8 +7,8 @@ class Session {
  public:
   Session();
   Session(std::string id);
-  Session(Session &origin);
-  Session operator=(Session &origin);
+  Session(const Session &origin);
+  Session& operator=(const Session &origin);
   ~Session();
 
   const std::string &getId(void) const;

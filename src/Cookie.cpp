@@ -12,18 +12,18 @@ void Cookie::destroyCookie(std::string &session_id) {
 }
 
 const std::string &Cookie::getClientId(std::string &session_id) {
-  Session &session = getSession(session_id);
+  const Session &session = getSession(session_id);
 
   return session.getId();
 }
 
-Session &Cookie::getSession(std::string &session_id) {
+const Session &Cookie::getSession(std::string &session_id) {
   return session_[session_id];
   // 없으면..?
 }
 
-std::string Cookie::createHash(std::string id) {
-  std::string session_id = toString(hash_(id));
+// std::string Cookie::createHash(std::string id) {
+  // std::string session_id = toString(hash_(id));  (since C++11)
 
-  return session_id;
-}
+  // return session_id;
+// }
