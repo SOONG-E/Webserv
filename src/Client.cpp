@@ -58,7 +58,7 @@ std::string Client::receive() const {
 
   std::size_t read_bytes = recv(fd_, &buf, BUF_SIZE, 0);
 
-  if (read_bytes == ERROR) {
+  if (read_bytes == ERROR<std::size_t>()) {
     throw SocketReceiveException(strerror(errno));
   }
 
@@ -76,7 +76,7 @@ void Client::send() {
   }
 
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
-  if (write_bytes == ERROR) {
+  if (write_bytes == ERROR<std::size_t>()) {
     throw SocketSendException(strerror(errno));
   }
 

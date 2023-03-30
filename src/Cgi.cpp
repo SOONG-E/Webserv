@@ -36,10 +36,10 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
   int pipe_fds1[2];
   int pipe_fds2[2];
 
-  if (pipe(pipe_fds1) == ERROR) {
+  if (pipe(pipe_fds1) == ERROR<int>()) {
     throw ResponseException(C500);
   }
-  if (pipe(pipe_fds2) == ERROR) {
+  if (pipe(pipe_fds2) == ERROR<int>()) {
     close(pipe_fds1[READ]);
     close(pipe_fds1[WRITE]);
     throw ResponseException(C500);
@@ -50,7 +50,7 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
 
   pid_ = fork();
 
-  if (pid_ == ERROR) {
+  if (pid_ == ERROR<pid_t>()) {
     deleteEnvp(envp);
     close(pipe_fds1[READ]);
     close(pipe_fds1[WRITE]);
@@ -75,8 +75,8 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
   pipe_fds_[READ] = pipe_fds2[READ];
   pipe_fds_[WRITE] = pipe_fds1[WRITE];
 
-  if (fcntl(pipe_fds_[READ], F_SETFL, O_NONBLOCK) == ERROR ||
-      fcntl(pipe_fds_[WRITE], F_SETFL, O_NONBLOCK) == ERROR) {
+  if (fcntl(pipe_fds_[READ], F_SETFL, O_NONBLOCK) == ERROR<int>() ||
+      fcntl(pipe_fds_[WRITE], F_SETFL, O_NONBLOCK) == ERROR<int>()) {
     close(pipe_fds_[READ]);
     close(pipe_fds_[WRITE]);
     kill(pid_, SIGTERM);
@@ -93,7 +93,7 @@ void Cgi::writeToPipe() {
   std::size_t write_bytes =
       write(pipe_fds_[WRITE], body_.c_str(), body_.size());
 
-  if (write_bytes == ERROR) {
+  if (write_bytes == ERROR<std::size_t>()) {
     close(pipe_fds_[READ]);
     close(pipe_fds_[WRITE]);
     kill(pid_, SIGTERM);
@@ -110,7 +110,7 @@ void Cgi::readToPipe() {
 
   std::size_t read_bytes = read(pipe_fds_[READ], buf, BUF_SIZE);
 
-  if (read_bytes == ERROR) {
+  if (read_bytes == ERROR<std::size_t>()) {
     close(pipe_fds_[READ]);
     kill(pid_, SIGTERM);
     throw ResponseException(C500);

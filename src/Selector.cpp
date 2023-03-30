@@ -32,7 +32,7 @@ int Selector::select() {
 
   int result = ::select(max_fd_ + 1, &read_fds_, &write_fds_, 0, &tm_);
 
-  if (result == ERROR) {
+  if (result == ERROR<int>()) {
     throw SelectFailedException(strerror(errno));
   }
 

@@ -25,10 +25,10 @@ void ServerSocket::open() {
     throw SocketOpenException("already open");
   }
   fd_ = socket(AF_INET, SOCK_STREAM, 0);
-  if (fd_ == ERROR) {
+  if (fd_ == ERROR<int>()) {
     throw SocketOpenException(strerror(errno));
   }
-}
+} 
 
 void ServerSocket::bind(const SocketAddress& address, int backlog) {
   const int enable = 1;
@@ -37,15 +37,15 @@ void ServerSocket::bind(const SocketAddress& address, int backlog) {
   }
 
   if (::bind(fd_, (sockaddr*)&address.getAddress(), address.getAddressLen()) ==
-      ERROR) {
+      ERROR<int>()) {
     throw SocketBindException(strerror(errno));
   }
 
-  if (fcntl(fd_, F_SETFL, O_NONBLOCK) == ERROR) {
+  if (fcntl(fd_, F_SETFL, O_NONBLOCK) == ERROR<int>()) {
     throw SocketBindException(strerror(errno));
   }
 
-  if (listen(fd_, backlog) == ERROR) {
+  if (listen(fd_, backlog) == ERROR<int>()) {
     throw SocketBindException(strerror(errno));
   }
   address_ = address;
@@ -56,11 +56,11 @@ Client ServerSocket::accept(const ServerBlock& default_server) const {
   socklen_t client_addrlen;
 
   int client_fd = ::accept(fd_, &client_addr, &client_addrlen);
-  if (client_fd == ERROR) {
+  if (client_fd == ERROR<int>()) {
     throw SocketAcceptException(strerror(errno));
   }
 
-  if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == ERROR) {
+  if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == ERROR<int>()) {
     close(client_fd);
     throw SocketAcceptException(strerror(errno));
   }
