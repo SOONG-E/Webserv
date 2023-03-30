@@ -87,7 +87,7 @@ void ConfigParser::parseErrorPage(void) {
   while (peek() != ";") {
     codes.push_back(expect());
   }
-  std::string page = codes.back();
+  const std::string& page = codes.back();
   codes.pop_back();
   for (std::size_t i = 0; i < codes.size(); ++i) {
     server_block_.addErrorPage(codes[i], page);

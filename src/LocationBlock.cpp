@@ -27,7 +27,8 @@ LocationBlock::LocationBlock(const LocationBlock& origin)
       return_url_(origin.return_url_),
       root_(origin.root_),
       autoindex_(origin.autoindex_),
-      index_(origin.index_) {}
+      index_(origin.index_),
+      cgi_param_(origin.cgi_param_) {}
 
 LocationBlock& LocationBlock::operator=(const LocationBlock& origin) {
   if (this != &origin) {
@@ -38,6 +39,7 @@ LocationBlock& LocationBlock::operator=(const LocationBlock& origin) {
     root_ = origin.root_;
     autoindex_ = origin.autoindex_;
     index_ = origin.index_;
+    cgi_param_ = origin.cgi_param_;
   }
   return *this;
 }
