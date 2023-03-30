@@ -101,6 +101,7 @@ void Cgi::writeToPipe() {
   }
   if (write_bytes == body_.size()) {
     close(pipe_fds_[WRITE]);
+    pipe_fds_[WRITE] = -1;
   }
   body_.erase(0, write_bytes);
 }
@@ -118,6 +119,7 @@ void Cgi::readToPipe() {
   if (read_bytes == 0) {
     is_completed_ = true;
     close(pipe_fds_[READ]);
+    pipe_fds_[READ] = -1;
   }
   response_ += std::string(buf, read_bytes);
 }
