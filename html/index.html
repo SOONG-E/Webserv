@@ -11,11 +11,9 @@
 		<div class="main">
 			<div class="main-200">
 				<h3>main!</h3>
-				<FORM action="/cgi-bin/test.py" method="post" >
-					당신이 좋아하는 커피는? <INPUT TYPE="text" NAME="coffee">
-				</FORM>
-				<form action="http://localhost/upload.php" method="post" enctype="multipart/form-data">
-					<input type="file" name="profile">
+				파일 업로드
+				<form action="http://localhost/uploadFile.py" method="post" enctype="multipart/form-data">
+					<input type="file" name="upload_file">
 					<input type="submit">
 			</form>
 			</div>
