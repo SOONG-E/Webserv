@@ -8,16 +8,17 @@
 
 class Cookie {
  public:
-  static std::string createCookie(std::string &id);
-  static void destroyCookie(std::string &session_id);
-  static const std::string &getClientId(std::string &session_id);
-  static Session &getSession(std::string &session_id);
+  std::string createCookie(std::string &id);
+  void destroyCookie(std::string &session_id);
+  const std::string &getClientId(std::string &session_id);
+  Session &getSession(std::string &session_id);
 
  private:
   typedef std::map<std::string, Session> session_type;
 
-  static session_type session_;
-  static std::hash<std::string> hash_;
+  std::string createHash(std::string id);
+  session_type session_;
+  std::hash<std::string> hash_;
 };
 
 #endif
