@@ -106,7 +106,7 @@ void HttpParser::parseHeader(const std::string& header_part) {
 }
 
 void HttpParser::parseCookie(void) {
-  std::string cookie = request_.getHeader("COOKIE");
+  const std::string& cookie = request_.getHeader("COOKIE");
   if (cookie.empty()) {
     return;
   }

@@ -120,7 +120,9 @@ void Client::clear() {
 }
 
 bool Client::isCgi() const {
-  return !response_obj_.getLocationBlock()->getCgiParam("CGI_PATH").empty();
+  const LocationBlock* location_block = response_obj_.getLocationBlock();
+  if (!location_block) return false;
+  return !location_block->getCgiParam("CGI_PATH").empty();
 }
 
 bool Client::isPartialWritten() const { return !buf_.empty(); }

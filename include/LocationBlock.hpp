@@ -32,7 +32,7 @@ class LocationBlock {
   bool getAutoindex(void) const;
   std::vector<std::string>& getIndex(void);
   const std::vector<std::string>& getIndex(void) const;
-  const std::string& getCgiParam(const std::string& key) const;
+  std::string getCgiParam(const std::string& key) const;
 
   void setUri(const std::string& uri);
   void setBodyLimit(const std::string& raw);

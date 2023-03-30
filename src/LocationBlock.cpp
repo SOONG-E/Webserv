@@ -75,7 +75,10 @@ const std::vector<std::string>& LocationBlock::getIndex(void) const {
   return index_;
 }
 
-const std::string& LocationBlock::getCgiParam(const std::string& key) const {
+std::string LocationBlock::getCgiParam(const std::string& key) const {
+  if (cgi_param_.find(key) == cgi_param_.end()) {
+    return "";
+  }
   return cgi_param_.at(key);
 }
 
