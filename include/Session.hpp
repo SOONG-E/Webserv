@@ -5,6 +5,7 @@
 
 class Session {
  public:
+  Session();
   Session(std::string id);
   Session(Session &origin);
   Session operator=(Session &origin);

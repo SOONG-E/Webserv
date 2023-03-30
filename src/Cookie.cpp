@@ -7,6 +7,7 @@ std::string Cookie::createCookie(std::string &id) {
   Session session(id);
 
   session_[session_id] = session;
+  return session_id;
 }
 
 void Cookie::destroyCookie(std::string &session_id) {

@@ -1,5 +1,7 @@
 #include "Session.hpp"
 
+Session::Session() {}
+
 Session::Session(std::string id) : id_(id) {}
 
 Session::Session(Session &origin) : id_(origin.id_) {}
