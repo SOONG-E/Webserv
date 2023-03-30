@@ -21,9 +21,11 @@ enum MethodIndex {
   CONNECT,
 };
 
-const int METHODS_COUNT = 8;
 const std::size_t BUF_SIZE = 65536;
+const std::size_t ERROR = -1;
 const std::size_t HEADER_MAX_SIZE = 8192;
+const int METHODS_COUNT = 8;
+const std::size_t NPOS = -1;
 
 const std::string BASE10 = "0123456789";
 const std::string CRLF = "\r\n";

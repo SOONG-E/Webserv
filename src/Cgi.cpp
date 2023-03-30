@@ -36,10 +36,10 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
   int pipe_fds1[2];
   int pipe_fds2[2];
 
-  if (pipe(pipe_fds1) == -1) {
+  if (pipe(pipe_fds1) == ERROR) {
     throw ResponseException(C500);
   }
-  if (pipe(pipe_fds2) == -1) {
+  if (pipe(pipe_fds2) == ERROR) {
     close(pipe_fds1[READ]);
     close(pipe_fds1[WRITE]);
     throw ResponseException(C500);
@@ -50,7 +50,7 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
 
   pid_ = fork();
 
-  if (pid_ == -1) {
+  if (pid_ == ERROR) {
     deleteEnvp(envp);
     close(pipe_fds1[READ]);
     close(pipe_fds1[WRITE]);
@@ -75,8 +75,8 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
   pipe_fds_[READ] = pipe_fds2[READ];
   pipe_fds_[WRITE] = pipe_fds1[WRITE];
 
-  if (fcntl(pipe_fds_[READ], F_SETFL, O_NONBLOCK) == -1 ||
-      fcntl(pipe_fds_[WRITE], F_SETFL, O_NONBLOCK) == -1) {
+  if (fcntl(pipe_fds_[READ], F_SETFL, O_NONBLOCK) == ERROR ||
+      fcntl(pipe_fds_[WRITE], F_SETFL, O_NONBLOCK) == ERROR) {
     close(pipe_fds_[READ]);
     close(pipe_fds_[WRITE]);
     kill(pid_, SIGTERM);
@@ -93,7 +93,7 @@ void Cgi::writeToPipe() {
   std::size_t write_bytes =
       write(pipe_fds_[WRITE], body_.c_str(), body_.size());
 
-  if (static_cast<ssize_t>(write_bytes) == -1) {
+  if (write_bytes == ERROR) {
     close(pipe_fds_[READ]);
     close(pipe_fds_[WRITE]);
     kill(pid_, SIGTERM);
@@ -110,7 +110,7 @@ void Cgi::readToPipe() {
 
   std::size_t read_bytes = read(pipe_fds_[READ], buf, BUF_SIZE);
 
-  if (static_cast<ssize_t>(read_bytes) == -1) {
+  if (read_bytes == ERROR) {
     close(pipe_fds_[READ]);
     kill(pid_, SIGTERM);
     throw ResponseException(C500);
