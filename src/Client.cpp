@@ -56,7 +56,7 @@ const SocketAddress& Client::getClientAddress() const { return cli_address_; }
 std::string Client::receive() const {
   char buf[BUF_SIZE];
 
-  size_t read_bytes = recv(fd_, &buf, BUF_SIZE, 0);
+  std::size_t read_bytes = recv(fd_, &buf, BUF_SIZE, 0);
 
   if (read_bytes == ERROR) {
     throw SocketReceiveException(strerror(errno));

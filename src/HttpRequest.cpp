@@ -68,7 +68,7 @@ void HttpRequest::setQueryString(const std::string& query_string) {
 }
 
 void HttpRequest::setHost(const std::string& host) {
-  size_t colon = host.find(":");
+  std::size_t colon = host.find(":");
   if (colon == std::string::npos) {
     host_ = host;
     return;

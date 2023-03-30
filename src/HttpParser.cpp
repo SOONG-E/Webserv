@@ -112,7 +112,7 @@ void HttpParser::parseCookie(void) {
   }
 
   std::string session_id_key("session-id");
-  size_t key_length = session_id_key.size();
+  std::size_t key_length = session_id_key.size();
   std::string session_id;
 
   std::vector<std::string> values = split(cookie, ";");
@@ -130,7 +130,7 @@ void HttpParser::parseCookie(void) {
 
 void HttpParser::parseQueryString(void) {
   std::string uri = request_.getUri();
-  size_t query_boundary = uri.find("?");
+  std::size_t query_boundary = uri.find("?");
   if (uri == "?" || query_boundary == std::string::npos) {
     return;
   }
