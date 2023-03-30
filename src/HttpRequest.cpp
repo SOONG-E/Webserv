@@ -45,11 +45,10 @@ std::size_t HttpRequest::getContentLength(void) const {
 }
 
 std::string HttpRequest::getHeader(const std::string& key) const {
-  try {
-    return headers_.at(key).front();
-  } catch (std::out_of_range& e) {
+  if (headers_.find(key) == headers_.end()) {
     return "";
   }
+  return headers_.at(key).front();
 }
 
 const std::string& HttpRequest::getBody(void) const { return body_; }
@@ -86,9 +85,5 @@ bool HttpRequest::isCgi() const {
 }
 
 void HttpRequest::addHeader(const std::string& key, const std::string& value) {
-  try {
-    headers_.at(key).push_back(value);
-  } catch (std::out_of_range& e) {
-    headers_[key] = std::vector<std::string>(1, value);
-  }
+  headers_[key].push_back(value);
 }

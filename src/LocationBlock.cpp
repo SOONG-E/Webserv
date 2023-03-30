@@ -89,11 +89,10 @@ void LocationBlock::setBodyLimit(const std::string& raw) {
     throw ConfigException(std::strerror(errno));
   }
   if (*unit == '\0') return;
-  try {
-    body_limit_ *= UNITS.size.at(unit);
-  } catch (std::out_of_range& e) {
+  if (UNITS.size.find(unit) == UNITS.size.end()) {
     throw ConfigException(ERRORS[TOKEN]);
   }
+  body_limit_ *= UNITS.size.at(unit);
 }
 
 void LocationBlock::addAllowedMethod(const std::string& method) {
