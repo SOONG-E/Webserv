@@ -91,17 +91,17 @@ void Client::send() {
 void Client::executeCgiIO() {
   try {
     Selector cgi_selector;
-    const int* pipe = cgi_.getPipe();
+    const int* pipe_fds = cgi_.getPipeFds();
 
-    cgi_selector.registerFD(pipe[WRITE]);
-    cgi_selector.registerFD(pipe[READ]);
+    cgi_selector.registerFD(pipe_fds[WRITE]);
+    cgi_selector.registerFD(pipe_fds[READ]);
 
     if (cgi_selector.select() > 0) {
-      if (cgi_.hasBody() && cgi_selector.isWritable(pipe[WRITE])) {
-        cgi_.writePipe();
+      if (cgi_.hasBody() && cgi_selector.isWritable(pipe_fds[WRITE])) {
+        cgi_.writeToPipe();
       }
-      if (cgi_selector.isReadable(pipe[READ])) {
-        cgi_.readPipe();
+      if (cgi_selector.isReadable(pipe_fds[READ])) {
+        cgi_.readToPipe();
       }
     }
   } catch (const std::exception& e) {

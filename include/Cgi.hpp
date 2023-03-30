@@ -25,12 +25,12 @@ class Cgi {
                     const SocketAddress& cli_addr,
                     const SocketAddress& serv_addr,
                     const std::string& cgi_path);
-  void writePipe();
-  void readPipe();
+  void writeToPipe();
+  void readToPipe();
   bool isCompleted() const;
   bool hasBody() const;
   const std::string& getResponse() const;
-  const int* getPipe() const;
+  const int* getPipeFds() const;
   void clear();
 
  private:

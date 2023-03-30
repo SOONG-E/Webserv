@@ -89,7 +89,7 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
   body_ = request_obj.getBody();
 }
 
-void Cgi::writePipe() {
+void Cgi::writeToPipe() {
   std::size_t write_bytes =
       write(pipe_fds_[WRITE], body_.c_str(), body_.size());
 
@@ -105,7 +105,7 @@ void Cgi::writePipe() {
   body_.erase(0, write_bytes);
 }
 
-void Cgi::readPipe() {
+void Cgi::readToPipe() {
   char buf[BUF_SIZE];
 
   std::size_t read_bytes = read(pipe_fds_[READ], buf, BUF_SIZE);
@@ -122,7 +122,7 @@ void Cgi::readPipe() {
   response_ += std::string(buf, read_bytes);
 }
 
-const int* Cgi::getPipe() const { return pipe_fds_; }
+const int* Cgi::getPipeFds() const { return pipe_fds_; }
 
 const std::string& Cgi::getResponse() const { return response_; }
 
