@@ -102,6 +102,7 @@ void Cgi::writePipe() {
 
   if (write_bytes == buf_.size()) {
     is_write_completed_ = true;
+    close(pipe_fds_[WRITE]);
     buf_.clear();
   } else {
     buf_.erase(0, write_bytes);
