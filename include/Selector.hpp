@@ -24,16 +24,6 @@ class Selector {
   fd_set fds_;
   fd_set read_fds_;
   fd_set write_fds_;
-
- public:
-  class SelectFailedException : public std::exception {
-   public:
-    SelectFailedException(const char* cause);
-    const char* what() const throw();
-
-   private:
-    const char* cause;
-  };
 };
 
 #endif

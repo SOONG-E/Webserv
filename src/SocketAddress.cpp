@@ -21,7 +21,7 @@ SocketAddress::SocketAddress(const std::string& ip, const std::string& port) {
 
   int result = getaddrinfo(ip.c_str(), port.c_str(), &hints, &addr_info);
   if (result != 0) {
-    throw std::invalid_argument(gai_strerror(result));
+    throw std::runtime_error(gai_strerror(result));
   }
 
   address_ = *(addr_info->ai_addr);

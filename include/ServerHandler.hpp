@@ -17,7 +17,6 @@ class ServerHandler {
  public:
   ServerHandler();
   ServerHandler(const ServerHandler& src);
-  ServerHandler& operator=(const ServerHandler& src);
   ~ServerHandler();
 
   void registerSignalHandlers() const;
@@ -32,13 +31,12 @@ class ServerHandler {
   typedef std::map<int, Client> clients_type;
   typedef Selector selector_type;
 
-  void receiveRequest(Client& client, std::vector<int>& delete_clients);
-  void sendResponse(Client& client, std::vector<int>& delete_clients);
+  void receiveRequest(Client& client);
+  void sendResponse(Client& client);
   const ServerBlock& findServerBlock(const std::string& socket_key,
                                      const std::string& server_name);
   void validateRequest(const HttpRequest& request_obj,
                        const LocationBlock& location_block);
-  void closeConnection(Client& client);
   void deleteClients(const std::vector<int>& delete_clients);
 
   server_blocks_type server_blocks_;

@@ -33,7 +33,7 @@ int Selector::select() {
   int result = ::select(max_fd_ + 1, &read_fds_, &write_fds_, 0, &tm_);
 
   if (result == ERROR<int>()) {
-    throw SelectFailedException(strerror(errno));
+    throw std::runtime_error(strerror(errno));
   }
 
   return result;
@@ -50,10 +50,3 @@ void Selector::clear(int fd) { FD_CLR(fd, &fds_); }
 
 bool Selector::isReadable(int fd) const { return FD_ISSET(fd, &read_fds_); }
 bool Selector::isWritable(int fd) const { return FD_ISSET(fd, &write_fds_); }
-
-Selector::SelectFailedException::SelectFailedException(const char* cause)
-    : cause(cause) {}
-
-const char* Selector::SelectFailedException::what() const throw() {
-  return cause;
-}

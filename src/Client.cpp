@@ -59,13 +59,14 @@ std::string Client::receive() const {
   std::size_t read_bytes = recv(fd_, &buf, BUF_SIZE, 0);
 
   if (read_bytes == ERROR<std::size_t>()) {
-    throw SocketReceiveException(strerror(errno));
+    std::cerr << "[Error] Receive failed: " << strerror(errno) << '\n';
+    throw ResponseException(C500);
   }
-
+  if (read_bytes == 0) {
+    throw ConnectionClosedException();
+  }
   std::string request(buf, read_bytes);
-  if (read_bytes) {
-    logReceiveInfo(request);
-  }
+  logReceiveInfo(request);
   return request;
 }
 
@@ -74,10 +75,11 @@ void Client::send() {
     buf_ = response_obj_.generate(parser_.getRequestObj(), isCgi(),
                                   cgi_.getResponse());
   }
-
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
+
   if (write_bytes == ERROR<std::size_t>()) {
-    throw SocketSendException(strerror(errno));
+    std::cerr << "[Error] Send failed: " << strerror(errno) << '\n';
+    throw ConnectionClosedException();
   }
 
   Log::header("Send Information");
@@ -108,6 +110,15 @@ void Client::executeCgiIO() {
     response_obj_.setStatus(C500);
     std::cerr << "[Error] Cgi IO failed: " << e.what() << '\n';
   }
+}
+
+void Client::close() {
+  ::close(fd_);
+  fd_ = -1;
+
+  Log::header("Close Connection Information");
+  logAddressInfo();
+  Log::footer("Close Connection");
 }
 
 void Client::clearBuffer() { buf_.clear(); }
@@ -164,14 +175,6 @@ void Client::logReceiveInfo(const std::string& request) const {
   Log::footer();
 }
 
-Client::SocketReceiveException::SocketReceiveException(const char* cause)
-    : cause(cause) {}
-
-const char* Client::SocketReceiveException::what() const throw() {
-  return cause;
+const char* Client::ConnectionClosedException::what() const throw() {
+  return "";
 }
-
-Client::SocketSendException::SocketSendException(const char* cause)
-    : cause(cause) {}
-
-const char* Client::SocketSendException::what() const throw() { return cause; }

@@ -64,7 +64,6 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
     dup2(pipe_fds2[WRITE], STDOUT_FILENO);
 
     execve(argv[0], argv, envp);
-
     exit(EXIT_FAILURE);
   }
 

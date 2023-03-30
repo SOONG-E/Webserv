@@ -10,18 +10,12 @@
 
 ServerHandler::ServerHandler() {}
 
-ServerHandler::ServerHandler(const ServerHandler& src) { *this = src; }
-
-ServerHandler& ServerHandler::operator=(const ServerHandler& src) {
-  if (this != &src) {
-    server_blocks_ = src.server_blocks_;
-    server_sockets_ = src.server_sockets_;
-    clients_ = src.clients_;
-    server_selector_ = src.server_selector_;
-    client_selector_ = src.client_selector_;
-  }
-  return *this;
-}
+ServerHandler::ServerHandler(const ServerHandler& src)
+    : server_blocks_(src.server_blocks_),
+      server_sockets_(src.server_sockets_),
+      clients_(src.clients_),
+      server_selector_(src.server_selector_),
+      client_selector_(src.client_selector_) {}
 
 ServerHandler::~ServerHandler() {}
 
@@ -35,7 +29,6 @@ void ServerHandler::configureServer(const Config& config) {
 
   for (std::size_t i = 0; i < serv_blocks.size(); ++i) {
     const std::vector<Listen>& listens = serv_blocks[i].getListens();
-
     for (std::size_t i = 0; i < listens.size(); ++i) {
       server_blocks_[listens[i].socket_key].push_back(serv_blocks[i]);
     }
@@ -45,13 +38,17 @@ void ServerHandler::configureServer(const Config& config) {
 void ServerHandler::createServers() {
   for (server_blocks_type::const_iterator it = server_blocks_.begin();
        it != server_blocks_.end(); ++it) {
-    std::size_t pos = it->first.find(':');
-    std::string ip = it->first.substr(0, pos);
-    std::string port = it->first.substr(pos + 1);
+    const std::string& socket_key = it->first;
+    const ServerBlock& default_server = server_blocks_[socket_key].front();
 
-    ServerSocket server_socket;
+    ServerSocket server_socket(default_server);
     server_socket.open();
+
+    std::size_t pos = socket_key.find(':');
+    std::string ip = socket_key.substr(0, pos);
+    std::string port = socket_key.substr(pos + 1);
     server_socket.bind(SocketAddress(ip, port), 128);
+
     server_sockets_.push_back(server_socket);
     server_selector_.registerFD(server_socket.getFD());
   }
@@ -62,23 +59,15 @@ void ServerHandler::acceptConnections() {
     if (server_selector_.select() > 0) {
       for (std::size_t i = 0; i < server_sockets_.size(); ++i) {
         if (server_selector_.isReadable(server_sockets_[i].getFD())) {
-          const SocketAddress& address = server_sockets_[i].getAddress();
-          std::string socket_key = address.getIP() + ":" + address.getPort();
-          const std::vector<ServerBlock>& server_blocks_of_key =
-              server_blocks_[socket_key];
-          const ServerBlock& default_server = server_blocks_of_key.front();
+          Client new_client = server_sockets_[i].accept();
 
-          Client new_client = server_sockets_[i].accept(default_server);
-
-          int client_fd = new_client.getFD();
-
-          client_selector_.registerFD(client_fd);
-          clients_.insert(std::make_pair(client_fd, new_client));
+          client_selector_.registerFD(new_client.getFD());
+          clients_.insert(std::make_pair(new_client.getFD(), new_client));
         }
       }
     }
   } catch (const std::exception& e) {
-    std::cerr << "[Error] Connection failed: " << e.what() << '\n';
+    std::cerr << "[Error] acceptConnections failed: " << e.what() << '\n';
   }
 }
 
@@ -95,14 +84,20 @@ void ServerHandler::respondToClients() {
         client = &it->second;
         int client_fd = client->getFD();
 
-        if (client_selector_.isReadable(client_fd)) {
-          receiveRequest(*client, delete_clients);
-        }
-        if (client->isReadyToCgiIO()) {
-          client->executeCgiIO();
-        }
-        if (client_selector_.isWritable(client_fd) && client->isReadyToSend()) {
-          sendResponse(*client, delete_clients);
+        try {
+          if (client_selector_.isReadable(client_fd)) {
+            receiveRequest(*client);
+          }
+          if (client->isReadyToCgiIO()) {
+            client->executeCgiIO();
+          }
+          if (client_selector_.isWritable(client_fd) &&
+              client->isReadyToSend()) {
+            sendResponse(*client);
+          }
+        } catch (const Client::ConnectionClosedException& e) {
+          delete_clients.push_back(client->getFD());
+          client->close();
         }
       }
 
@@ -111,23 +106,14 @@ void ServerHandler::respondToClients() {
       }
     }
   } catch (const std::exception& e) {
-    std::cerr << "[Error] Select failed: " << e.what() << '\n';
+    std::cerr << "[Error] respondToClients failed: " << e.what() << '\n';
   }
 }
 
-void ServerHandler::receiveRequest(Client& client,
-                                   std::vector<int>& delete_clients) {
+void ServerHandler::receiveRequest(Client& client) {
   try {
-    std::string request = client.receive();
-
-    if (request.empty()) {
-      delete_clients.push_back(client.getFD());
-      closeConnection(client);
-      return;
-    }
-
     HttpParser& parser = client.getParser();
-    parser.appendRequest(request);
+    parser.appendRequest(client.receive());
 
     if (parser.isCompleted()) {
       const HttpRequest& request_obj = client.getRequestObj();
@@ -143,39 +129,37 @@ void ServerHandler::receiveRequest(Client& client,
       validateRequest(request_obj, location_block);
 
       if (client.isCgi()) {
-        const SocketAddress& cli_addr = client.getClientAddress();
-        const SocketAddress& serv_addr = client.getServerAddress();
-        const std::string& cgi_path = location_block.getCgiParam("CGI_PATH");
-
-        client.getCgi().runCgiScript(request_obj, cli_addr, serv_addr,
-                                     cgi_path);
+        client.getCgi().runCgiScript(request_obj, client.getClientAddress(),
+                                     client.getServerAddress(),
+                                     location_block.getCgiParam("CGI_PATH"));
       }
     }
   } catch (const ResponseException& e) {
     client.getResponseObj().setStatus(e.index);
+  } catch (const std::exception& e) {
+    client.getResponseObj().setStatus(C500);
+    std::cerr << "[Error] receiveRequest failed: " << e.what() << '\n';
   }
 }
 
-void ServerHandler::sendResponse(Client& client,
-                                 std::vector<int>& delete_clients) {
+void ServerHandler::sendResponse(Client& client) {
   try {
     client.send();
     if (!client.isPartialWritten()) {
       const HttpRequest& request_obj = client.getRequestObj();
-      HttpResponse& response_obj = client.getResponseObj();
+      const HttpResponse& response_obj = client.getResponseObj();
 
       if (request_obj.getHeader("CONNECTION") == "close" ||
           !response_obj.isSuccessCode()) {
-        delete_clients.push_back(client.getFD());
-        closeConnection(client);
-        return;
+        throw Client::ConnectionClosedException();
       }
       client.clear();
     }
+  } catch (const Client::ConnectionClosedException& e) {
+    throw Client::ConnectionClosedException();
   } catch (const std::exception& e) {
     client.getResponseObj().setStatus(C500);
-    client.clearBuffer();
-    std::cerr << "[Error] Send failed: " << e.what() << '\n';
+    std::cerr << "[Error] sendResponse failed: " << e.what() << '\n';
   }
 }
 
@@ -206,14 +190,6 @@ void ServerHandler::validateRequest(const HttpRequest& request_obj,
              location_block.getBodyLimit() < request_obj.getContentLength()) {
     throw ResponseException(C413);
   }
-}
-
-void ServerHandler::closeConnection(Client& client) {
-  close(client.getFD());
-
-  Log::header("Close Connection Information");
-  client.logAddressInfo();
-  Log::footer("Close Connection");
 }
 
 void ServerHandler::deleteClients(const std::vector<int>& delete_clients) {
