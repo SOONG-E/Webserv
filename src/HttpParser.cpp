@@ -171,7 +171,7 @@ void HttpParser::parseHeaderFields(const std::string& header_part) {
     request_.addHeader(trim(line[0]), trim(line[1]));
   }
 
-  request_.setHost(request_.getHeader("Host"));
+  request_.setHost(request_.getHeader("HOST"));
   if (request_.getHost().empty()) throw ResponseException(C400);
   if (request_.getHeader("CONTENT-TYPE").empty()) {
     request_.addHeader("CONTENT-TYPE", "application/octet-stream");
