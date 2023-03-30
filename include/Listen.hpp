@@ -4,12 +4,7 @@
 #include <string>
 
 struct Listen {
-  enum Index {
-    HOST,
-    PORT,
-  };
-
-  static const std::string DEFAULTS[];
+  static const std::string DEFAULT_HOST;
 
   Listen();
   explicit Listen(const std::string& token);

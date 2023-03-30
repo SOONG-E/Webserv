@@ -4,12 +4,12 @@
 #include "exception.hpp"
 #include "utility.hpp"
 
-const std::string Listen::DEFAULTS[] = {"0.0.0.0", "80"};
+const std::string Listen::DEFAULT_HOST = "0.0.0.0";
 
-Listen::Listen() : host(DEFAULTS[HOST]), port(DEFAULTS[PORT]) {}
+Listen::Listen() : host(DEFAULT_HOST), port(DEFAULT_PORT) {}
 
 Listen::Listen(const std::string& token)
-    : host(DEFAULTS[HOST]), port(DEFAULTS[PORT]) {
+    : host(DEFAULT_HOST), port(DEFAULT_PORT) {
   std::vector<std::string> splitted = split(token, ":");
   if (splitted.size() == 1) {
     if (isNumber(splitted[0])) {

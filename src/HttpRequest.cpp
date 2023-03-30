@@ -3,8 +3,10 @@
 #include <stdexcept>
 
 #include "ResponseStatus.hpp"
+#include "constant.hpp"
 
-HttpRequest::HttpRequest() : port_("80"), content_length_(-1) {}
+HttpRequest::HttpRequest()
+    : port_(DEFAULT_PORT), content_length_(DEFAULT_CONTENT_LENGTH) {}
 
 HttpRequest::HttpRequest(const HttpRequest& origin)
     : method_(origin.method_),
@@ -81,7 +83,7 @@ void HttpRequest::setContentLength(std::size_t content_length) {
 }
 
 bool HttpRequest::isCgi() const {
-  return !uri_.compare(0, CGI_PATH.size(), CGI_PATH);
+  return uri_.compare(0, SCRIPT_PATH.size(), SCRIPT_PATH) == 0;
 }
 
 void HttpRequest::addHeader(const std::string& key, const std::string& value) {

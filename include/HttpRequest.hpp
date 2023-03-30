@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
-#include "constant.hpp"
-
 class HttpRequest {
+  static const std::size_t DEFAULT_CONTENT_LENGTH = -1;
+
  public:
   HttpRequest();
   HttpRequest(const HttpRequest& origin);
