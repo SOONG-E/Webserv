@@ -97,11 +97,7 @@ void ServerHandler::respondToClients() {
           }
         } catch (const Client::ConnectionClosedException& e) {
           delete_clients.push_back(client->getFD());
-          close(client->getFD());
-
-          Log::header("Close Connection Information");
-          client->logAddressInfo();
-          Log::footer("Close Connection");
+          client->closeConnection();
         }
       }
 

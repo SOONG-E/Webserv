@@ -112,6 +112,14 @@ void Client::executeCgiIO() {
   }
 }
 
+void Client::closeConnection() const {
+  close(fd_);
+
+  Log::header("Close Connection Information");
+  logAddressInfo();
+  Log::footer("Close Connection");
+}
+
 void Client::clear() {
   parser_.clear();
   cgi_.clear();

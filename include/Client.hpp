@@ -34,7 +34,7 @@ class Client {
   std::string receive() const;
   void send();
   void executeCgiIO();
-
+  void closeConnection() const;
   void clear();
 
   bool isCgi() const;
