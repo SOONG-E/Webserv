@@ -96,12 +96,13 @@ void Client::executeCgiIO() {
     cgi_selector.registerFD(pipe_fds[WRITE]);
     cgi_selector.registerFD(pipe_fds[READ]);
 
-    if (cgi_selector.select() == 0) return;
-    if (cgi_.hasBody() && cgi_selector.isWritable(pipe_fds[WRITE])) {
-      cgi_.writeToPipe();
-    }
-    if (cgi_selector.isReadable(pipe_fds[READ])) {
-      cgi_.readToPipe();
+    if (cgi_selector.select() > 0) {
+      if (cgi_.hasBody() && cgi_selector.isWritable(pipe_fds[WRITE])) {
+        cgi_.writeToPipe();
+      }
+      if (cgi_selector.isReadable(pipe_fds[READ])) {
+        cgi_.readToPipe();
+      }
     }
   } catch (const std::exception& e) {
     response_obj_.setStatus(C500);
@@ -128,8 +129,8 @@ bool Client::isCgi() const {
 bool Client::isPartialWritten() const { return !buf_.empty(); }
 
 bool Client::isReadyToCgiIO() const {
-  if (response_obj_.isSuccessCode() && parser_.isCompleted() && isCgi() &&
-      !cgi_.isCompleted()) {
+  if (parser_.isCompleted() && isCgi() && !cgi_.isCompleted() &&
+      response_obj_.isSuccessCode()) {
     return true;
   }
   return false;
