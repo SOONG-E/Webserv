@@ -35,8 +35,6 @@ class Client {
   void send();
   void executeCgiIO();
 
-  void close();
-  void clearBuffer();
   void clear();
 
   bool isCgi() const;

@@ -112,17 +112,6 @@ void Client::executeCgiIO() {
   }
 }
 
-void Client::close() {
-  ::close(fd_);
-  fd_ = -1;
-
-  Log::header("Close Connection Information");
-  logAddressInfo();
-  Log::footer("Close Connection");
-}
-
-void Client::clearBuffer() { buf_.clear(); }
-
 void Client::clear() {
   parser_.clear();
   cgi_.clear();
