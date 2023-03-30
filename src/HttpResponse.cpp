@@ -105,13 +105,18 @@ std::string HttpResponse::combine(const HttpRequest& request,
   return header + body;
 }
 
-std::string HttpResponse::combineCgiResponse(
-    const HttpRequest& request, const std::string& cgi_response) const {
+std::string HttpResponse::combineCgiResponse(const HttpRequest& request,
+                                             std::string cgi_response) const {
   std::string header = commonHeader(request);
   // entity-header
   std::size_t body_size =
       cgi_response.size() - cgi_response.find(DOUBLE_CRLF) - DOUBLE_CRLF.size();
   header += "Content-Length: " + toString(body_size) + CRLF;
+  std::size_t index = cgi_response.find("Status:");
+  if (index != std::string::npos) {
+    cgi_response.erase(index,
+                       cgi_response.find(CRLF, index) + CRLF.size() - index);
+  }
   return header + cgi_response;
 }
 
