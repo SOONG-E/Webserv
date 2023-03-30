@@ -3,6 +3,8 @@
 #include <cerrno>
 #include <cstring>
 
+#include "constant.hpp"
+
 Selector::Selector() : max_fd_(-1) {
   FD_ZERO(&fds_);
   tm_.tv_sec = 0;
@@ -30,7 +32,7 @@ int Selector::select() {
 
   int result = ::select(max_fd_ + 1, &read_fds_, &write_fds_, 0, &tm_);
 
-  if (result == -1) {
+  if (result == ERROR<int>()) {
     throw SelectFailedException(strerror(errno));
   }
 

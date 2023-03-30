@@ -63,10 +63,9 @@ void ServerBlock::addLocationBlock(const LocationBlock& location_block) {
 
 const LocationBlock& ServerBlock::findLocationBlock(
     const std::string& request_uri) const {
-  for (std::size_t i = 0; i < location_blocks_.size(); ++i) {
-    if (request_uri == location_blocks_[i].getUri()) {
-      return redirect(location_blocks_[i]);
-    }
+  std::size_t index = find(request_uri);
+  if (index != NPOS) {
+    return redirect(location_blocks_[index]);
   }
   std::size_t end_pos = request_uri.size();
   while (true) {
@@ -75,12 +74,20 @@ const LocationBlock& ServerBlock::findLocationBlock(
       throw ResponseException(C404);
     }
     std::string partial_uri = request_uri.substr(0, end_pos + 1);
-    for (std::size_t i = 0; i < location_blocks_.size(); ++i) {
-      if (partial_uri == location_blocks_[i].getUri()) {
-        return redirect(location_blocks_[i]);
-      }
+    index = find(partial_uri);
+    if (index != NPOS) {
+      return redirect(location_blocks_[index]);
     }
   }
+}
+
+std::size_t ServerBlock::find(const std::string& uri) const {
+  for (std::size_t i = 0; i < location_blocks_.size(); ++i) {
+    if (uri == location_blocks_[i].getUri()) {
+      return i;
+    }
+  }
+  return NPOS;
 }
 
 const LocationBlock& ServerBlock::redirect(

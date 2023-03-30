@@ -56,9 +56,9 @@ const SocketAddress& Client::getClientAddress() const { return cli_address_; }
 std::string Client::receive() const {
   char buf[BUF_SIZE];
 
-  size_t read_bytes = recv(fd_, &buf, BUF_SIZE, 0);
+  std::size_t read_bytes = recv(fd_, &buf, BUF_SIZE, 0);
 
-  if (static_cast<ssize_t>(read_bytes) == -1) {
+  if (read_bytes == ERROR<std::size_t>()) {
     throw SocketReceiveException(strerror(errno));
   }
 
@@ -76,7 +76,7 @@ void Client::send() {
   }
 
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
-  if (write_bytes == static_cast<std::size_t>(-1)) {
+  if (write_bytes == ERROR<std::size_t>()) {
     throw SocketSendException(strerror(errno));
   }
 
@@ -96,13 +96,12 @@ void Client::executeCgiIO() {
     cgi_selector.registerFD(pipe_fds[WRITE]);
     cgi_selector.registerFD(pipe_fds[READ]);
 
-    if (cgi_selector.select() > 0) {
-      if (cgi_.hasBody() && cgi_selector.isWritable(pipe_fds[WRITE])) {
-        cgi_.writeToPipe();
-      }
-      if (cgi_selector.isReadable(pipe_fds[READ])) {
-        cgi_.readToPipe();
-      }
+    if (cgi_selector.select() == 0) return;
+    if (cgi_.hasBody() && cgi_selector.isWritable(pipe_fds[WRITE])) {
+      cgi_.writeToPipe();
+    }
+    if (cgi_selector.isReadable(pipe_fds[READ])) {
+      cgi_.readToPipe();
     }
   } catch (const std::exception& e) {
     response_obj_.setStatus(C500);
