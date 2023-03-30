@@ -59,7 +59,7 @@ void ServerHandler::createServers() {
 
 void ServerHandler::acceptConnections() {
   try {
-    server_selector_.select();
+    if (server_selector_.select() == 0) return;
     for (std::size_t i = 0; i < server_sockets_.size(); ++i) {
       if (server_selector_.isReadable(server_sockets_[i].getFD())) {
         const SocketAddress& address = server_sockets_[i].getAddress();
@@ -83,7 +83,7 @@ void ServerHandler::acceptConnections() {
 
 void ServerHandler::respondToClients() {
   try {
-    client_selector_.select();
+    if (client_selector_.select() == 0) return;
     Client* client;
     std::vector<int> delete_clients;
 

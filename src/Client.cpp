@@ -58,7 +58,7 @@ std::string Client::receive() const {
 
   size_t read_bytes = recv(fd_, &buf, BUF_SIZE, 0);
 
-  if (static_cast<ssize_t>(read_bytes) == -1) {
+  if (read_bytes == ERROR) {
     throw SocketReceiveException(strerror(errno));
   }
 
@@ -76,7 +76,7 @@ void Client::send() {
   }
 
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
-  if (write_bytes == static_cast<std::size_t>(-1)) {
+  if (write_bytes == ERROR) {
     throw SocketSendException(strerror(errno));
   }
 
@@ -96,7 +96,7 @@ void Client::executeCgiIO() {
     cgi_selector.registerFD(pipe_fds[WRITE]);
     cgi_selector.registerFD(pipe_fds[READ]);
 
-    cgi_selector.select();
+    if (cgi_selector.select() == 0) return;
     if (cgi_.hasBody() && cgi_selector.isWritable(pipe_fds[WRITE])) {
       cgi_.writeToPipe();
     }
