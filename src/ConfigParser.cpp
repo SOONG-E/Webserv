@@ -166,7 +166,9 @@ void ConfigParser::parseIndex(void) {
 }
 
 void ConfigParser::parseCgiParams(void) {
-  location_block_.addCgiParam(expect(), expect());
+  const std::string& key = expect();
+  const std::string& value = expect();
+  location_block_.addCgiParam(key, value);
   expect(";");
 }
 
