@@ -32,8 +32,6 @@ class HttpRequest {
   void addHeader(const std::string& key, const std::string& value);
   void setBody(const std::string& body);
 
-  bool isCgi() const;
-
  private:
   typedef std::map<std::string, std::vector<std::string> > headers_type;
 

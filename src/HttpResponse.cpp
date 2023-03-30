@@ -55,12 +55,12 @@ void HttpResponse::clear(void) {
 
 bool HttpResponse::isSuccessCode(void) const { return status_ <= C200; }
 
-std::string HttpResponse::generate(const HttpRequest& request,
+std::string HttpResponse::generate(const HttpRequest& request, bool is_cgi,
                                    const std::string& cgi_response) {
   if (!isSuccessCode()) {
     return generateErrorPage(request);
   }
-  if (request.isCgi()) {
+  if (is_cgi) {
     return combineCgiResponse(request, cgi_response);
   }
   std::string body;

@@ -98,7 +98,7 @@ void ServerHandler::respondToClients() {
         if (client_selector_.isReadable(client_fd)) {
           receiveRequest(*client, delete_clients);
         }
-        if (client->getRequestObj().isCgi() &&
+        if (client->isCgi() &&
             !client->getCgi().isCompleted()) {
           client->executeCgiIO();
         }
@@ -143,7 +143,7 @@ void ServerHandler::receiveRequest(Client& client,
 
       validateRequest(request_obj, location_block);
 
-      if (request_obj.isCgi()) {
+      if (client.isCgi()) {
         const SocketAddress& cli_addr = client.getClientAddress();
         const SocketAddress& serv_addr = client.getServerAddress();
         const std::string& cgi_path = location_block.getCgiParam("CGI_PATH");

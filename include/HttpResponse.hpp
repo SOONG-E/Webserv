@@ -28,7 +28,7 @@ class HttpResponse {
 
   void clear(void);
   bool isSuccessCode(void) const;
-  std::string generate(const HttpRequest& request,
+  std::string generate(const HttpRequest& request, bool is_cgi,
                        const std::string& cgi_response);
 
  private:

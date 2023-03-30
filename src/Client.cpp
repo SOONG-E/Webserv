@@ -71,8 +71,8 @@ std::string Client::receive() const {
 
 void Client::send() {
   if (!isPartialWritten()) {
-    buf_ =
-        response_obj_.generate(parser_.getRequestObj(), cgi_.getCgiResponse());
+    buf_ = response_obj_.generate(parser_.getRequestObj(), isCgi(),
+                                  cgi_.getCgiResponse());
   }
 
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
@@ -119,14 +119,15 @@ void Client::clear() {
   response_obj_.clear();
 }
 
+bool Client::isCgi() const {
+  return !response_obj_.getLocationBlock()->getCgiParam("CGI_PATH").empty();
+}
+
 bool Client::isPartialWritten() const { return !buf_.empty(); }
 
 bool Client::isReadyToSend() const {
-  const HttpRequest& request_obj = parser_.getRequestObj();
-
-  if (!response_obj_.isSuccessCode() ||
-      (!request_obj.isCgi() && parser_.isCompleted()) ||
-      (request_obj.isCgi() && cgi_.isCompleted())) {
+  if (!response_obj_.isSuccessCode() || (!isCgi() && parser_.isCompleted()) ||
+      (isCgi() && cgi_.isCompleted())) {
     return true;
   }
   return false;

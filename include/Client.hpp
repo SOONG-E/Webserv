@@ -38,6 +38,7 @@ class Client {
   void clearBuffer();
   void clear();
 
+  bool isCgi() const;
   bool isPartialWritten() const;
   bool isReadyToSend() const;
 
