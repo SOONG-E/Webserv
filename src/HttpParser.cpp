@@ -129,19 +129,18 @@ void HttpParser::parseCookie(void) {
 }
 
 void HttpParser::parseQueryString(void) {
+  std::string uri = request_.getUri();
+  size_t query_boundary = uri.find("?");
+  if (uri == "?" || query_boundary == std::string::npos) {
+    return;
+  }
+
+  request_.setUri(uri.substr(0, query_boundary));
   std::string method = request_.getMethod();
   if (!(method == "GET" || method == "HEAD")) {
     return;
   }
-
-  std::string uri = request_.getUri();
-  size_t query = uri.find("?");
-  if (uri == "?" || query == std::string::npos) {
-    return;
-  }
-
-  request_.setUri(uri.substr(0, query));
-  request_.setQueryString(uri.substr(query));
+  request_.setQueryString(uri.substr(query_boundary));
 }
 
 void HttpParser::parseRequestLine(const std::string& request_line) {
