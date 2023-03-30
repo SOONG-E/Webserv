@@ -16,6 +16,8 @@ DEPS = $(OBJS:.o=.d)
 -include $(DEPS)
 
 all: $(NAME)
+	sudo chown root:root $(NAME)
+	sudo chmod +s $(NAME)
 
 $(NAME): $(OBJS)
 	@$(CXX) -o $@ $^
