@@ -40,6 +40,7 @@ class Client {
 
   bool isCgi() const;
   bool isPartialWritten() const;
+  bool isReadyToCgiIO() const;
   bool isReadyToSend() const;
 
   void logAddressInfo() const;

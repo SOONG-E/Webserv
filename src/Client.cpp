@@ -125,9 +125,16 @@ bool Client::isCgi() const {
 
 bool Client::isPartialWritten() const { return !buf_.empty(); }
 
+bool Client::isReadyToCgiIO() const {
+  if (parser_.isCompleted() && isCgi() && !cgi_.isCompleted()) {
+    return true;
+  }
+  return false;
+}
+
 bool Client::isReadyToSend() const {
-  if (!response_obj_.isSuccessCode() || (!isCgi() && parser_.isCompleted()) ||
-      (isCgi() && cgi_.isCompleted())) {
+  if (!response_obj_.isSuccessCode() ||
+      (parser_.isCompleted() && (!isCgi() || cgi_.isCompleted()))) {
     return true;
   }
   return false;

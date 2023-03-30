@@ -98,8 +98,7 @@ void ServerHandler::respondToClients() {
         if (client_selector_.isReadable(client_fd)) {
           receiveRequest(*client, delete_clients);
         }
-        if (client->isCgi() &&
-            !client->getCgi().isCompleted()) {
+        if (client->isReadyToCgiIO()) {
           client->executeCgiIO();
         }
         if (client_selector_.isWritable(client_fd) && client->isReadyToSend()) {
