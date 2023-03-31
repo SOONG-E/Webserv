@@ -1,7 +1,6 @@
 #ifndef COOKIE_HPP_
 #define COOKIE_HPP_
 
-// #include <functional>
 #include <map>
 
 #include "Session.hpp"
@@ -16,9 +15,7 @@ class Cookie {
  private:
   typedef std::map<std::string, Session> session_type;
 
-  // std::string createHash(std::string id);
   session_type session_;
-  // std::hash<std::string> hash_;  (since C++11)
 };
 
 #endif

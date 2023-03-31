@@ -21,9 +21,3 @@ const Session &Cookie::getSession(std::string &session_id) {
   return session_[session_id];
   // 없으면..?
 }
-
-// std::string Cookie::createHash(std::string id) {
-  // std::string session_id = toString(hash_(id));  (since C++11)
-
-  // return session_id;
-// }
