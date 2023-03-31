@@ -60,7 +60,7 @@ std::string Client::receive() const {
 
   if (read_bytes == ERROR<std::size_t>()) {
     std::cerr << "[Error] Receive failed: " << strerror(errno) << '\n';
-    throw ResponseException(C500);
+    throw ConnectionClosedException();
   }
   if (read_bytes == 0) {
     throw ConnectionClosedException();

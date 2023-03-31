@@ -123,8 +123,10 @@ void ServerHandler::respondToClients() {
 
 void ServerHandler::receiveRequest(Client& client) {
   try {
+    std::string request = client.receive();
+
     HttpParser& parser = client.getParser();
-    parser.appendRequest(client.receive());
+    parser.appendRequest(request);
 
     if (parser.isCompleted()) {
       const HttpRequest& request_obj = client.getRequestObj();
@@ -147,30 +149,20 @@ void ServerHandler::receiveRequest(Client& client) {
     }
   } catch (const ResponseException& e) {
     client.getResponseObj().setStatus(e.index);
-  } catch (const std::exception& e) {
-    client.getResponseObj().setStatus(C500);
-    std::cerr << "[Error] receiveRequest failed: " << e.what() << '\n';
   }
 }
 
 void ServerHandler::sendResponse(Client& client) {
-  try {
-    client.send();
-    if (!client.isPartialWritten()) {
-      const HttpRequest& request_obj = client.getRequestObj();
-      const HttpResponse& response_obj = client.getResponseObj();
+  client.send();
+  if (!client.isPartialWritten()) {
+    const HttpRequest& request_obj = client.getRequestObj();
+    const HttpResponse& response_obj = client.getResponseObj();
 
-      if (request_obj.getHeader("CONNECTION") == "close" ||
-          !response_obj.isSuccessCode()) {
-        throw Client::ConnectionClosedException();
-      }
-      client.clear();
+    if (request_obj.getHeader("CONNECTION") == "close" ||
+        !response_obj.isSuccessCode()) {
+      throw Client::ConnectionClosedException();
     }
-  } catch (const Client::ConnectionClosedException& e) {
-    throw Client::ConnectionClosedException();
-  } catch (const std::exception& e) {
-    client.getResponseObj().setStatus(C500);
-    std::cerr << "[Error] sendResponse failed: " << e.what() << '\n';
+    client.clear();
   }
 }
 
