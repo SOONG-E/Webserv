@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 
+#include <cstdlib>
 #include <iostream>
 
 #include "Log.hpp"
@@ -30,7 +31,12 @@ void ServerHandler::configureServer(const Config& config) {
   for (std::size_t i = 0; i < serv_blocks.size(); ++i) {
     const std::vector<Listen>& listens = serv_blocks[i].getListens();
     for (std::size_t i = 0; i < listens.size(); ++i) {
-      server_blocks_[listens[i].socket_key].push_back(serv_blocks[i]);
+      try {
+        server_blocks_[listens[i].socket_key].push_back(serv_blocks[i]);
+      } catch (const std::exception& e) {
+        std::cerr << "[Error] configureServer failed: " << e.what() << '\n';
+        std::exit(EXIT_FAILURE);
+      }
     }
   }
 }
@@ -42,15 +48,20 @@ void ServerHandler::createServers() {
     const ServerBlock& default_server = server_blocks_[socket_key].front();
 
     ServerSocket server_socket(default_server);
-    server_socket.open();
+    try {
+      server_socket.open();
 
-    std::size_t pos = socket_key.find(':');
-    std::string ip = socket_key.substr(0, pos);
-    std::string port = socket_key.substr(pos + 1);
-    server_socket.bind(SocketAddress(ip, port), 128);
+      std::size_t pos = socket_key.find(':');
+      std::string ip = socket_key.substr(0, pos);
+      std::string port = socket_key.substr(pos + 1);
+      server_socket.bind(SocketAddress(ip, port), 128);
 
-    server_sockets_.push_back(server_socket);
-    server_selector_.registerFD(server_socket.getFD());
+      server_sockets_.push_back(server_socket);
+      server_selector_.registerFD(server_socket.getFD());
+    } catch (const std::exception& e) {
+      std::cerr << "[Error] createServers failed: " << e.what() << '\n';
+      std::exit(EXIT_FAILURE);
+    }
   }
 }
 

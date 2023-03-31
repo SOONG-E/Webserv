@@ -16,23 +16,17 @@ int main(int argc, char* argv[]) {
 
   const std::string& filename = (argc == 2) ? argv[1] : DEFAULT_PATH;
 
-  try {
-    ConfigParser config_parser(filename);
-    const Config& config = config_parser.parse();
+  ServerHandler handler;
+  ConfigParser config_parser(filename);
+  const Config& config = config_parser.parse();
 
-    ServerHandler handler;
-    handler.registerSignalHandlers();
-    handler.configureServer(config);
-    handler.createServers();
+  handler.registerSignalHandlers();
+  handler.configureServer(config);
+  handler.createServers();
 
-    while (1) {
-      handler.acceptConnections();
-      handler.respondToClients();
-    }
-
-  } catch (const std::exception& e) {
-    std::cerr << e.what() << "\n";
-    return EXIT_FAILURE;
+  while (1) {
+    handler.acceptConnections();
+    handler.respondToClients();
   }
   return EXIT_SUCCESS;
 }
