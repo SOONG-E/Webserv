@@ -116,7 +116,7 @@ void HttpParser::parseCookie(void) {
   std::string session_id;
 
   std::vector<std::string> values = split(cookie, ";");
-  for (std::vector<std::string>::iterator it = values.begin();
+  for (std::vector<std::string>::const_iterator it = values.begin();
        it != values.end(); ++it) {
     if (it->find("=") == std::string::npos) {
       throw ResponseException(C400);
@@ -161,7 +161,7 @@ void HttpParser::parseRequestLine(const std::string& request_line) {
 void HttpParser::parseHeaderFields(const std::string& header_part) {
   std::vector<std::string> headers = splitByCRLF(header_part);
   std::vector<std::string> line;
-  for (std::vector<std::string>::iterator header = headers.begin();
+  for (std::vector<std::string>::const_iterator header = headers.begin();
        header != headers.end(); ++header) {
     if (header->length() == 0) break;
     line = split(*header, ":");

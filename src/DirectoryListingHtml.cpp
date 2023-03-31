@@ -51,7 +51,7 @@ std::string DirectoryListingHtml::body(const std::string& url,
       "        <th>Last modified</th>"
       "        <th>Size</th>"
       "      </tr>";
-  for (std::set<File>::iterator entry_iter = entries.begin();
+  for (std::set<File>::const_iterator entry_iter = entries.begin();
        entry_iter != entries.end(); ++entry_iter) {
     html +=
         "      <tr>"
