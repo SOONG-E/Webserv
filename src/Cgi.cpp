@@ -169,7 +169,7 @@ char** Cgi::generateEnvp(const HttpRequest& request_obj,
   char** envp = new char*[env_map.size() + 1];
 
   int i = 0;
-  for (std::map<std::string, std::string>::iterator it = env_map.begin();
+  for (std::map<std::string, std::string>::const_iterator it = env_map.begin();
        it != env_map.end(); ++it, ++i) {
     envp[i] = strdup((it->first + "=" + it->second).c_str());
     if (envp[i] == NULL) {
