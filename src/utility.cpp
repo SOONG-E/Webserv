@@ -76,3 +76,11 @@ std::string trim(const std::string& str) {
   if (start == std::string::npos) return "";
   return (str.substr(start, end - start + 1));
 }
+
+std::string getAbsolutePath(const std::string& uri) {
+  char buf[FILENAME_MAX];
+  if (!getcwd(buf, FILENAME_MAX)) {
+    throw ResponseException(C500);
+  }
+  return buf + uri;
+}
