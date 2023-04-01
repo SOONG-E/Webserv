@@ -4,7 +4,7 @@
 
 std::string DirectoryListingHtml::generate(const std::string& url,
                                            const std::set<File>& entries) {
-  return head(url) + body(url, entries);
+  return head(url) + body(url, entries) + "\n";
 }
 
 std::string DirectoryListingHtml::head(const std::string& url) {
