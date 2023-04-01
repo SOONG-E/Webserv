@@ -27,7 +27,6 @@ class HttpParser {
   void setHeader(void);
   void handlePost(void);
   void parseHeader(const std::string& header_part);
-  void parseCookie(void);
   void parseQueryString(void);
   void parseRequestLine(const std::string& request_line);
   void parseHeaderFields(const std::string& header_part);
