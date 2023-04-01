@@ -156,7 +156,7 @@ void ServerHandler::receiveRequest(Client& client) {
       const HttpRequest& request_obj = client.getRequestObj();
       const ServerBlock& server_block =
           findServerBlock(client.getSocketKey(), request_obj.getHeader("HOST"));
-      const LocationBlock& location_block =
+      const LocationBlock& location_block =  
           server_block.findLocationBlock(request_obj.getUri());
 
       HttpResponse& response_obj = client.getResponseObj();
@@ -164,7 +164,7 @@ void ServerHandler::receiveRequest(Client& client) {
       response_obj.setLocationBlock(&location_block);
 
       validateRequest(request_obj, location_block);
-      if (!client.isHasCookie()) {
+      if (!client.hasCookie()) {
         issueSessionId(client);
       }
 

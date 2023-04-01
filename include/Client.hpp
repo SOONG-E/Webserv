@@ -46,7 +46,7 @@ class Client {
   bool isReadyToCgiIO() const;
   bool isReadyToSend() const;
   bool isProcessing() const;
-  bool isHasCookie() const;
+  bool hasCookie() const;
 
   void logAddressInfo() const;
   void logConnectionInfo() const;
