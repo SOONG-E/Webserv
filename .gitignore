@@ -2,6 +2,7 @@
 .vscode
 .DS_Store
 *.dSYM
+upload_file
 
 # Prerequisites
 *.d
