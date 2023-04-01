@@ -53,6 +53,13 @@ std::string HttpRequest::getHeader(const std::string& key) const {
   return headers_.at(key).front();
 }
 
+std::string HttpRequest::getCookie(const std::string& name) const {
+  if (cookie_.find(name) == cookie_.end()) {
+    return "";
+  }
+  return cookie_.find(name)->second;
+}
+
 const std::string& HttpRequest::getBody(void) const { return body_; }
 
 void HttpRequest::setMethod(const std::string& method) { method_ = method; }
@@ -74,6 +81,10 @@ void HttpRequest::setHost(const std::string& host) {
     return;
   }
   host_ = host.substr(0, colon);
+}
+
+void HttpRequest::setCookie(const cookie_list_type& cookie) {
+  cookie_ = cookie;
 }
 
 void HttpRequest::setBody(const std::string& body) { body_ = body; }

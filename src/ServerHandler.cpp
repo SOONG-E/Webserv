@@ -164,7 +164,8 @@ void ServerHandler::receiveRequest(Client& client) {
       response_obj.setLocationBlock(&location_block);
 
       validateRequest(request_obj, location_block);
-      if (!client.isHasCookie()) {
+      if (!client.isHasCookie() ||
+          client.getParser().getRequestObj().getCookie("Session-ID").empty()) {
         issueSessionId(client);
       }
 

@@ -14,6 +14,8 @@ class HttpRequest {
   HttpRequest operator=(const HttpRequest& origin);
   ~HttpRequest();
 
+  typedef std::map<std::string, std::string> cookie_list_type;
+
   const std::string& getMethod(void) const;
   const std::string& getUri(void) const;
   const std::string& getQueryString(void) const;
@@ -21,6 +23,7 @@ class HttpRequest {
   const std::string& getSessionId(void) const;
   std::size_t getContentLength(void) const;
   std::string getHeader(const std::string& key) const;
+  std::string getCookie(const std::string& name) const;
   const std::string& getBody(void) const;
 
   void setMethod(const std::string& method);
@@ -28,6 +31,7 @@ class HttpRequest {
   void setSessionId(const std::string& session_id);
   void setQueryString(const std::string& query_string);
   void setHost(const std::string& host);
+  void setCookie(const cookie_list_type& cookie);
   void setContentLength(std::size_t content_length);
   void addHeader(const std::string& key, const std::string& value);
   void setBody(const std::string& body);
@@ -43,6 +47,7 @@ class HttpRequest {
   std::string session_id_;
   std::size_t content_length_;
   headers_type headers_;
+  cookie_list_type cookie_;
   std::string body_;
 };
 

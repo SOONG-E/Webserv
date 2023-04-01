@@ -135,19 +135,22 @@ void HttpParser::parseRequestLine(const std::string& request_line) {
 }
 
 void HttpParser::parseCookie(void) {
-  std::string cookie = request_.getHeader("COOKIE");
-  std::vector<std::string> cookie_list = split(cookie, ";");
-  if (1 < cookie_list.size()) throw ResponseException(C400);
+  HttpRequest::cookie_list_type request_cookie_list;
 
-  std::vector<std::string> value = split(cookie, "=");
+  std::string cookies = request_.getHeader("COOKIE");
+  std::vector<std::string> cookie_list = split(cookies, ";");
+  std::vector<std::string> values;
 
-  if (value.size() < 2 ||
-      trim(value[0]) != "Session-ID")  // session_id 네임 바꾸면 수정
-    throw ResponseException(C400);
-
-  std::string session_id = trim(value[1]);
-
-  request_.addHeader("COOKIE", session_id);
+  for (std::vector<std::string>::iterator it = cookie_list.begin();
+       it != cookie_list.end(); ++it) {
+    values = split(*it, "=");
+    if (values.size() != 2) {
+      throw ResponseException(C400);
+    }
+    request_cookie_list[trim(values[0])] = trim(values[1]);
+  }
+  request_.setCookie(request_cookie_list);
+  request_.setSessionId(request_.getCookie("Session-ID"));
 }
 
 void HttpParser::parseHeaderFields(const std::string& header_part) {
