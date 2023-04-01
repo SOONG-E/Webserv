@@ -6,21 +6,21 @@
 
 #include "constant.hpp"
 
-Selector::Selector() : max_fd_(-1) {
-  FD_ZERO(&fds_);
+Selector::Selector() : max_fd_(DEFAULT_FD) {
   tm_.tv_sec = 0;
   tm_.tv_usec = 0;
+  FD_ZERO(&fds_);
 }
 
 Selector::Selector(const Selector& src) { *this = src; }
 
 Selector& Selector::operator=(const Selector& src) {
   if (this != &src) {
+    tm_ = src.tm_;
     max_fd_ = src.max_fd_;
     fds_ = src.fds_;
     read_fds_ = src.read_fds_;
     write_fds_ = src.write_fds_;
-    tm_ = src.tm_;
   }
   return *this;
 }

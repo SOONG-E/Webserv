@@ -6,11 +6,10 @@
 
 #include "HttpRequest.hpp"
 #include "LocationBlock.hpp"
-#include "ResponseStatus.hpp"
 #include "ServerBlock.hpp"
 
 class HttpResponse {
-  static const int DEFAULT_STATUS = C200;
+  static const int DEFAULT_STATUS;
 
  public:
   static const std::string DEFAULT_ERROR_PAGE;

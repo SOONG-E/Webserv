@@ -7,7 +7,7 @@ const std::string Error::DELIM = ": ";
 const std::string Error::PREFIX = "Error" + DELIM;
 const std::string Error::INFO[] = {
     "Invalid argument",  // EARG
-    "Cgi IO failed",     // ECGI
+    "Cgi I/O failed",    // ECGI
     "File open failed",  // EOPEN
     "Receive failed",    // ERECV
     "Send failed",       // ESEND

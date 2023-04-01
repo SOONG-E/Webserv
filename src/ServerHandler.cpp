@@ -11,7 +11,7 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-size_t ServerHandler::avail_session_id_ = 0;
+std::size_t ServerHandler::avail_session_id_ = 0;
 
 ServerHandler::ServerHandler() {}
 

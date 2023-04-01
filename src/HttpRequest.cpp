@@ -5,6 +5,8 @@
 #include "ResponseStatus.hpp"
 #include "constant.hpp"
 
+const std::size_t HttpRequest::DEFAULT_CONTENT_LENGTH = -1;
+
 HttpRequest::HttpRequest()
     : port_(DEFAULT_PORT), content_length_(DEFAULT_CONTENT_LENGTH) {}
 
@@ -75,7 +77,7 @@ void HttpRequest::setQueryString(const std::string& query_string) {
 }
 
 void HttpRequest::setHost(const std::string& host) {
-  size_t colon = host.find(":");
+  std::size_t colon = host.find(":");
   if (colon == std::string::npos) {
     host_ = host;
     return;

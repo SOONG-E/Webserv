@@ -3,6 +3,8 @@
 #include <iomanip>
 #include <iostream>
 
+const int Log::WIDTH = 55;
+const char Log::PADDING_CHAR = '-';
 const std::string Log::FOOTER_SUFFIX = " Success";
 const std::string Log::COLORS[] = {
     "\033[0m",     // DEFAULT

@@ -10,8 +10,8 @@ struct Log {
     GREEN,
   };
 
-  static const int WIDTH = 55;
-  static const char PADDING_CHAR = '-';
+  static const int WIDTH;
+  static const char PADDING_CHAR;
   static const std::string FOOTER_SUFFIX;
   static const std::string COLORS[];
 

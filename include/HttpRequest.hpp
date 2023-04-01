@@ -6,7 +6,7 @@
 #include <vector>
 
 class HttpRequest {
-  static const std::size_t DEFAULT_CONTENT_LENGTH = -1;
+  static const std::size_t DEFAULT_CONTENT_LENGTH;
 
  public:
   HttpRequest();

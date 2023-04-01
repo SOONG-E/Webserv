@@ -3,10 +3,13 @@
 #include <algorithm>
 #include <stdexcept>
 
+#include "Error.hpp"
 #include "ResponseStatus.hpp"
 #include "constant.hpp"
 #include "exception.hpp"
 #include "utility.hpp"
+
+const std::size_t HttpParser::HEADER_MAX_SIZE = 8192;
 
 HttpParser::HttpParser(const std::string& socket_buffer)
     : buffer_(socket_buffer), bound_pos_(std::string::npos) {}
@@ -77,6 +80,7 @@ void HttpParser::handlePost(void) {
       try {
         request_.setContentLength(::stoi(request_.getHeader("CONTENT-LENGTH")));
       } catch (std::invalid_argument& e) {
+        Error::log(e.what());
         throw ResponseException(C400);
       }
     }
@@ -105,18 +109,16 @@ void HttpParser::parseHeader(const std::string& header_part) {
 }
 
 void HttpParser::parseQueryString(void) {
-  std::string uri = request_.getUri();
+  const std::string& uri = request_.getUri();
   std::size_t query_boundary = uri.find("?");
   if (uri == "?" || query_boundary == std::string::npos) {
     return;
   }
-
   request_.setUri(uri.substr(0, query_boundary));
-  std::string method = request_.getMethod();
-  if (!(method == "GET" || method == "HEAD")) {
-    return;
+  if (request_.getMethod() == METHODS[GET] ||
+      request_.getMethod() == METHODS[HEAD]) {
+    request_.setQueryString(uri.substr(query_boundary));
   }
-  request_.setQueryString(uri.substr(query_boundary));
 }
 
 void HttpParser::parseRequestLine(const std::string& request_line) {

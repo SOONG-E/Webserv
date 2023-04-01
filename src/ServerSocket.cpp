@@ -9,7 +9,7 @@
 #include "constant.hpp"
 
 ServerSocket::ServerSocket(const ServerBlock& default_server)
-    : fd_(-1), default_server_(default_server) {}
+    : fd_(DEFAULT_FD), default_server_(default_server) {}
 
 ServerSocket::ServerSocket(const ServerSocket& src)
     : fd_(src.fd_),
@@ -19,8 +19,8 @@ ServerSocket::ServerSocket(const ServerSocket& src)
 ServerSocket::~ServerSocket() {}
 
 void ServerSocket::open() {
-  if (fd_ != -1) {
-    throw std::logic_error("already open");
+  if (fd_ != DEFAULT_FD) {
+    throw std::logic_error("Server socket already opened");
   }
   fd_ = socket(AF_INET, SOCK_STREAM, 0);
   if (fd_ == ERROR<int>()) {
@@ -30,7 +30,8 @@ void ServerSocket::open() {
 
 void ServerSocket::bind(const SocketAddress& address, int backlog) {
   const int enable = 1;
-  if (setsockopt(fd_, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
+  if (setsockopt(fd_, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) ==
+      ERROR<int>()) {
     throw std::runtime_error(strerror(errno));
   }
 

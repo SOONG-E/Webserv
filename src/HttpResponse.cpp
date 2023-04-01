@@ -14,6 +14,7 @@
 #include "exception.hpp"
 #include "utility.hpp"
 
+const int HttpResponse::DEFAULT_STATUS = C200;
 const std::string HttpResponse::DEFAULT_ERROR_PAGE = "html/error.html";
 
 HttpResponse::HttpResponse(const ServerBlock& default_server)
@@ -106,7 +107,7 @@ std::string HttpResponse::generateFromCgi(const HttpRequest& request,
   const std::string STATUS = "Status: ";
   std::size_t pos = cgi_response.find(STATUS);
   if (pos != std::string::npos) {
-    std::size_t count = cgi_response.find(CRLF, pos) - pos;  // error
+    std::size_t count = cgi_response.find(CRLF, pos) - pos;
     std::string status_line = cgi_response.substr(pos, count);
     cgi_response.erase(pos, count + CRLF.size());
     status_line.replace(0, STATUS.size(), "HTTP/1.1 ");

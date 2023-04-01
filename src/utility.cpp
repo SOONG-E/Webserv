@@ -5,6 +5,7 @@
 #include <fstream>
 #include <stdexcept>
 
+#include "constant.hpp"
 #include "exception.hpp"
 
 std::string formatTime(const char* format, std::time_t timestamp) {
@@ -22,7 +23,7 @@ std::size_t hexToInt(const std::string& value) {
 
 bool isDirectory(const std::string& path) {
   struct stat statbuf;
-  if (stat(path.c_str(), &statbuf) < 0) {
+  if (stat(path.c_str(), &statbuf) == ERROR<int>()) {
     return false;
   }
   return S_ISDIR(statbuf.st_mode);
@@ -65,7 +66,7 @@ std::size_t stoi(const std::string& value) {
   std::size_t num;
   iss >> num;
   if (iss.fail()) {
-    throw std::invalid_argument("stoi");
+    throw std::invalid_argument("stoi() failed: " + value);
   }
   return num;
 }
