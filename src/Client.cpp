@@ -7,6 +7,7 @@
 #include "Error.hpp"
 #include "Log.hpp"
 #include "constant.hpp"
+#include "exception.hpp"
 
 Client::Client(int fd, const ServerBlock& default_server,
                const SocketAddress& cli_addr, const SocketAddress& serv_addr)
@@ -120,8 +121,8 @@ void Client::executeCgiIO() {
         cgi_.readToPipe();
       }
     }
-  } catch (const std::exception& e) {
-    response_obj_.setStatus(C500);
+  } catch (const ResponseException& e) {
+    response_obj_.setStatus(e.status);
     Error::log(Error::INFO[ECGI], e.what());
   }
 }
