@@ -7,6 +7,8 @@
 #include "HttpRequest.hpp"
 
 class HttpParser {
+  static const std::size_t HEADER_MAX_SIZE = 8192;
+
  public:
   explicit HttpParser(const std::string& socket_buffer = "");
   HttpParser(const HttpParser& origin);

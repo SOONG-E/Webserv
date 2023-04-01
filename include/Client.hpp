@@ -1,6 +1,7 @@
 #ifndef CLIENT_HPP_
 #define CLIENT_HPP_
 
+#include <ctime>
 #include <exception>
 #include <string>
 
@@ -30,8 +31,8 @@ class Client {
   const Cgi& getCgi() const;
   const SocketAddress& getServerAddress() const;
   const SocketAddress& getClientAddress() const;
-  time_t getTimeout() const;
-  void setTimeout(time_t time);
+  std::time_t getTimeout() const;
+  void setTimeout(std::time_t time = std::time(NULL));
   void setSessionId(std::string session_id);
 
   std::string receive() const;
@@ -64,7 +65,7 @@ class Client {
   HttpResponse response_obj_;
   Cgi cgi_;
   std::string buf_;
-  time_t timeout_;
+  std::time_t timeout_;
 };
 
 #endif

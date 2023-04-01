@@ -13,8 +13,8 @@ Client::Client(int fd, const ServerBlock& default_server,
     : fd_(fd),
       cli_address_(cli_addr),
       serv_address_(serv_addr),
-      response_obj_(default_server),
-      timeout_(time(NULL) + KEEPALIVE_TIMEOUT) {
+      response_obj_(default_server) {
+  setTimeout();
   logConnectionInfo();
 }
 
@@ -56,9 +56,11 @@ const SocketAddress& Client::getServerAddress() const { return serv_address_; }
 
 const SocketAddress& Client::getClientAddress() const { return cli_address_; }
 
-time_t Client::getTimeout() const { return timeout_; }
+std::time_t Client::getTimeout() const { return timeout_; }
 
-void Client::setTimeout(time_t time) { timeout_ = time; }
+void Client::setTimeout(std::time_t time) {
+  timeout_ = time + KEEPALIVE_TIMEOUT;
+}
 
 void Client::setSessionId(std::string session_id) {
   parser_.getRequestObj().setSessionId(session_id);

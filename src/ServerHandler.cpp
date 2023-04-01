@@ -93,7 +93,7 @@ void ServerHandler::closeTimeoutClients() {
   for (clients_type::iterator it = clients_.begin(); it != clients_.end();
        ++it) {
     client = &it->second;
-    if (client->getTimeout() < time(NULL) && !client->isProcessing()) {
+    if (client->getTimeout() < std::time(NULL) && !client->isProcessing()) {
       client->closeConnection();
       delete_clients.push_back(client->getFD());
     }
@@ -175,7 +175,10 @@ void ServerHandler::receiveRequest(Client& client) {
         } else {
           response_obj.setStatus(C204);
         }
-      } else if (client.isCgi()) {
+        return;
+      }
+
+      if (client.isCgi()) {
         client.getCgi().runCgiScript(request_obj, client.getClientAddress(),
                                      client.getServerAddress(),
                                      location_block.getCgiParam("CGI_PATH"));
@@ -197,7 +200,7 @@ void ServerHandler::sendResponse(Client& client) {
       throw Client::ConnectionClosedException();
     }
     client.clear();
-    client.setTimeout(time(NULL) + KEEPALIVE_TIMEOUT);
+    client.setTimeout();
   }
 }
 
