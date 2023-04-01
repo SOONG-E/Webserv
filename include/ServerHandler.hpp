@@ -25,6 +25,7 @@ class ServerHandler {
   void acceptConnections();
   void closeTimeoutClients();
   void respondToClients();
+  void issueSessionId(Client& client);
 
  private:
   typedef std::map<std::string, std::vector<ServerBlock> > server_blocks_type;
@@ -45,6 +46,7 @@ class ServerHandler {
   clients_type clients_;
   selector_type server_selector_;
   selector_type client_selector_;
+  static size_t avail_session_id_;
 };
 
 #endif
