@@ -143,6 +143,10 @@ std::string HttpResponse::commonHeader(const HttpRequest& request) const {
   }
   // response-header
   header += "Server: Webserv" + CRLF;
+  if (request.getHeader("COOKIE").empty()) {
+    header += "Set-Cookie: Session-ID=";
+    header += request.getSessionId() + CRLF;
+  }
   return header;
 }
 
