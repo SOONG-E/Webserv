@@ -6,6 +6,7 @@
 
 enum StatusIndex {
   C200,
+  C201,
   C204,
   C400,
   C404,
