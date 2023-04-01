@@ -9,6 +9,7 @@
 
 #include "DirectoryListingHtml.hpp"
 #include "File.hpp"
+#include "ResponseStatus.hpp"
 #include "constant.hpp"
 #include "exception.hpp"
 #include "utility.hpp"
@@ -61,10 +62,10 @@ std::string HttpResponse::generate(const HttpRequest& request, bool is_cgi,
     return generateErrorPage(request);
   }
   if (is_cgi) {
-    return combineCgiResponse(request, cgi_response);
+    return generateCgiResponse(request, cgi_response);
   }
   if (request.getMethod() == METHODS[DELETE]) {
-    return commonHeader(request) + DOUBLE_CRLF;
+    return commonHeader(request) + CRLF;
   }
   std::string body;
   try {
@@ -99,6 +100,31 @@ std::string HttpResponse::generateResponse(const HttpRequest& request,
   return combine(request, body);
 }
 
+std::string HttpResponse::generateCgiResponse(const HttpRequest& request,
+                                              std::string cgi_response) const {
+  std::string response = commonHeader(request);
+  const std::string STATUS = "Status: ";
+  std::size_t pos = cgi_response.find(STATUS);
+  if (pos != std::string::npos) {
+    std::size_t count = cgi_response.find(CRLF, pos) - pos;  // error
+    std::string status_line = cgi_response.substr(pos, count);
+    cgi_response.erase(pos, count + CRLF.size());
+    status_line.replace(0, STATUS.size(), "HTTP/1.1 ");
+    response.replace(0, response.find(CRLF), status_line);
+  }
+  response += cgi_response;
+  std::size_t bound_pos = response.find(DOUBLE_CRLF);
+  if (bound_pos == std::string::npos) {
+    return response + CRLF;
+  }
+  // entity-header
+  bound_pos += CRLF.size();
+  std::size_t body_size = response.size() - bound_pos - CRLF.size();
+  response.insert(bound_pos, "Content-Length: " + toString(body_size) + CRLF);
+  response.insert(bound_pos, "Content-Type: text/html" + CRLF);
+  return response;
+}
+
 std::string HttpResponse::combine(const HttpRequest& request,
                                   const std::string& body) const {
   std::string header = commonHeader(request);
@@ -106,28 +132,6 @@ std::string HttpResponse::combine(const HttpRequest& request,
   header += "Content-Length: " + toString(body.size()) + CRLF;
   header += "Content-Type: text/html" + DOUBLE_CRLF;
   return header + body;
-}
-#include "Log.hpp"
-std::string HttpResponse::combineCgiResponse(const HttpRequest& request,
-                                             std::string cgi_response) const {
-  std::string header = commonHeader(request);
-  // entity-header
-  std::size_t body_size =
-      cgi_response.size() - cgi_response.find(DOUBLE_CRLF) - DOUBLE_CRLF.size();
-  header += "Content-Length: " + toString(body_size) + CRLF;
-  const std::string STATUS = "Status:";
-  std::size_t pos = cgi_response.find(STATUS);
-  if (pos == std::string::npos) {
-    return header + cgi_response;
-  }
-  std::size_t count = cgi_response.find(CRLF, pos) + CRLF.size() - pos;
-  cgi_response.replace(pos, STATUS.size(), "HTTP/1.1");
-  header.replace(0, header.find(CRLF),
-                 cgi_response.substr(pos, cgi_response.find(CRLF, pos)));
-  if (pos != std::string::npos) {
-    cgi_response.erase(pos, count);
-  }
-  return header + cgi_response;
 }
 
 std::string HttpResponse::commonHeader(const HttpRequest& request) const {
