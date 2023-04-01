@@ -91,7 +91,7 @@ void ServerHandler::closeTimeoutClients() {
     if (client->getTimeout() < time(NULL) && !client->isProcessing()) {
       client->closeConnection();
       clients_.erase(client->getFD());
-      client_selector_.clear(client->getFD());
+      client_selector_.unregisterFD(client->getFD());
     }
   }
 }
@@ -220,6 +220,6 @@ void ServerHandler::validateRequest(const HttpRequest& request_obj,
 void ServerHandler::deleteClients(const std::vector<int>& delete_clients) {
   for (std::size_t i = 0; i < delete_clients.size(); ++i) {
     clients_.erase(delete_clients[i]);
-    client_selector_.clear(delete_clients[i]);
+    client_selector_.unregisterFD(delete_clients[i]);
   }
 }

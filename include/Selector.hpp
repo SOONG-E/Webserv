@@ -14,7 +14,7 @@ class Selector {
 
   int select();
   void registerFD(int fd);
-  void clear(int fd);
+  void unregisterFD(int fd);
   bool isReadable(int fd) const;
   bool isWritable(int fd) const;
 

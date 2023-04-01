@@ -47,7 +47,7 @@ void Selector::registerFD(int fd) {
   }
 }
 
-void Selector::clear(int fd) { FD_CLR(fd, &fds_); }
+void Selector::unregisterFD(int fd) { FD_CLR(fd, &fds_); }
 
 bool Selector::isReadable(int fd) const { return FD_ISSET(fd, &read_fds_); }
 bool Selector::isWritable(int fd) const { return FD_ISSET(fd, &write_fds_); }
