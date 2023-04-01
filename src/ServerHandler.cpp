@@ -11,6 +11,8 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
+size_t ServerHandler::avail_session_id_ = 0;
+
 ServerHandler::ServerHandler() {}
 
 ServerHandler::ServerHandler(const ServerHandler& src)
@@ -134,6 +136,9 @@ void ServerHandler::respondToClients() {
     Error::log("respondToClients() failed", e.what());
   }
 }
+void ServerHandler::issueSessionId(Client& client) {
+  client.setSessionId(toString(avail_session_id_++));
+}
 
 void ServerHandler::receiveRequest(Client& client) {
   try {
@@ -154,6 +159,9 @@ void ServerHandler::receiveRequest(Client& client) {
       response_obj.setLocationBlock(&location_block);
 
       validateRequest(request_obj, location_block);
+      if (!client.isHasCookie()) {
+        issueSessionId(client);
+      }
 
       if (request_obj.getMethod() == METHODS[DELETE]) {
         if (unlink(getAbsolutePath(request_obj.getUri()).c_str()) ==

@@ -32,6 +32,7 @@ class Client {
   const SocketAddress& getClientAddress() const;
   time_t getTimeout() const;
   void setTimeout(time_t time);
+  void setSessionId(std::string session_id);
 
   std::string receive() const;
   void send();
@@ -44,6 +45,7 @@ class Client {
   bool isReadyToCgiIO() const;
   bool isReadyToSend() const;
   bool isProcessing() const;
+  bool isHasCookie() const;
 
   void logAddressInfo() const;
   void logConnectionInfo() const;
