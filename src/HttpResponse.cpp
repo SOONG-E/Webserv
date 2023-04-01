@@ -62,7 +62,7 @@ std::string HttpResponse::generate(const HttpRequest& request, bool is_cgi,
     return generateErrorPage(request);
   }
   if (is_cgi) {
-    return generateCgiResponse(request, cgi_response);
+    return generateFromCgi(request, cgi_response);
   }
   if (request.getMethod() == METHODS[DELETE]) {
     return commonHeader(request) + CRLF;
@@ -100,8 +100,8 @@ std::string HttpResponse::generateResponse(const HttpRequest& request,
   return combine(request, body);
 }
 
-std::string HttpResponse::generateCgiResponse(const HttpRequest& request,
-                                              std::string cgi_response) const {
+std::string HttpResponse::generateFromCgi(const HttpRequest& request,
+                                          std::string cgi_response) const {
   std::string response = commonHeader(request);
   const std::string STATUS = "Status: ";
   std::size_t pos = cgi_response.find(STATUS);

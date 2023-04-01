@@ -35,8 +35,8 @@ class HttpResponse {
   std::string generateErrorPage(const HttpRequest& request);
   std::string generateResponse(const HttpRequest& request,
                                const std::string& body) const;
-  std::string generateCgiResponse(const HttpRequest& request,
-                                  std::string cgi_response) const;
+  std::string generateFromCgi(const HttpRequest& request,
+                              std::string cgi_response) const;
   std::string combine(const HttpRequest& request,
                       const std::string& body) const;
   std::string commonHeader(const HttpRequest& request) const;
