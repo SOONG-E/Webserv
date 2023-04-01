@@ -26,6 +26,7 @@ int main(int argc, char* argv[]) {
 
   while (1) {
     handler.acceptConnections();
+    handler.closeTimeoutClients();
     handler.respondToClients();
   }
   return EXIT_SUCCESS;

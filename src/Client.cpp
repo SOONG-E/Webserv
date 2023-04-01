@@ -13,7 +13,8 @@ Client::Client(int fd, const ServerBlock& default_server,
     : fd_(fd),
       cli_address_(cli_addr),
       serv_address_(serv_addr),
-      response_obj_(default_server) {
+      response_obj_(default_server),
+      timeout_(time(NULL) + 5) {
   logConnectionInfo();
 }
 
@@ -24,7 +25,8 @@ Client::Client(const Client& src)
       parser_(src.parser_),
       response_obj_(src.response_obj_),
       cgi_(src.cgi_),
-      buf_(src.buf_) {}
+      buf_(src.buf_),
+      timeout_(src.timeout_) {}
 
 Client::~Client() {}
 
@@ -53,6 +55,10 @@ const Cgi& Client::getCgi() const { return cgi_; }
 const SocketAddress& Client::getServerAddress() const { return serv_address_; }
 
 const SocketAddress& Client::getClientAddress() const { return cli_address_; }
+
+time_t Client::getTimeout() const { return timeout_; }
+
+void Client::setTimeout(time_t time) { timeout_ = time; }
 
 std::string Client::receive() const {
   char buf[BUF_SIZE];
@@ -85,7 +91,8 @@ void Client::send() {
 
   Log::header("Send Information");
   logAddressInfo();
-  // std::cout << "[Send Data] " << '\n' << buf_.substr(0, write_bytes) << '\n';
+  // std::cout << "[Send Data] " << '\n' << buf_.substr(0, write_bytes) <<
+  // '\n';
   Log::footer("Send");
 
   buf_.erase(0, write_bytes);
@@ -153,6 +160,13 @@ bool Client::isReadyToCgiIO() const {
 bool Client::isReadyToSend() const {
   if (!response_obj_.isSuccessCode() ||
       (parser_.isCompleted() && (!isCgi() || cgi_.isCompleted()))) {
+    return true;
+  }
+  return false;
+}
+
+bool Client::isProcessing() const {
+  if (!parser_.getBuffer().empty()) {
     return true;
   }
   return false;

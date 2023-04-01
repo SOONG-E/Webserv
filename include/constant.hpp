@@ -28,6 +28,7 @@ const std::string WHITESPACE = " \t\n\v\f\r";
 const std::string METHODS[] = {
     "GET", "POST", "DELETE", "HEAD", "OPTIONS", "PUT", "TRACE", "CONNECT",
 };
+const time_t KEEPALIVE_TIMEOUT = 5;
 
 template <typename T>
 T ERROR() {

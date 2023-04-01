@@ -23,6 +23,7 @@ class ServerHandler {
   void configureServer(const Config& config);
   void createServers();
   void acceptConnections();
+  void closeTimeoutClients();
   void respondToClients();
 
  private:

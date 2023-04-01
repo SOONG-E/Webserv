@@ -30,6 +30,8 @@ class Client {
   const Cgi& getCgi() const;
   const SocketAddress& getServerAddress() const;
   const SocketAddress& getClientAddress() const;
+  time_t getTimeout() const;
+  void setTimeout(time_t time);
 
   std::string receive() const;
   void send();
@@ -41,6 +43,7 @@ class Client {
   bool isPartialWritten() const;
   bool isReadyToCgiIO() const;
   bool isReadyToSend() const;
+  bool isProcessing() const;
 
   void logAddressInfo() const;
   void logConnectionInfo() const;
@@ -59,6 +62,7 @@ class Client {
   HttpResponse response_obj_;
   Cgi cgi_;
   std::string buf_;
+  time_t timeout_;
 };
 
 #endif

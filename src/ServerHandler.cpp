@@ -82,6 +82,20 @@ void ServerHandler::acceptConnections() {
   }
 }
 
+void ServerHandler::closeTimeoutClients() {
+  Client* client;
+
+  for (clients_type::iterator it = clients_.begin(); it != clients_.end();
+       ++it) {
+    client = &it->second;
+    if (client->getTimeout() < time(NULL) && !client->isProcessing()) {
+      client->closeConnection();
+      clients_.erase(client->getFD());
+      client_selector_.clear(client->getFD());
+    }
+  }
+}
+
 void ServerHandler::respondToClients() {
   try {
     if (client_selector_.select() > 0) {
@@ -122,7 +136,6 @@ void ServerHandler::respondToClients() {
 }
 
 void ServerHandler::receiveRequest(Client& client) {
-  HttpResponse& response_obj = client.getResponseObj();
   try {
     std::string request = client.receive();
 
@@ -136,6 +149,7 @@ void ServerHandler::receiveRequest(Client& client) {
       const LocationBlock& location_block =
           server_block.findLocationBlock(request_obj.getUri());
 
+      HttpResponse& response_obj = client.getResponseObj();
       response_obj.setServerBlock(&server_block);
       response_obj.setLocationBlock(&location_block);
 
@@ -155,7 +169,7 @@ void ServerHandler::receiveRequest(Client& client) {
       }
     }
   } catch (const ResponseException& e) {
-    response_obj.setStatus(e.index);
+    client.getResponseObj().setStatus(e.index);
   }
 }
 
@@ -170,6 +184,7 @@ void ServerHandler::sendResponse(Client& client) {
       throw Client::ConnectionClosedException();
     }
     client.clear();
+    client.setTimeout(time(NULL) + KEEPALIVE_TIMEOUT);
   }
 }
 
