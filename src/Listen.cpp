@@ -1,5 +1,8 @@
 #include "Listen.hpp"
 
+#include <cstdlib>
+
+#include "Error.hpp"
 #include "constant.hpp"
 #include "exception.hpp"
 #include "utility.hpp"
@@ -21,7 +24,7 @@ Listen::Listen(const std::string& token)
     host = splitted[0];
     port = splitted[1];
   } else {
-    throw ConfigException(ERRORS[TOKEN]);
+    Error::log(Error::INFO[ETOKEN], EXIT_FAILURE);
   }
   socket_key = host + ":" + port;
 }

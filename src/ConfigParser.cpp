@@ -1,10 +1,11 @@
 #include "ConfigParser.hpp"
 
+#include <cstdlib>
 #include <fstream>
 #include <sstream>
 #include <vector>
 
-#include "constant.hpp"
+#include "Error.hpp"
 #include "exception.hpp"
 #include "utility.hpp"
 
@@ -39,7 +40,7 @@ const Config& ConfigParser::parse(void) {
     config_.addServerBlock(server_block_);
   }
   if (!expect().empty()) {
-    throw ConfigException(ERRORS[TOKEN]);
+    Error::log(Error::INFO[ETOKEN], EXIT_FAILURE);
   }
   return config_;
 }
@@ -61,7 +62,7 @@ void ConfigParser::parseServerBlock(void) {
       parseLocationBlock();
       server_block_.addLocationBlock(location_block_);
     } else {
-      throw ConfigException(ERRORS[TOKEN]);
+      Error::log(Error::INFO[ETOKEN], EXIT_FAILURE);
     }
   }
   expect("}");
@@ -123,7 +124,7 @@ void ConfigParser::parseLocationBlock(void) {
     } else if (token.compare(0, 4, "CGI_") == 0) {
       parseCgiParams();
     } else {
-      throw ConfigException(ERRORS[TOKEN]);
+      Error::log(Error::INFO[ETOKEN], EXIT_FAILURE);
     }
   }
   expect("}");
@@ -176,7 +177,7 @@ std::string ConfigParser::expect(const std::string& expected) {
   skipWhitespace();
   if (!expected.empty()) {
     if (content_.substr(pos_, expected.size()) != expected) {
-      throw ConfigException(ERRORS[TOKEN]);
+      Error::log(Error::INFO[ETOKEN], EXIT_FAILURE);
     }
     pos_ += expected.size();
     return expected;

@@ -5,13 +5,13 @@
 
 #include "Config.hpp"
 #include "ConfigParser.hpp"
+#include "Error.hpp"
 #include "ServerHandler.hpp"
 #include "constant.hpp"
 
 int main(int argc, char* argv[]) {
   if (argc > 2) {
-    std::cerr << ERRORS[PREFIX] << ERRORS[ARG] << std::endl;
-    return EXIT_FAILURE;
+    Error::log(Error::INFO[EARG], EXIT_FAILURE);
   }
 
   const std::string& filename = (argc == 2) ? argv[1] : DEFAULT_PATH;

@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include "ByteUnits.hpp"
+#include "Error.hpp"
 #include "constant.hpp"
 #include "exception.hpp"
 
@@ -91,11 +92,11 @@ void LocationBlock::setBodyLimit(const std::string& raw) {
   char* unit;
   body_limit_ = std::strtoul(raw.c_str(), &unit, 10);
   if (errno == ERANGE) {
-    throw ConfigException(std::strerror(errno));
+    Error::log(std::strerror(errno), EXIT_FAILURE);
   }
   if (*unit == '\0') return;
   if (UNITS.size.find(unit) == UNITS.size.end()) {
-    throw ConfigException(ERRORS[TOKEN]);
+    Error::log(Error::INFO[ETOKEN], EXIT_FAILURE);
   }
   body_limit_ *= UNITS.size.at(unit);
 }
@@ -112,7 +113,7 @@ void LocationBlock::setRoot(const std::string& root) { root_ = root; }
 
 void LocationBlock::setAutoindex(const std::string& raw) {
   if (raw != "on" && raw != "off") {
-    throw ConfigException(ERRORS[TOKEN]);
+    Error::log(Error::INFO[ETOKEN], EXIT_FAILURE);
   }
   autoindex_ = (raw == "on");
 }
