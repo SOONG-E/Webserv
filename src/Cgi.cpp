@@ -33,15 +33,14 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
                        const SocketAddress& cli_addr,
                        const SocketAddress& serv_addr,
                        const std::string& cgi_path) {
-  int pipe_fds1[2];
-  int pipe_fds2[2];
+  int pipe_fds[2][2];
 
-  if (pipe(pipe_fds1) == ERROR<int>()) {
+  if (pipe(pipe_fds[0]) == ERROR<int>()) {
     throw ResponseException(C500);
   }
-  if (pipe(pipe_fds2) == ERROR<int>()) {
-    close(pipe_fds1[READ]);
-    close(pipe_fds1[WRITE]);
+  if (pipe(pipe_fds[1]) == ERROR<int>()) {
+    close(pipe_fds[0][READ]);
+    close(pipe_fds[0][WRITE]);
     throw ResponseException(C500);
   }
 
@@ -52,27 +51,27 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
 
   if (pid_ == ERROR<pid_t>()) {
     deleteEnvp(envp);
-    close(pipe_fds1[READ]);
-    close(pipe_fds1[WRITE]);
-    close(pipe_fds2[READ]);
-    close(pipe_fds2[WRITE]);
+    close(pipe_fds[0][READ]);
+    close(pipe_fds[0][WRITE]);
+    close(pipe_fds[1][READ]);
+    close(pipe_fds[1][WRITE]);
     throw ResponseException(C500);
   } else if (pid_ == 0) {
-    close(pipe_fds1[WRITE]);
-    close(pipe_fds2[READ]);
-    dup2(pipe_fds1[READ], STDIN_FILENO);
-    dup2(pipe_fds2[WRITE], STDOUT_FILENO);
+    close(pipe_fds[0][WRITE]);
+    close(pipe_fds[1][READ]);
+    dup2(pipe_fds[0][READ], STDIN_FILENO);
+    dup2(pipe_fds[1][WRITE], STDOUT_FILENO);
 
     execve(argv[0], argv, envp);
     exit(EXIT_FAILURE);
   }
 
   deleteEnvp(envp);
-  close(pipe_fds1[READ]);
-  close(pipe_fds2[WRITE]);
+  close(pipe_fds[0][READ]);
+  close(pipe_fds[1][WRITE]);
 
-  pipe_fds_[READ] = pipe_fds2[READ];
-  pipe_fds_[WRITE] = pipe_fds1[WRITE];
+  pipe_fds_[READ] = pipe_fds[1][READ];
+  pipe_fds_[WRITE] = pipe_fds[0][WRITE];
 
   if (fcntl(pipe_fds_[READ], F_SETFL, O_NONBLOCK) == ERROR<int>() ||
       fcntl(pipe_fds_[WRITE], F_SETFL, O_NONBLOCK) == ERROR<int>()) {
@@ -179,14 +178,6 @@ char** Cgi::generateEnvp(const HttpRequest& request_obj,
   }
   envp[i] = NULL;
   return envp;
-}
-
-std::string Cgi::getAbsolutePath(const std::string& uri) const {
-  char buf[FILENAME_MAX];
-  if (!getcwd(buf, FILENAME_MAX)) {
-    throw ResponseException(C500);
-  }
-  return buf + uri;
 }
 
 void Cgi::deleteEnvp(char** envp) const {

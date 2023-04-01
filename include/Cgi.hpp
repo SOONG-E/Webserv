@@ -37,7 +37,6 @@ class Cgi {
   char** generateEnvp(const HttpRequest& request_obj,
                       const SocketAddress& cli_addr,
                       const SocketAddress& serv_addr) const;
-  std::string getAbsolutePath(const std::string& uri) const;
   void deleteEnvp(char** envp) const;
 
   bool is_completed_;
