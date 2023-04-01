@@ -188,3 +188,11 @@ void Cgi::deleteEnvp(char** envp) const {
   }
   delete[] envp;
 }
+
+std::string Cgi::getAbsolutePath(const std::string& uri) const {
+  char buf[FILENAME_MAX];
+  if (!getcwd(buf, FILENAME_MAX)) {
+    throw ResponseException(C500);
+  }
+  return buf + uri;
+}

@@ -14,14 +14,6 @@ std::string formatTime(const char* format, std::time_t timestamp) {
   return buf;
 }
 
-std::string getAbsolutePath(const std::string& uri) {
-  char buf[FILENAME_MAX];
-  if (!getcwd(buf, FILENAME_MAX)) {
-    throw ResponseException(C500);
-  }
-  return buf + uri;
-}
-
 std::size_t hexToInt(const std::string& value) {
   std::size_t out;
   std::istringstream iss(value);

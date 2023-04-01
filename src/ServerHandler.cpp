@@ -170,8 +170,7 @@ void ServerHandler::receiveRequest(Client& client) {
       }
 
       if (request_obj.getMethod() == METHODS[DELETE]) {
-        if (unlink(getAbsolutePath(request_obj.getUri()).c_str()) ==
-            ERROR<int>()) {
+        if (unlink(("." + request_obj.getUri()).c_str()) == ERROR<int>()) {
           response_obj.setStatus(C404);
         } else {
           response_obj.setStatus(C204);

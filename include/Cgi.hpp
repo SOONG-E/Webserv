@@ -38,6 +38,7 @@ class Cgi {
                       const SocketAddress& cli_addr,
                       const SocketAddress& serv_addr) const;
   void deleteEnvp(char** envp) const;
+  std::string getAbsolutePath(const std::string& uri) const;
 
   bool is_completed_;
   int pipe_fds_[2];
