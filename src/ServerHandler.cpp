@@ -141,7 +141,9 @@ void ServerHandler::receiveRequest(Client& client) {
 
       validateRequest(request_obj, location_block);
 
-      if (client.isCgi()) {
+      if (request_obj.getMethod() == "DELETE") {
+        unlink(getAbsolutePath(request_obj.getUri()).c_str());
+      } else if (client.isCgi()) {
         client.getCgi().runCgiScript(request_obj, client.getClientAddress(),
                                      client.getServerAddress(),
                                      location_block.getCgiParam("CGI_PATH"));
