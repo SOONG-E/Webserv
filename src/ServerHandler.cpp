@@ -148,7 +148,7 @@ void ServerHandler::issueSessionId(Client& client) {
 void ServerHandler::receiveRequest(Client& client) {
   try {
     std::string request = client.receive();
-    client.setTimeout(time(NULL) + KEEPALIVE_TIMEOUT);
+    client.setTimeout();
 
     HttpParser& parser = client.getParser();
     parser.appendRequest(request);
