@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "HttpResponse.hpp"
+#include "constant.hpp"
 #include "exception.hpp"
 
 ServerBlock::ServerBlock() {}
