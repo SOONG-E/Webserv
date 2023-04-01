@@ -60,6 +60,10 @@ time_t Client::getTimeout() const { return timeout_; }
 
 void Client::setTimeout(time_t time) { timeout_ = time; }
 
+void Client::setSessionId(std::string session_id) {
+  parser_.getRequestObj().setSessionId(session_id);
+}
+
 std::string Client::receive() const {
   char buf[BUF_SIZE];
 
@@ -172,6 +176,12 @@ bool Client::isProcessing() const {
   return false;
 }
 
+bool Client::isHasCookie() const {
+  if (getRequestObj().getHeader("COOKIE").empty()) {
+    return false;
+  }
+  return true;
+}
 void Client::logAddressInfo() const {
   std::cout << "[Client address]" << '\n'
             << cli_address_.getIP() << ":" << cli_address_.getPort() << '\n'
