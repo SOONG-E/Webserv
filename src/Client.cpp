@@ -179,7 +179,8 @@ bool Client::isProcessing() const {
 }
 
 bool Client::isHasCookie() const {
-  if (getRequestObj().getHeader("COOKIE").empty()) {
+  if (getRequestObj().getHeader("COOKIE").empty() ||
+      getRequestObj().getCookie("Session-ID").empty()) {
     return false;
   }
   return true;
