@@ -67,7 +67,8 @@ std::string HttpResponse::generate(const HttpRequest& request, bool is_cgi,
   try {
     const std::string& uri = request.getUri();
     if (request.getMethod() == METHODS[DELETE]) {
-      body = directoryListing(uri.substr(0, uri.rfind('/') + 1));
+      body =
+          directoryListing(getAbsolutePath(uri.substr(0, uri.rfind('/') + 1)));
     } else {
       body = rootUri(request.getUri());
     }
