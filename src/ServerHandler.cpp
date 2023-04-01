@@ -122,6 +122,7 @@ void ServerHandler::respondToClients() {
 }
 
 void ServerHandler::receiveRequest(Client& client) {
+  HttpResponse& response_obj = client.getResponseObj();
   try {
     std::string request = client.receive();
 
@@ -135,7 +136,6 @@ void ServerHandler::receiveRequest(Client& client) {
       const LocationBlock& location_block =
           server_block.findLocationBlock(request_obj.getUri());
 
-      HttpResponse& response_obj = client.getResponseObj();
       response_obj.setServerBlock(&server_block);
       response_obj.setLocationBlock(&location_block);
 
@@ -144,7 +144,9 @@ void ServerHandler::receiveRequest(Client& client) {
       if (request_obj.getMethod() == METHODS[DELETE]) {
         if (unlink(getAbsolutePath(request_obj.getUri()).c_str()) ==
             ERROR<int>()) {
-          client.getResponseObj().setStatus(C404);
+          response_obj.setStatus(C404);
+        } else {
+          response_obj.setStatus(C204);
         }
       } else if (client.isCgi()) {
         client.getCgi().runCgiScript(request_obj, client.getClientAddress(),
@@ -153,7 +155,7 @@ void ServerHandler::receiveRequest(Client& client) {
       }
     }
   } catch (const ResponseException& e) {
-    client.getResponseObj().setStatus(e.index);
+    response_obj.setStatus(e.index);
   }
 }
 

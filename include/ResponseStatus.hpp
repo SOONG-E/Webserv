@@ -6,6 +6,7 @@
 
 enum StatusIndex {
   C200,
+  C204,
   C400,
   C404,
   C405,
@@ -22,6 +23,7 @@ struct ResponseStatus {
 
   ResponseStatus() {
     reason.insert(std::make_pair(C200, REASONS[C200]));
+    reason.insert(std::make_pair(C204, REASONS[C204]));
     reason.insert(std::make_pair(C400, REASONS[C400]));
     reason.insert(std::make_pair(C404, REASONS[C404]));
     reason.insert(std::make_pair(C405, REASONS[C405]));

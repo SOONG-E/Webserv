@@ -53,7 +53,7 @@ void HttpResponse::clear(void) {
   location_block_ = NULL;
 }
 
-bool HttpResponse::isSuccessCode(void) const { return status_ <= C200; }
+bool HttpResponse::isSuccessCode(void) const { return status_ <= C204; }
 
 std::string HttpResponse::generate(const HttpRequest& request, bool is_cgi,
                                    const std::string& cgi_response) {
@@ -63,15 +63,12 @@ std::string HttpResponse::generate(const HttpRequest& request, bool is_cgi,
   if (is_cgi) {
     return combineCgiResponse(request, cgi_response);
   }
+  if (request.getMethod() == METHODS[DELETE]) {
+    return commonHeader(request) + DOUBLE_CRLF;
+  }
   std::string body;
   try {
-    const std::string& uri = request.getUri();
-    if (request.getMethod() == METHODS[DELETE]) {
-      body =
-          directoryListing(getAbsolutePath(uri.substr(0, uri.rfind('/') + 1)));
-    } else {
-      body = rootUri(request.getUri());
-    }
+    body = rootUri(request.getUri());
   } catch (FileOpenException& e) {
     setStatus(C404);
     body =
