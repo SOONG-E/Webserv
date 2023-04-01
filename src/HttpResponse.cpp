@@ -107,7 +107,7 @@ std::string HttpResponse::combine(const HttpRequest& request,
   header += "Content-Type: text/html" + DOUBLE_CRLF;
   return header + body;
 }
-
+#include "Log.hpp"
 std::string HttpResponse::combineCgiResponse(const HttpRequest& request,
                                              std::string cgi_response) const {
   std::string header = commonHeader(request);
@@ -115,10 +115,17 @@ std::string HttpResponse::combineCgiResponse(const HttpRequest& request,
   std::size_t body_size =
       cgi_response.size() - cgi_response.find(DOUBLE_CRLF) - DOUBLE_CRLF.size();
   header += "Content-Length: " + toString(body_size) + CRLF;
-  std::size_t index = cgi_response.find("Status:");
-  if (index != std::string::npos) {
-    cgi_response.erase(index,
-                       cgi_response.find(CRLF, index) + CRLF.size() - index);
+  const std::string STATUS = "Status:";
+  std::size_t pos = cgi_response.find(STATUS);
+  if (pos == std::string::npos) {
+    return header + cgi_response;
+  }
+  std::size_t count = cgi_response.find(CRLF, pos) + CRLF.size() - pos;
+  cgi_response.replace(pos, STATUS.size(), "HTTP/1.1");
+  header.replace(0, header.find(CRLF),
+                 cgi_response.substr(pos, cgi_response.find(CRLF, pos)));
+  if (pos != std::string::npos) {
+    cgi_response.erase(pos, count);
   }
   return header + cgi_response;
 }
