@@ -28,15 +28,15 @@ def split_filename(filename):
 
 	return base_name, extension
 
-def recreate_filename(filename):
-	if not exists(filename):
+def recreate_filename(path, filename):
+	if not exists(path + filename):
 		return filename
 	
 	filename, extension = split_filename(filename)
 
 	for num in range(1, sys.maxsize):
 		suffix = str(num)
-		if not exists(filename + suffix + extension):
+		if not exists(path + filename + suffix + extension):
 			return filename + suffix + extension
 	raise Exception("There are too many duplicated name.")
 
@@ -51,14 +51,14 @@ try:
 	validateRequest(form)
 	uploaded_file = form['upload_file']
 
-	path = "../upload_file/"
+	path = "./upload_file/"
 	guaranteeDirectoryExistance(path)
 
 	assert isdir(path)
 
-	filename = path + uploaded_file.filename
-	filename = recreate_filename(filename)
-	
+	filename = recreate_filename(path, uploaded_file.filename)
+	filename = path + filename
+
 	assert not exists(filename)
 
 	save_file = open(filename, 'wb')
