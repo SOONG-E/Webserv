@@ -93,7 +93,7 @@ void ServerHandler::closeTimeoutClients() {
   for (clients_type::iterator it = clients_.begin(); it != clients_.end();
        ++it) {
     client = &it->second;
-    if (client->getTimeout() < std::time(NULL) && !client->isProcessing()) {
+    if (client->getTimeout() < std::time(0) && !client->isReceiveFinished()) {
       client->closeConnection();
       delete_clients.push_back(client->getFD());
     }
@@ -148,6 +148,7 @@ void ServerHandler::issueSessionId(Client& client) {
 void ServerHandler::receiveRequest(Client& client) {
   try {
     std::string request = client.receive();
+    client.setTimeout(time(NULL) + KEEPALIVE_TIMEOUT);
 
     HttpParser& parser = client.getParser();
     parser.appendRequest(request);
@@ -156,7 +157,7 @@ void ServerHandler::receiveRequest(Client& client) {
       const HttpRequest& request_obj = client.getRequestObj();
       const ServerBlock& server_block =
           findServerBlock(client.getSocketKey(), request_obj.getHeader("HOST"));
-      const LocationBlock& location_block =  
+      const LocationBlock& location_block =
           server_block.findLocationBlock(request_obj.getUri());
 
       HttpResponse& response_obj = client.getResponseObj();

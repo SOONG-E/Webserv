@@ -45,7 +45,7 @@ class Client {
   bool isPartialWritten() const;
   bool isReadyToCgiIO() const;
   bool isReadyToSend() const;
-  bool isProcessing() const;
+  bool isReceiveFinished() const;
   bool hasCookie() const;
 
   void logAddressInfo() const;

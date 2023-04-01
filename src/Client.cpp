@@ -172,8 +172,8 @@ bool Client::isReadyToSend() const {
   return false;
 }
 
-bool Client::isProcessing() const {
-  if (!parser_.getBuffer().empty()) {
+bool Client::isReceiveFinished() const {
+  if (parser_.isCompleted() || !response_obj_.isSuccessCode()) {
     return true;
   }
   return false;
