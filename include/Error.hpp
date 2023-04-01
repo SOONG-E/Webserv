@@ -4,17 +4,21 @@
 #include <string>
 
 enum ErrorIndex {
-  EPREFIX,
   EARG,
+  ECGI,
   EOPEN,
+  ERECV,
+  ESEND,
   ETOKEN,
 };
 
 struct Error {
+  static const std::string DELIM;
   static const std::string PREFIX;
   static const std::string INFO[];
 
-  static void log(const std::string& err_info, int exit_status = 0);
+  static void log(const std::string& err_info, const std::string& arg = "",
+                  int exit_status = 0);
 };
 
 #endif

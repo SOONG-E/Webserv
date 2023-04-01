@@ -24,7 +24,7 @@ Listen::Listen(const std::string& token)
     host = splitted[0];
     port = splitted[1];
   } else {
-    Error::log(Error::INFO[ETOKEN], EXIT_FAILURE);
+    Error::log(Error::INFO[ETOKEN], "", EXIT_FAILURE);
   }
   socket_key = host + ":" + port;
 }

@@ -3,13 +3,25 @@
 #include <cstdlib>
 #include <iostream>
 
-const std::string Error::PREFIX = "Error: ";
-const std::string Error::INFO[] = {"Invalid argument", "File open failed",
-                                   "Unexpected token"};
+const std::string Error::DELIM = ": ";
+const std::string Error::PREFIX = "Error" + DELIM;
+const std::string Error::INFO[] = {
+    "Invalid argument",  // EARG
+    "Cgi IO failed",     // ECGI
+    "File open failed",  // EOPEN
+    "Receive failed",    // ERECV
+    "Send failed",       // ESEND
+    "Unexpected token",  // ETOKEN
+};
 
-void Error::log(const std::string& err_info, int exit_status) {
-  std::cerr << PREFIX << err_info << std::endl;
+void Error::log(const std::string& info, const std::string& arg,
+                int exit_status) {
+  std::cerr << PREFIX << info;
+  if (!arg.empty()) {
+    std::cerr << DELIM << arg;
+  }
+  std::cerr << std::endl;
   if (exit_status) {
-    exit(exit_status);
+    std::exit(exit_status);
   }
 }

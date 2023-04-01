@@ -29,8 +29,11 @@ struct ByteUnits {
   std::map<std::string, std::size_t> size;
 };
 
-const std::string ByteUnits::KEYS[] = {"k", "K", "m", "M", "g", "G"};
-const std::size_t ByteUnits::VALUES[] = {1 << 10, 1 << 10, 1 << 20,
-                                         1 << 20, 1 << 30, 1 << 30};
+const std::string ByteUnits::KEYS[] = {
+    "k", "K", "m", "M", "g", "G",
+};
+const std::size_t ByteUnits::VALUES[] = {
+    1 << 10, 1 << 10, 1 << 20, 1 << 20, 1 << 30, 1 << 30,
+};
 
 #endif

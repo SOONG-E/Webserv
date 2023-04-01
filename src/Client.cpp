@@ -4,6 +4,7 @@
 #include <cstring>
 #include <iostream>
 
+#include "Error.hpp"
 #include "Log.hpp"
 #include "constant.hpp"
 
@@ -59,7 +60,7 @@ std::string Client::receive() const {
   std::size_t read_bytes = recv(fd_, &buf, BUF_SIZE, 0);
 
   if (read_bytes == ERROR<std::size_t>()) {
-    std::cerr << "[Error] Receive failed: " << strerror(errno) << '\n';
+    Error::log(Error::INFO[ERECV], std::strerror(errno));
     throw ConnectionClosedException();
   }
   if (read_bytes == 0) {
@@ -78,7 +79,7 @@ void Client::send() {
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
 
   if (write_bytes == ERROR<std::size_t>()) {
-    std::cerr << "[Error] Send failed: " << strerror(errno) << '\n';
+    Error::log(Error::INFO[ESEND], std::strerror(errno));
     throw ConnectionClosedException();
   }
 
@@ -108,7 +109,7 @@ void Client::executeCgiIO() {
     }
   } catch (const std::exception& e) {
     response_obj_.setStatus(C500);
-    std::cerr << "[Error] Cgi IO failed: " << e.what() << '\n';
+    Error::log(Error::INFO[ECGI], e.what());
   }
 }
 
@@ -127,9 +128,14 @@ void Client::clear() {
 }
 
 bool Client::isCgi() const {
-  const LocationBlock* location_block = response_obj_.getLocationBlock();
-  if (!location_block) return false;
   const HttpRequest& request_obj = parser_.getRequestObj();
+  if (request_obj.getMethod() == METHODS[DELETE]) {
+    return false;
+  }
+  const LocationBlock* location_block = response_obj_.getLocationBlock();
+  if (!location_block) {
+    return false;
+  }
   return location_block->isCgi(request_obj.getUri(), request_obj.getMethod(),
                                request_obj.getQueryString());
 }

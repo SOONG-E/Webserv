@@ -6,8 +6,8 @@
 
 class FileOpenException : public ExceptionTemplate {
  public:
-  explicit FileOpenException(const std::string& err_info = Error::INFO[EOPEN])
-      : ExceptionTemplate(err_info) {}
+  explicit FileOpenException(const std::string& info = Error::INFO[EOPEN])
+      : ExceptionTemplate(info) {}
 };
 
 #endif

@@ -10,8 +10,12 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-const std::string LocationBlock::DEFAULTS[] = {"100m", "html", "off",
-                                               "index.html"};
+const std::string LocationBlock::DEFAULTS[] = {
+    "100m",
+    "html",
+    "off",
+    "index.html",
+};
 
 LocationBlock::LocationBlock() : root_(DEFAULTS[ROOT]) {
   setBodyLimit(DEFAULTS[CLIENT_MAX_BODY_SIZE]);
@@ -92,11 +96,11 @@ void LocationBlock::setBodyLimit(const std::string& raw) {
   char* unit;
   body_limit_ = std::strtoul(raw.c_str(), &unit, 10);
   if (errno == ERANGE) {
-    Error::log(std::strerror(errno), EXIT_FAILURE);
+    Error::log(Error::INFO[ETOKEN], std::strerror(errno), EXIT_FAILURE);
   }
   if (*unit == '\0') return;
   if (UNITS.size.find(unit) == UNITS.size.end()) {
-    Error::log(Error::INFO[ETOKEN], EXIT_FAILURE);
+    Error::log(Error::INFO[ETOKEN], unit, EXIT_FAILURE);
   }
   body_limit_ *= UNITS.size.at(unit);
 }
@@ -113,7 +117,7 @@ void LocationBlock::setRoot(const std::string& root) { root_ = root; }
 
 void LocationBlock::setAutoindex(const std::string& raw) {
   if (raw != "on" && raw != "off") {
-    Error::log(Error::INFO[ETOKEN], EXIT_FAILURE);
+    Error::log(Error::INFO[ETOKEN], raw, EXIT_FAILURE);
   }
   autoindex_ = (raw == "on");
 }

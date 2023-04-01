@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "Error.hpp"
 #include "Log.hpp"
 #include "ResponseStatus.hpp"
 #include "exception.hpp"
@@ -34,8 +35,7 @@ void ServerHandler::configureServer(const Config& config) {
       try {
         server_blocks_[listens[i].socket_key].push_back(serv_blocks[i]);
       } catch (const std::exception& e) {
-        std::cerr << "[Error] configureServer failed: " << e.what() << '\n';
-        std::exit(EXIT_FAILURE);
+        Error::log("configureServer() failed", e.what(), EXIT_FAILURE);
       }
     }
   }
@@ -59,8 +59,7 @@ void ServerHandler::createServers() {
       server_sockets_.push_back(server_socket);
       server_selector_.registerFD(server_socket.getFD());
     } catch (const std::exception& e) {
-      std::cerr << "[Error] createServers failed: " << e.what() << '\n';
-      std::exit(EXIT_FAILURE);
+      Error::log("createServers() failed", e.what(), EXIT_FAILURE);
     }
   }
 }
@@ -78,7 +77,7 @@ void ServerHandler::acceptConnections() {
       }
     }
   } catch (const std::exception& e) {
-    std::cerr << "[Error] acceptConnections failed: " << e.what() << '\n';
+    Error::log("acceptConnections() failed", e.what());
   }
 }
 
@@ -117,7 +116,7 @@ void ServerHandler::respondToClients() {
       }
     }
   } catch (const std::exception& e) {
-    std::cerr << "[Error] respondToClients failed: " << e.what() << '\n';
+    Error::log("respondToClients() failed", e.what());
   }
 }
 

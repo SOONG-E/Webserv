@@ -8,8 +8,8 @@
 
 class ExceptionTemplate : public std::runtime_error {
  public:
-  explicit ExceptionTemplate(const std::string& err_info)
-      : std::runtime_error(Error::PREFIX + err_info) {}
+  explicit ExceptionTemplate(const std::string& info)
+      : std::runtime_error(Error::PREFIX + info) {}
 };
 
 #endif

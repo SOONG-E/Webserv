@@ -39,8 +39,9 @@ const Config& ConfigParser::parse(void) {
     parseServerBlock();
     config_.addServerBlock(server_block_);
   }
-  if (!expect().empty()) {
-    Error::log(Error::INFO[ETOKEN], EXIT_FAILURE);
+  std::string token = expect();
+  if (!token.empty()) {
+    Error::log(Error::INFO[ETOKEN], token, EXIT_FAILURE);
   }
   return config_;
 }
@@ -62,7 +63,7 @@ void ConfigParser::parseServerBlock(void) {
       parseLocationBlock();
       server_block_.addLocationBlock(location_block_);
     } else {
-      Error::log(Error::INFO[ETOKEN], EXIT_FAILURE);
+      Error::log(Error::INFO[ETOKEN], token, EXIT_FAILURE);
     }
   }
   expect("}");
@@ -124,7 +125,7 @@ void ConfigParser::parseLocationBlock(void) {
     } else if (token.compare(0, 4, "CGI_") == 0) {
       parseCgiParams();
     } else {
-      Error::log(Error::INFO[ETOKEN], EXIT_FAILURE);
+      Error::log(Error::INFO[ETOKEN], token, EXIT_FAILURE);
     }
   }
   expect("}");
@@ -167,23 +168,25 @@ void ConfigParser::parseIndex(void) {
 }
 
 void ConfigParser::parseCgiParams(void) {
-  const std::string& key = expect();
-  const std::string& value = expect();
+  std::string key = expect();
+  std::string value = expect();
   location_block_.addCgiParam(key, value);
   expect(";");
 }
 
 std::string ConfigParser::expect(const std::string& expected) {
   skipWhitespace();
+  std::string token;
   if (!expected.empty()) {
-    if (content_.substr(pos_, expected.size()) != expected) {
-      Error::log(Error::INFO[ETOKEN], EXIT_FAILURE);
+    token = content_.substr(pos_, expected.size());
+    if (token != expected) {
+      Error::log(Error::INFO[ETOKEN], token, EXIT_FAILURE);
     }
     pos_ += expected.size();
     return expected;
   }
-  std::string token = "";
-  std::string delim = ";{}";
+  const std::string delim = ";{}";
+  token = "";
   while (pos_ < content_.size() && !std::isspace(content_[pos_])) {
     if (!token.empty() && delim.find(content_[pos_]) != std::string::npos)
       break;
