@@ -185,7 +185,7 @@ void ServerHandler::receiveRequest(Client& client) {
       }
     }
   } catch (const ResponseException& e) {
-    client.getResponseObj().setStatus(e.index);
+    client.getResponseObj().setStatus(e.status);
   }
 }
 

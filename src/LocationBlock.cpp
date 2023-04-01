@@ -11,10 +11,10 @@
 #include "exception.hpp"
 
 const std::string LocationBlock::DEFAULTS[] = {
-    "100m",
-    "html",
-    "off",
-    "index.html",
+    "100m",        // CLIENT_MAX_BODY_SIZE
+    "html",        // ROOT
+    "off",         // AUTOINDEX
+    "index.html",  // INDEX
 };
 
 LocationBlock::LocationBlock() : root_(DEFAULTS[ROOT]) {

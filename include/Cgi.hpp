@@ -12,7 +12,7 @@
 #include "SocketAddress.hpp"
 #include "utility.hpp"
 
-enum e_pipe_fd { READ = 0, WRITE = 1 };
+enum PipeFD { READ = 0, WRITE = 1 };
 
 class Cgi {
  public:

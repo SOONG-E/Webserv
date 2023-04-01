@@ -5,9 +5,9 @@
 
 const std::string Log::FOOTER_SUFFIX = " Success";
 const std::string Log::COLORS[] = {
-    "\033[0m",
-    "\033[0;31m",
-    "\033[0;32m",
+    "\033[0m",     // DEFAULT
+    "\033[0;31m",  // RED
+    "\033[0;32m",  // GREEN
 };
 
 void Log::pad(const std::string& msg, const std::string& color) {
