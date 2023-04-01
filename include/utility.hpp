@@ -13,6 +13,7 @@
 
 std::string formatTime(const char* format,
                        std::time_t timestamp = std::time(NULL));
+std::string getAbsolutePath(const std::string& uri);
 std::size_t hexToInt(const std::string& value);
 bool isDirectory(const std::string& path);
 bool isNumber(const std::string& str);
@@ -21,7 +22,6 @@ std::vector<std::string> split(const std::string& content,
                                const std::string& delim = WHITESPACE);
 std::size_t stoi(const std::string& value);
 std::string trim(const std::string& str);
-std::string getAbsolutePath(const std::string& uri);
 
 template <typename T>
 std::string toString(T value) {

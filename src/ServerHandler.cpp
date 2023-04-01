@@ -8,6 +8,7 @@
 #include "Error.hpp"
 #include "Log.hpp"
 #include "ResponseStatus.hpp"
+#include "constant.hpp"
 #include "exception.hpp"
 
 ServerHandler::ServerHandler() {}
@@ -140,8 +141,11 @@ void ServerHandler::receiveRequest(Client& client) {
 
       validateRequest(request_obj, location_block);
 
-      if (request_obj.getMethod() == "DELETE") {
-        unlink(getAbsolutePath(request_obj.getUri()).c_str());
+      if (request_obj.getMethod() == METHODS[DELETE]) {
+        if (unlink(getAbsolutePath(request_obj.getUri()).c_str()) ==
+            ERROR<int>()) {
+          client.getResponseObj().setStatus(C404);
+        }
       } else if (client.isCgi()) {
         client.getCgi().runCgiScript(request_obj, client.getClientAddress(),
                                      client.getServerAddress(),

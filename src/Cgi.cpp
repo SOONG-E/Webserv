@@ -1,6 +1,5 @@
 #include "Cgi.hpp"
 
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 

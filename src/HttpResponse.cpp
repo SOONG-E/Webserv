@@ -65,7 +65,12 @@ std::string HttpResponse::generate(const HttpRequest& request, bool is_cgi,
   }
   std::string body;
   try {
-    body = rootUri(request.getUri());
+    const std::string& uri = request.getUri();
+    if (request.getMethod() == METHODS[DELETE]) {
+      body = directoryListing(uri.substr(0, uri.rfind('/') + 1));
+    } else {
+      body = rootUri(request.getUri());
+    }
   } catch (FileOpenException& e) {
     setStatus(C404);
     body =

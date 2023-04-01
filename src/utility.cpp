@@ -2,6 +2,7 @@
 
 #include <sys/stat.h>
 
+#include <cstdio>
 #include <fstream>
 #include <stdexcept>
 
@@ -11,6 +12,14 @@ std::string formatTime(const char* format, std::time_t timestamp) {
   char buf[80];
   std::strftime(buf, sizeof(buf), format, std::localtime(&timestamp));
   return buf;
+}
+
+std::string getAbsolutePath(const std::string& uri) {
+  char buf[FILENAME_MAX];
+  if (!getcwd(buf, FILENAME_MAX)) {
+    throw ResponseException(C500);
+  }
+  return buf + uri;
 }
 
 std::size_t hexToInt(const std::string& value) {
@@ -75,12 +84,4 @@ std::string trim(const std::string& str) {
   std::size_t end = str.find_last_not_of(WHITESPACE);
   if (start == std::string::npos) return "";
   return (str.substr(start, end - start + 1));
-}
-
-std::string getAbsolutePath(const std::string& uri) {
-  char buf[FILENAME_MAX];
-  if (!getcwd(buf, FILENAME_MAX)) {
-    throw ResponseException(C500);
-  }
-  return buf + uri;
 }
