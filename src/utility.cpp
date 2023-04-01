@@ -2,7 +2,6 @@
 
 #include <sys/stat.h>
 
-#include <cstdio>
 #include <fstream>
 #include <stdexcept>
 
