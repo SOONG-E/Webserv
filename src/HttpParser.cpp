@@ -102,30 +102,6 @@ void HttpParser::parseHeader(const std::string& header_part) {
   parseRequestLine(request_line);
   std::string headers = header_part.substr(boundary + CRLF.length());
   parseHeaderFields(headers);
-  parseCookie();
-}
-
-void HttpParser::parseCookie(void) {
-  const std::string& cookie = request_.getHeader("COOKIE");
-  if (cookie.empty()) {
-    return;
-  }
-
-  std::string session_id_key("session-id");
-  std::size_t key_length = session_id_key.size();
-  std::string session_id;
-
-  std::vector<std::string> values = split(cookie, ";");
-  for (std::vector<std::string>::const_iterator it = values.begin();
-       it != values.end(); ++it) {
-    if (it->find("=") == std::string::npos) {
-      throw ResponseException(C400);
-    }
-    if (trim(*it).compare(0, key_length, session_id_key) == 0) {
-      session_id = trim(it->substr(it->find("=") + 1));
-    }
-  }
-  request_.setSessionId(session_id);
 }
 
 void HttpParser::parseQueryString(void) {
