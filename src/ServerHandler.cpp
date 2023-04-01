@@ -84,15 +84,20 @@ void ServerHandler::acceptConnections() {
 
 void ServerHandler::closeTimeoutClients() {
   Client* client;
+  std::vector<int> delete_clients;
+
+  delete_clients.reserve(clients_.size());
 
   for (clients_type::iterator it = clients_.begin(); it != clients_.end();
        ++it) {
     client = &it->second;
     if (client->getTimeout() < time(NULL) && !client->isProcessing()) {
       client->closeConnection();
-      clients_.erase(client->getFD());
-      client_selector_.unregisterFD(client->getFD());
+      delete_clients.push_back(client->getFD());
     }
+  }
+  if (!delete_clients.empty()) {
+    deleteClients(delete_clients);
   }
 }
 

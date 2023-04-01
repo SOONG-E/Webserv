@@ -14,7 +14,7 @@ Client::Client(int fd, const ServerBlock& default_server,
       cli_address_(cli_addr),
       serv_address_(serv_addr),
       response_obj_(default_server),
-      timeout_(time(NULL) + 5) {
+      timeout_(time(NULL) + KEEPALIVE_TIMEOUT) {
   logConnectionInfo();
 }
 
