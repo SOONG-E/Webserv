@@ -43,7 +43,11 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
     throw ResponseException(C500);
   }
 
-  char* argv[2] = {const_cast<char*>(cgi_path.c_str()), NULL};
+  std::string abs_cgi_path = getAbsolutePath(cgi_path);
+  std::string abs_uri = getAbsolutePath(request_obj.getUri());
+
+  char* argv[3] = {const_cast<char*>(abs_cgi_path.c_str()),
+                   const_cast<char*>(abs_uri.c_str()), NULL};
   char** envp = generateEnvp(request_obj, cli_addr, serv_addr);
 
   pid_ = fork();
