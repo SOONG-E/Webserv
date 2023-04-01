@@ -85,7 +85,7 @@ void Client::send() {
 
   Log::header("Send Information");
   logAddressInfo();
-  std::cout << "[Send Data] " << '\n' << buf_.substr(0, write_bytes) << '\n';
+  // std::cout << "[Send Data] " << '\n' << buf_.substr(0, write_bytes) << '\n';
   Log::footer("Send");
 
   buf_.erase(0, write_bytes);
@@ -174,7 +174,8 @@ void Client::logConnectionInfo() const {
 void Client::logReceiveInfo(const std::string& request) const {
   Log::header("Receive Information");
   logAddressInfo();
-  std::cout << "[Receive data]" << '\n' << request << '\n';
+  static_cast<void>(request);
+  // std::cout << "[Receive data]" << '\n' << request << '\n';
   Log::footer();
 }
 
