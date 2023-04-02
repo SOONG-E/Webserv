@@ -16,7 +16,7 @@
 
 class ServerHandler {
  public:
-  ServerHandler();
+  ServerHandler(std::size_t server_block_count);
   ServerHandler(const ServerHandler& src);
   ~ServerHandler();
 
@@ -32,17 +32,23 @@ class ServerHandler {
   typedef std::vector<ServerSocket> server_sockets_type;
   typedef std::map<int, Client> clients_type;
   typedef Selector selector_type;
-  typedef std::map<std::string, Session> sessions_type;
+  typedef std::map<std::string, Session> sessions_mapped_type;
+  typedef std::map<int, sessions_mapped_type> sessions_type;
+  typedef std::vector<unsigned long long> avail_session_id_type;
 
   void receiveRequest(Client& client);
   void sendResponse(Client& client);
-  const ServerBlock& findServerBlock(const std::string& server_key,
+  const ServerBlock& findServerBlock(const std::string& server_socket_key,
                                      const std::string& server_name);
   void validateRequest(const HttpRequest& request_obj,
                        const LocationBlock& location_block);
+  void deleteTimeoutClients();
+  void deleteTimeoutSessions();
   void deleteClients(const std::vector<int>& delete_clients);
-  void deleteSessions(const std::vector<std::string>& delete_sessions);
+  void deleteSessions(sessions_mapped_type& dest,
+                      const std::vector<const std::string*>& delete_sessions);
   void generateSession(Client& client);
+  std::string generateSessionID(int server_block_key);
   bool isValidSessionID(const Client& client);
   Session& findSession(const Client& client);
 
@@ -52,7 +58,7 @@ class ServerHandler {
   selector_type server_selector_;
   selector_type client_selector_;
   sessions_type sessions_;
-  static size_t avail_session_id_;
+  avail_session_id_type avail_session_id_;
 };
 
 #endif

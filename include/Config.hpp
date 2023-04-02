@@ -15,6 +15,7 @@ class Config {
   ~Config();
 
   const std::vector<ServerBlock>& getServerBlocks(void) const;
+  std::size_t getServerBlockCount() const;
 
   void addServerBlock(const ServerBlock& server_block);
 

@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
   ConfigParser config_parser(filename);
   const Config& config = config_parser.parse();
 
-  ServerHandler handler;
+  ServerHandler handler(config.getServerBlockCount());
   handler.registerSignalHandlers();
   handler.configureServer(config);
   handler.createServers();

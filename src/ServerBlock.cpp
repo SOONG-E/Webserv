@@ -26,6 +26,10 @@ ServerBlock& ServerBlock::operator=(const ServerBlock& origin) {
 
 ServerBlock::~ServerBlock() {}
 
+int ServerBlock::getKey() const { return key_; }
+
+void ServerBlock::setKey(int key) { key_ = key; }
+
 const std::vector<Listen>& ServerBlock::getListens(void) const {
   return listens_;
 }
@@ -45,8 +49,8 @@ const std::vector<LocationBlock>& ServerBlock::getLocationBlocks(void) const {
   return location_blocks_;
 }
 
-void ServerBlock::addListen(const std::string& server_key) {
-  listens_.push_back(Listen(server_key));
+void ServerBlock::addListen(const std::string& server_socket_key) {
+  listens_.push_back(Listen(server_socket_key));
 }
 
 void ServerBlock::addServerName(const std::string& name) {
@@ -105,7 +109,7 @@ std::set<std::string> ServerBlock::keys(void) const {
     for (std::set<std::string>::const_iterator names_iter =
              server_names_.begin();
          names_iter != server_names_.end(); ++names_iter) {
-      keys.insert(listens_[i].server_key + ":" + *names_iter);
+      keys.insert(listens_[i].server_socket_key + ":" + *names_iter);
     }
   }
   return keys;

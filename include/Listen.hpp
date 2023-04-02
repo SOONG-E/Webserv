@@ -11,7 +11,7 @@ struct Listen {
 
   std::string host;
   std::string port;
-  std::string server_key;
+  std::string server_socket_key;
 };
 
 #endif

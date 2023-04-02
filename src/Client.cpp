@@ -39,8 +39,19 @@ HttpParser& Client::getParser() { return parser_; }
 
 const HttpParser& Client::getParser() const { return parser_; }
 
-std::string Client::getServerKey() const {
+std::string Client::getServerSocketKey() const {
   return serv_address_.getIP() + ":" + serv_address_.getPort();
+}
+
+int Client::getServerBlockKey() const {
+  return response_obj_.getServerBlock()->getKey();
+}
+
+std::string Client::getSessionKey() const {
+  const HttpRequest& request_obj = parser_.getRequestObj();
+
+  return request_obj.getCookie("Session-ID") + ":" + cli_address_.getIP() +
+         ":" + request_obj.getHeader("USER-AGENT");
 }
 
 const HttpRequest& Client::getRequestObj() const {

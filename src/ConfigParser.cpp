@@ -34,10 +34,14 @@ ConfigParser& ConfigParser::operator=(const ConfigParser& origin) {
 ConfigParser::~ConfigParser() {}
 
 const Config& ConfigParser::parse(void) {
+  int count = 0;
+
   while (peek() == "server") {
     server_block_.clear();
     parseServerBlock();
+    server_block_.setKey(count);
     config_.addServerBlock(server_block_);
+    count++;
   }
   std::string token = expect();
   if (!token.empty()) {

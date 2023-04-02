@@ -11,9 +11,8 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-std::size_t ServerHandler::avail_session_id_ = 0;
-
-ServerHandler::ServerHandler() {}
+ServerHandler::ServerHandler(std::size_t server_block_count)
+    : avail_session_id_(avail_session_id_type(server_block_count, 1)) {}
 
 ServerHandler::ServerHandler(const ServerHandler& src)
     : server_blocks_(src.server_blocks_),
@@ -37,7 +36,7 @@ void ServerHandler::configureServer(const Config& config) {
     const std::vector<Listen>& listens = serv_blocks[i].getListens();
     for (std::size_t i = 0; i < listens.size(); ++i) {
       try {
-        server_blocks_[listens[i].server_key].push_back(serv_blocks[i]);
+        server_blocks_[listens[i].server_socket_key].push_back(serv_blocks[i]);
       } catch (const std::exception& e) {
         Error::log("configureServer() failed", e.what(), EXIT_FAILURE);
       }
@@ -48,16 +47,17 @@ void ServerHandler::configureServer(const Config& config) {
 void ServerHandler::createServers() {
   for (server_blocks_type::const_iterator it = server_blocks_.begin();
        it != server_blocks_.end(); ++it) {
-    const std::string& server_key = it->first;
-    const ServerBlock& default_server = server_blocks_[server_key].front();
+    const std::string& server_socket_key = it->first;
+    const ServerBlock& default_server =
+        server_blocks_[server_socket_key].front();
 
     ServerSocket server_socket(default_server);
     try {
       server_socket.open();
 
-      std::size_t pos = server_key.find(':');
-      std::string ip = server_key.substr(0, pos);
-      std::string port = server_key.substr(pos + 1);
+      std::size_t pos = server_socket_key.find(':');
+      std::string ip = server_socket_key.substr(0, pos);
+      std::string port = server_socket_key.substr(pos + 1);
       server_socket.bind(SocketAddress(ip, port), 128);
 
       server_sockets_.push_back(server_socket);
@@ -98,7 +98,6 @@ void ServerHandler::respondToClients() {
            ++it) {
         client = &it->second;
         int client_fd = client->getFD();
-
         try {
           if (client_selector_.isReadable(client_fd)) {
             receiveRequest(*client);
@@ -126,40 +125,8 @@ void ServerHandler::respondToClients() {
 }
 
 void ServerHandler::handleTimeout() {
-  Client* client;
-  std::vector<int> delete_clients;
-
-  delete_clients.reserve(clients_.size());
-
-  for (clients_type::iterator it = clients_.begin(); it != clients_.end();
-       ++it) {
-    client = &it->second;
-
-    if (client->getTimeout() < std::time(0) && !client->isReceiveFinished()) {
-      client->closeConnection();
-      delete_clients.push_back(client->getFD());
-    }
-  }
-  if (!delete_clients.empty()) {
-    deleteClients(delete_clients);
-  }
-
-  Session* session;
-  std::vector<std::string> delete_sessions;
-
-  delete_sessions.reserve(sessions_.size());
-
-  for (sessions_type::iterator it = sessions_.begin(); it != sessions_.end();
-       ++it) {
-    session = &it->second;
-
-    if (session->getTimeout() < std::time(NULL)) {
-      delete_sessions.push_back(it->first);
-    }
-  }
-  if (!delete_sessions.empty()) {
-    deleteSessions(delete_sessions);
-  }
+  deleteTimeoutClients();
+  deleteTimeoutSessions();
 }
 
 void ServerHandler::receiveRequest(Client& client) {
@@ -172,8 +139,8 @@ void ServerHandler::receiveRequest(Client& client) {
 
     if (parser.isCompleted()) {
       const HttpRequest& request_obj = client.getRequestObj();
-      const ServerBlock& server_block =
-          findServerBlock(client.getServerKey(), request_obj.getHeader("HOST"));
+      const ServerBlock& server_block = findServerBlock(
+          client.getServerSocketKey(), request_obj.getHeader("HOST"));
       const LocationBlock& location_block =
           server_block.findLocationBlock(request_obj.getUri());
 
@@ -226,9 +193,9 @@ void ServerHandler::sendResponse(Client& client) {
 }
 
 const ServerBlock& ServerHandler::findServerBlock(
-    const std::string& server_key, const std::string& server_name) {
+    const std::string& server_socket_key, const std::string& server_name) {
   const std::vector<ServerBlock>& server_blocks_of_key =
-      server_blocks_[server_key];
+      server_blocks_[server_socket_key];
 
   for (std::size_t i = 0; i < server_blocks_of_key.size(); ++i) {
     const std::set<std::string>& server_names =
@@ -254,6 +221,48 @@ void ServerHandler::validateRequest(const HttpRequest& request_obj,
   }
 }
 
+void ServerHandler::deleteTimeoutClients() {
+  Client* client;
+  std::vector<int> delete_clients;
+
+  delete_clients.reserve(clients_.size());
+
+  for (clients_type::iterator it = clients_.begin(); it != clients_.end();
+       ++it) {
+    client = &it->second;
+
+    if (client->getTimeout() < std::time(0) && !client->isReceiveFinished()) {
+      client->closeConnection();
+      delete_clients.push_back(client->getFD());
+    }
+  }
+  if (!delete_clients.empty()) {
+    deleteClients(delete_clients);
+  }
+}
+
+void ServerHandler::deleteTimeoutSessions() {
+  Session* session;
+  std::vector<const std::string*> delete_sessions;
+
+  for (sessions_type::iterator sessions_it = sessions_.begin();
+       sessions_it != sessions_.end(); ++sessions_it) {
+    delete_sessions.reserve(sessions_it->second.size());
+
+    for (sessions_mapped_type::iterator mapped_it = sessions_it->second.begin();
+         mapped_it != sessions_it->second.end(); ++mapped_it) {
+      session = &mapped_it->second;
+      if (session->getTimeout() < std::time(NULL)) {
+        delete_sessions.push_back(&mapped_it->first);
+      }
+    }
+    if (!delete_sessions.empty()) {
+      deleteSessions(sessions_it->second, delete_sessions);
+    }
+    delete_sessions.clear();
+  }
+}
+
 void ServerHandler::deleteClients(const std::vector<int>& delete_clients) {
   for (std::size_t i = 0; i < delete_clients.size(); ++i) {
     clients_.erase(delete_clients[i]);
@@ -262,43 +271,45 @@ void ServerHandler::deleteClients(const std::vector<int>& delete_clients) {
 }
 
 void ServerHandler::deleteSessions(
-    const std::vector<std::string>& delete_sessions) {
+    sessions_mapped_type& dest,
+    const std::vector<const std::string*>& delete_sessions) {
   for (std::size_t i = 0; i < delete_sessions.size(); ++i) {
-    sessions_.erase(delete_sessions[i]);
+    dest.erase(*delete_sessions[i]);
   }
 }
 
 void ServerHandler::generateSession(Client& client) {
-  std::string session_id = toString(avail_session_id_++);
+  static std::vector<unsigned long long> avail_session_id;
+
+  int server_block_key = client.getServerBlockKey();
+  std::string session_id = generateSessionID(server_block_key);
   std::string session_key = session_id + ":" +
                             client.getClientAddress().getIP() + ":" +
                             client.getRequestObj().getHeader("USER-AGENT");
 
-  sessions_.insert(std::make_pair(session_key, Session(session_id)));
+  sessions_[server_block_key].insert(
+      std::make_pair(session_key, Session(session_id)));
+}
+
+std::string ServerHandler::generateSessionID(int server_block_key) {
+  return toString(avail_session_id_[server_block_key]++);
 }
 
 bool ServerHandler::isValidSessionID(const Client& client) {
-  const Session* session;
-  const HttpRequest& request_obj = client.getRequestObj();
-  std::string session_id = request_obj.getCookie("Session-ID");
-  std::string session_key = session_id + ":" +
-                            client.getClientAddress().getIP() + ":" +
-                            request_obj.getHeader("USER-AGENT");
+  int server_block_key = client.getServerBlockKey();
+  std::string session_key = client.getSessionKey();
 
-  for (sessions_type::iterator it = sessions_.begin(); it != sessions_.end();
-       ++it) {
-    session = &it->second;
-    if (session->getSessionID() == session_id && it->first == session_key) {
-      return true;
-    }
+  try {
+    sessions_[server_block_key].at(session_key);
+  } catch (const std::out_of_range& e) {
+    return false;
   }
-  return false;
+  return true;
 }
 
 Session& ServerHandler::findSession(const Client& client) {
-  const HttpRequest& request_obj = client.getRequestObj();
-  std::string session_key = request_obj.getCookie("Session-ID") + ":" +
-                            client.getClientAddress().getIP() + ":" +
-                            request_obj.getHeader("USER-AGENT");
-  return sessions_.find(session_key)->second;
+  int server_block_key = client.getServerBlockKey();
+  std::string session_key = client.getSessionKey();
+
+  return sessions_[server_block_key].find(session_key)->second;
 }

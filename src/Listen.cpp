@@ -26,5 +26,5 @@ Listen::Listen(const std::string& token)
   } else {
     Error::log(Error::INFO[ETOKEN], "", EXIT_FAILURE);
   }
-  server_key = host + ":" + port;
+  server_socket_key = host + ":" + port;
 }
