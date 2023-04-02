@@ -10,6 +10,7 @@
 #include "HttpResponse.hpp"
 #include "Selector.hpp"
 #include "ServerBlock.hpp"
+#include "Session.hpp"
 #include "SocketAddress.hpp"
 #include "exception.hpp"
 
@@ -24,7 +25,6 @@ class Client {
   HttpParser& getParser();
   const HttpParser& getParser() const;
   std::string getServerKey() const;
-  std::string getClientKey() const;
   const HttpRequest& getRequestObj() const;
   HttpResponse& getResponseObj();
   const HttpResponse& getResponseObj() const;
@@ -34,7 +34,8 @@ class Client {
   const SocketAddress& getClientAddress() const;
   std::time_t getTimeout() const;
   void setTimeout(std::time_t time = std::time(NULL));
-  void setSessionId(std::string session_id);
+  Session& getSession() const;
+  void setSession(Session& session);
 
   std::string receive() const;
   void send();
@@ -48,6 +49,7 @@ class Client {
   bool isReadyToSend() const;
   bool isReceiveFinished() const;
   bool hasCookie() const;
+  bool hasSession() const;
 
   void logAddressInfo() const;
   void logConnectionInfo() const;
@@ -65,6 +67,7 @@ class Client {
   HttpParser parser_;
   HttpResponse response_obj_;
   Cgi cgi_;
+  Session* session_;
   std::string buf_;
   std::time_t timeout_;
 };

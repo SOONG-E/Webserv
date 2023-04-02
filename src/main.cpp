@@ -16,10 +16,10 @@ int main(int argc, char* argv[]) {
 
   const std::string& filename = (argc == 2) ? argv[1] : DEFAULT_PATH;
 
-  ServerHandler handler;
   ConfigParser config_parser(filename);
   const Config& config = config_parser.parse();
 
+  ServerHandler handler;
   handler.registerSignalHandlers();
   handler.configureServer(config);
   handler.createServers();
@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
   while (1) {
     handler.acceptConnections();
     handler.respondToClients();
-    handler.closeTimeoutClients();
+    handler.handleTimeout();
   }
   return EXIT_SUCCESS;
 }

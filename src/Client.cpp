@@ -14,7 +14,8 @@ Client::Client(int fd, const ServerBlock& default_server,
     : fd_(fd),
       cli_address_(cli_addr),
       serv_address_(serv_addr),
-      response_obj_(default_server) {
+      response_obj_(default_server),
+      session_(NULL) {
   setTimeout();
   logConnectionInfo();
 }
@@ -26,6 +27,7 @@ Client::Client(const Client& src)
       parser_(src.parser_),
       response_obj_(src.response_obj_),
       cgi_(src.cgi_),
+      session_(src.session_),
       buf_(src.buf_),
       timeout_(src.timeout_) {}
 
@@ -39,10 +41,6 @@ const HttpParser& Client::getParser() const { return parser_; }
 
 std::string Client::getServerKey() const {
   return serv_address_.getIP() + ":" + serv_address_.getPort();
-}
-
-std::string Client::getClientKey() const {
-  return cli_address_.getIP() + ":" + cli_address_.getPort();
 }
 
 const HttpRequest& Client::getRequestObj() const {
@@ -67,9 +65,9 @@ void Client::setTimeout(std::time_t time) {
   timeout_ = time + KEEPALIVE_TIMEOUT;
 }
 
-void Client::setSessionId(std::string session_id) {
-  parser_.getRequestObj().setSessionId(session_id);
-}
+Session& Client::getSession() const { return *session_; }
+
+void Client::setSession(Session& session) { session_ = &session; }
 
 std::string Client::receive() const {
   char buf[BUF_SIZE];
@@ -190,6 +188,9 @@ bool Client::hasCookie() const {
   }
   return true;
 }
+
+bool Client::hasSession() const { return session_ != NULL ? true : false; }
+
 void Client::logAddressInfo() const {
   std::cout << "[Client address]" << '\n'
             << cli_address_.getIP() << ":" << cli_address_.getPort() << '\n'
@@ -207,7 +208,7 @@ void Client::logReceiveInfo(const std::string& request) const {
   Log::header("Receive Information");
   logAddressInfo();
   static_cast<void>(request);
-  // std::cout << "[Receive data]" << '\n' << request << '\n';
+  std::cout << "[Receive data]" << '\n' << request << '\n';
   Log::footer();
 }
 

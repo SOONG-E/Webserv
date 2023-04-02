@@ -20,7 +20,8 @@ ServerHandler::ServerHandler(const ServerHandler& src)
       server_sockets_(src.server_sockets_),
       clients_(src.clients_),
       server_selector_(src.server_selector_),
-      client_selector_(src.client_selector_) {}
+      client_selector_(src.client_selector_),
+      sessions_(src.sessions_) {}
 
 ServerHandler::~ServerHandler() {}
 
@@ -73,33 +74,15 @@ void ServerHandler::acceptConnections() {
       for (std::size_t i = 0; i < server_sockets_.size(); ++i) {
         if (server_selector_.isReadable(server_sockets_[i].getFD())) {
           Client new_client = server_sockets_[i].accept();
+          int client_fd = new_client.getFD();
 
-          client_selector_.registerFD(new_client.getFD());
-          clients_.insert(std::make_pair(new_client.getFD(), new_client));
+          client_selector_.registerFD(client_fd);
+          clients_.insert(std::make_pair(client_fd, new_client));
         }
       }
     }
   } catch (const std::exception& e) {
     Error::log("acceptConnections() failed", e.what());
-  }
-}
-
-void ServerHandler::closeTimeoutClients() {
-  Client* client;
-  std::vector<int> delete_clients;
-
-  delete_clients.reserve(clients_.size());
-
-  for (clients_type::iterator it = clients_.begin(); it != clients_.end();
-       ++it) {
-    client = &it->second;
-    if (client->getTimeout() < std::time(0) && !client->isReceiveFinished()) {
-      client->closeConnection();
-      delete_clients.push_back(client->getFD());
-    }
-  }
-  if (!delete_clients.empty()) {
-    deleteClients(delete_clients);
   }
 }
 
@@ -128,7 +111,7 @@ void ServerHandler::respondToClients() {
             sendResponse(*client);
           }
         } catch (const Client::ConnectionClosedException& e) {
-          delete_clients.push_back(client->getFD());
+          delete_clients.push_back(client_fd);
           client->closeConnection();
         }
       }
@@ -142,8 +125,41 @@ void ServerHandler::respondToClients() {
   }
 }
 
-void ServerHandler::issueSessionId(Client& client) {
-  client.setSessionId(toString(avail_session_id_++));
+void ServerHandler::handleTimeout() {
+  Client* client;
+  std::vector<int> delete_clients;
+
+  delete_clients.reserve(clients_.size());
+
+  for (clients_type::iterator it = clients_.begin(); it != clients_.end();
+       ++it) {
+    client = &it->second;
+
+    if (client->getTimeout() < std::time(0) && !client->isReceiveFinished()) {
+      client->closeConnection();
+      delete_clients.push_back(client->getFD());
+    }
+  }
+  if (!delete_clients.empty()) {
+    deleteClients(delete_clients);
+  }
+
+  Session* session;
+  std::vector<std::string> delete_sessions;
+
+  delete_sessions.reserve(sessions_.size());
+
+  for (sessions_type::iterator it = sessions_.begin(); it != sessions_.end();
+       ++it) {
+    session = &it->second;
+
+    if (session->getTimeout() < std::time(NULL)) {
+      delete_sessions.push_back(it->first);
+    }
+  }
+  if (!delete_sessions.empty()) {
+    deleteSessions(delete_sessions);
+  }
 }
 
 void ServerHandler::receiveRequest(Client& client) {
@@ -167,9 +183,11 @@ void ServerHandler::receiveRequest(Client& client) {
 
       validateRequest(request_obj, location_block);
 
-      if (!client.hasCookie()) {
-        issueSessionId(client);
+      if (!client.hasCookie() || !isValidSessionID(client)) {
+        generateSession(client);
       }
+      Session& session = findSession(client);
+      client.setSession(session);
 
       if (request_obj.getMethod() == METHODS[DELETE]) {
         if (unlink(("." + request_obj.getUri()).c_str()) == ERROR<int>()) {
@@ -202,8 +220,9 @@ void ServerHandler::sendResponse(Client& client) {
       throw Client::ConnectionClosedException();
     }
     client.clear();
-    client.setTimeout();
   }
+  client.setTimeout();
+  client.getSession().setTimeout();
 }
 
 const ServerBlock& ServerHandler::findServerBlock(
@@ -240,4 +259,46 @@ void ServerHandler::deleteClients(const std::vector<int>& delete_clients) {
     clients_.erase(delete_clients[i]);
     client_selector_.unregisterFD(delete_clients[i]);
   }
+}
+
+void ServerHandler::deleteSessions(
+    const std::vector<std::string>& delete_sessions) {
+  for (std::size_t i = 0; i < delete_sessions.size(); ++i) {
+    sessions_.erase(delete_sessions[i]);
+  }
+}
+
+void ServerHandler::generateSession(Client& client) {
+  std::string session_id = toString(avail_session_id_++);
+  std::string session_key = session_id + ":" +
+                            client.getClientAddress().getIP() + ":" +
+                            client.getRequestObj().getHeader("USER-AGENT");
+
+  sessions_.insert(std::make_pair(session_key, Session(session_id)));
+}
+
+bool ServerHandler::isValidSessionID(const Client& client) {
+  const Session* session;
+  const HttpRequest& request_obj = client.getRequestObj();
+  std::string session_id = request_obj.getCookie("Session-ID");
+  std::string session_key = session_id + ":" +
+                            client.getClientAddress().getIP() + ":" +
+                            request_obj.getHeader("USER-AGENT");
+
+  for (sessions_type::iterator it = sessions_.begin(); it != sessions_.end();
+       ++it) {
+    session = &it->second;
+    if (session->getSessionID() == session_id && it->first == session_key) {
+      return true;
+    }
+  }
+  return false;
+}
+
+Session& ServerHandler::findSession(const Client& client) {
+  const HttpRequest& request_obj = client.getRequestObj();
+  std::string session_key = request_obj.getCookie("Session-ID") + ":" +
+                            client.getClientAddress().getIP() + ":" +
+                            client.getRequestObj().getHeader("USER-AGENT");
+  return sessions_.find(session_key)->second;
 }
