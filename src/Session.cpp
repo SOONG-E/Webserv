@@ -17,6 +17,6 @@ time_t Session::getTimeout() const { return timeout_; }
 
 void Session::setTimeout(time_t time) { timeout_ = time + SESSION_TIMEOUT; }
 
-void Session::addFileName(const std::string& filename) {
+void Session::addFilename(const std::string& filename) {
   upload_filenames_.push_back(filename);
 }

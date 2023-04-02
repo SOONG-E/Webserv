@@ -15,7 +15,7 @@ class Session {
   const std::string& getSessionID() const;
   time_t getTimeout() const;
   void setTimeout(std::time_t time = std::time(NULL));
-  void addFileName(const std::string& filename);
+  void addFilename(const std::string& filename);
 
  private:
   const std::string session_id_;
