@@ -299,6 +299,6 @@ Session& ServerHandler::findSession(const Client& client) {
   const HttpRequest& request_obj = client.getRequestObj();
   std::string session_key = request_obj.getCookie("Session-ID") + ":" +
                             client.getClientAddress().getIP() + ":" +
-                            client.getRequestObj().getHeader("USER-AGENT");
+                            request_obj.getHeader("USER-AGENT");
   return sessions_.find(session_key)->second;
 }
