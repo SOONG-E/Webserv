@@ -230,8 +230,7 @@ void ServerHandler::deleteTimeoutClients() {
   for (clients_type::iterator it = clients_.begin(); it != clients_.end();
        ++it) {
     client = &it->second;
-
-    if (client->getTimeout() < std::time(0) && !client->isReceiveFinished()) {
+    if (client->getTimeout() < std::time(0) && !client->isResponseWaiting()) {
       client->closeConnection();
       delete_clients.push_back(client->getFD());
     }

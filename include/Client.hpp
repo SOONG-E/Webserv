@@ -49,7 +49,7 @@ class Client {
   bool isPartialWritten() const;
   bool isReadyToCgiIO() const;
   bool isReadyToSend() const;
-  bool isReceiveFinished() const;
+  bool isResponseWaiting() const;
   bool hasCookie() const;
   bool hasSession() const;
 
