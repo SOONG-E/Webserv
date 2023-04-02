@@ -37,7 +37,7 @@ HttpParser& Client::getParser() { return parser_; }
 
 const HttpParser& Client::getParser() const { return parser_; }
 
-std::string Client::getSocketKey() const {
+std::string Client::getServerKey() const {
   return serv_address_.getIP() + ":" + serv_address_.getPort();
 }
 

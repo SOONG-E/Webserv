@@ -21,7 +21,7 @@ class ServerBlock {
   const std::string& getErrorPage(const std::string& code) const;
   const std::vector<LocationBlock>& getLocationBlocks(void) const;
 
-  void addListen(const std::string& socket_key);
+  void addListen(const std::string& server_key);
   void addServerName(const std::string& name);
   void addErrorPage(const std::string& code, const std::string& page);
   void addLocationBlock(const LocationBlock& location_block);

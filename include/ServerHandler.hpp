@@ -35,7 +35,7 @@ class ServerHandler {
 
   void receiveRequest(Client& client);
   void sendResponse(Client& client);
-  const ServerBlock& findServerBlock(const std::string& socket_key,
+  const ServerBlock& findServerBlock(const std::string& server_key,
                                      const std::string& server_name);
   void validateRequest(const HttpRequest& request_obj,
                        const LocationBlock& location_block);

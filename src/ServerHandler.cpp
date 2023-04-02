@@ -36,7 +36,7 @@ void ServerHandler::configureServer(const Config& config) {
     const std::vector<Listen>& listens = serv_blocks[i].getListens();
     for (std::size_t i = 0; i < listens.size(); ++i) {
       try {
-        server_blocks_[listens[i].socket_key].push_back(serv_blocks[i]);
+        server_blocks_[listens[i].server_key].push_back(serv_blocks[i]);
       } catch (const std::exception& e) {
         Error::log("configureServer() failed", e.what(), EXIT_FAILURE);
       }
@@ -47,16 +47,16 @@ void ServerHandler::configureServer(const Config& config) {
 void ServerHandler::createServers() {
   for (server_blocks_type::const_iterator it = server_blocks_.begin();
        it != server_blocks_.end(); ++it) {
-    const std::string& socket_key = it->first;
-    const ServerBlock& default_server = server_blocks_[socket_key].front();
+    const std::string& server_key = it->first;
+    const ServerBlock& default_server = server_blocks_[server_key].front();
 
     ServerSocket server_socket(default_server);
     try {
       server_socket.open();
 
-      std::size_t pos = socket_key.find(':');
-      std::string ip = socket_key.substr(0, pos);
-      std::string port = socket_key.substr(pos + 1);
+      std::size_t pos = server_key.find(':');
+      std::string ip = server_key.substr(0, pos);
+      std::string port = server_key.substr(pos + 1);
       server_socket.bind(SocketAddress(ip, port), 128);
 
       server_sockets_.push_back(server_socket);
@@ -141,6 +141,7 @@ void ServerHandler::respondToClients() {
     Error::log("respondToClients() failed", e.what());
   }
 }
+
 void ServerHandler::issueSessionId(Client& client) {
   client.setSessionId(toString(avail_session_id_++));
 }
@@ -156,7 +157,7 @@ void ServerHandler::receiveRequest(Client& client) {
     if (parser.isCompleted()) {
       const HttpRequest& request_obj = client.getRequestObj();
       const ServerBlock& server_block =
-          findServerBlock(client.getSocketKey(), request_obj.getHeader("HOST"));
+          findServerBlock(client.getServerKey(), request_obj.getHeader("HOST"));
       const LocationBlock& location_block =
           server_block.findLocationBlock(request_obj.getUri());
 
@@ -165,6 +166,7 @@ void ServerHandler::receiveRequest(Client& client) {
       response_obj.setLocationBlock(&location_block);
 
       validateRequest(request_obj, location_block);
+
       if (!client.hasCookie()) {
         issueSessionId(client);
       }
@@ -205,9 +207,9 @@ void ServerHandler::sendResponse(Client& client) {
 }
 
 const ServerBlock& ServerHandler::findServerBlock(
-    const std::string& socket_key, const std::string& server_name) {
+    const std::string& server_key, const std::string& server_name) {
   const std::vector<ServerBlock>& server_blocks_of_key =
-      server_blocks_[socket_key];
+      server_blocks_[server_key];
 
   for (std::size_t i = 0; i < server_blocks_of_key.size(); ++i) {
     const std::set<std::string>& server_names =

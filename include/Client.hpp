@@ -23,7 +23,7 @@ class Client {
   int getFD() const;
   HttpParser& getParser();
   const HttpParser& getParser() const;
-  std::string getSocketKey() const;
+  std::string getServerKey() const;
   const HttpRequest& getRequestObj() const;
   HttpResponse& getResponseObj();
   const HttpResponse& getResponseObj() const;
