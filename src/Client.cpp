@@ -41,6 +41,10 @@ std::string Client::getServerKey() const {
   return serv_address_.getIP() + ":" + serv_address_.getPort();
 }
 
+std::string Client::getClientKey() const {
+  return cli_address_.getIP() + ":" + cli_address_.getPort();
+}
+
 const HttpRequest& Client::getRequestObj() const {
   return parser_.getRequestObj();
 }

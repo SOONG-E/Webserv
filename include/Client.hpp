@@ -24,6 +24,7 @@ class Client {
   HttpParser& getParser();
   const HttpParser& getParser() const;
   std::string getServerKey() const;
+  std::string getClientKey() const;
   const HttpRequest& getRequestObj() const;
   HttpResponse& getResponseObj();
   const HttpResponse& getResponseObj() const;
