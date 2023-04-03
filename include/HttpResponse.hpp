@@ -19,12 +19,12 @@ class HttpResponse {
   HttpResponse(const HttpResponse& origin);
   ~HttpResponse();
 
-  Session* getSession(void) const;
+  Session& getSession(void) const;
   const ServerBlock* getServerBlock(void) const;
   const LocationBlock* getLocationBlock(void) const;
 
   void setStatus(const int status);
-  void setSession(Session* session);
+  void setSession(Session& session);
   void setServerBlock(const ServerBlock* server_block);
   void setLocationBlock(const LocationBlock* location_block);
 

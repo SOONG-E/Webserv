@@ -14,8 +14,7 @@ Client::Client(int fd, const ServerBlock& default_server,
     : fd_(fd),
       cli_address_(cli_addr),
       serv_address_(serv_addr),
-      response_obj_(default_server),
-      session_(NULL) {
+      response_obj_(default_server) {
   setTimeout();
   logConnectionInfo();
 }
@@ -27,7 +26,6 @@ Client::Client(const Client& src)
       parser_(src.parser_),
       response_obj_(src.response_obj_),
       cgi_(src.cgi_),
-      session_(src.session_),
       buf_(src.buf_),
       timeout_(src.timeout_) {}
 
@@ -76,10 +74,6 @@ void Client::setTimeout(std::time_t time) {
   timeout_ = time + KEEPALIVE_TIMEOUT;
 }
 
-Session& Client::getSession() const { return *session_; }
-
-void Client::setSession(Session& session) { session_ = &session; }
-
 std::string Client::receive() const {
   char buf[BUF_SIZE];
 
@@ -100,7 +94,7 @@ std::string Client::receive() const {
 void Client::send() {
   if (!isPartialWritten()) {
     buf_ = response_obj_.generate(parser_.getRequestObj(), isCgi(),
-                                  cgi_.getResponse(), session_);
+                                  cgi_.getResponse());
   }
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
 
@@ -199,8 +193,6 @@ bool Client::hasCookie() const {
   }
   return true;
 }
-
-bool Client::hasSession() const { return session_ != NULL ? true : false; }
 
 void Client::logAddressInfo() const {
   std::cout << "[Client address]" << '\n'

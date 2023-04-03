@@ -36,8 +36,6 @@ class Client {
   const SocketAddress& getClientAddress() const;
   std::time_t getTimeout() const;
   void setTimeout(std::time_t time = std::time(NULL));
-  Session& getSession() const;
-  void setSession(Session& session);
 
   std::string receive() const;
   void send();
@@ -51,7 +49,6 @@ class Client {
   bool isReadyToSend() const;
   bool isResponseWaiting() const;
   bool hasCookie() const;
-  bool hasSession() const;
 
   void logAddressInfo() const;
   void logConnectionInfo() const;
@@ -69,7 +66,6 @@ class Client {
   HttpParser parser_;
   HttpResponse response_obj_;
   Cgi cgi_;
-  Session* session_;
   std::string buf_;
   std::time_t timeout_;
 };

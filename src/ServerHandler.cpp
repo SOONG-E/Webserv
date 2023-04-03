@@ -153,7 +153,7 @@ void ServerHandler::receiveRequest(Client& client) {
         generateSession(client);
       }
       Session& session = findSession(client);
-      client.setSession(session);
+      response_obj.setSession(session);
 
       if (request_obj.getMethod() == METHODS[DELETE]) {
         if (unlink(("." + request_obj.getUri()).c_str()) == ERROR<int>()) {
@@ -188,7 +188,8 @@ void ServerHandler::sendResponse(Client& client) {
     client.clear();
   }
   client.setTimeout();
-  client.getSession().setTimeout();
+  Session& session = client.getResponseObj().getSession();
+  session.setTimeout();
 }
 
 const ServerBlock& ServerHandler::findServerBlock(

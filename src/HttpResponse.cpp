@@ -31,7 +31,7 @@ HttpResponse::HttpResponse(const HttpResponse& origin)
 
 HttpResponse::~HttpResponse() {}
 
-Session* HttpResponse::getSession(void) const { return session_; }
+Session& HttpResponse::getSession(void) const { return *session_; }
 
 const ServerBlock* HttpResponse::getServerBlock(void) const {
   return server_block_;
@@ -43,7 +43,7 @@ const LocationBlock* HttpResponse::getLocationBlock(void) const {
 
 void HttpResponse::setStatus(const int status) { status_ = status; }
 
-void HttpResponse::setSession(Session* session) { session_ = session; }
+void HttpResponse::setSession(Session& session) { session_ = &session; }
 
 void HttpResponse::setServerBlock(const ServerBlock* server_block) {
   server_block_ = server_block;
