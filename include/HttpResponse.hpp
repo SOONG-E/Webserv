@@ -31,18 +31,17 @@ class HttpResponse {
   void clear(void);
   bool isSuccessCode(void) const;
   std::string generate(const HttpRequest& request, bool is_cgi,
-                       const std::string& cgi_response, Session* session);
+                       const std::string& cgi_response);
 
  private:
   std::string generateErrorPage(const HttpRequest& request);
   std::string generateResponse(const HttpRequest& request,
                                const std::string& body) const;
   std::string generateFromCgi(const HttpRequest& request,
-                              std::string cgi_response, Session* session) const;
+                              std::string cgi_response) const;
   std::string combine(const HttpRequest& request,
                       const std::string& body) const;
-  std::string commonHeader(const HttpRequest& request,
-                           Session* session = NULL) const;
+  std::string commonHeader(const HttpRequest& request) const;
   std::string rootUri(std::string uri) const;
   std::string readIndexFile(const std::string& url) const;
   std::string directoryListing(const std::string& url) const;
