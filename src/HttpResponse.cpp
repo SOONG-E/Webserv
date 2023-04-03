@@ -31,6 +31,8 @@ HttpResponse::HttpResponse(const HttpResponse& origin)
 
 HttpResponse::~HttpResponse() {}
 
+Session* HttpResponse::getSession(void) const { return session_; }
+
 const ServerBlock* HttpResponse::getServerBlock(void) const {
   return server_block_;
 }
@@ -40,6 +42,8 @@ const LocationBlock* HttpResponse::getLocationBlock(void) const {
 }
 
 void HttpResponse::setStatus(const int status) { status_ = status; }
+
+void HttpResponse::setSession(Session* session) { session_ = session; }
 
 void HttpResponse::setServerBlock(const ServerBlock* server_block) {
   server_block_ = server_block;
@@ -58,12 +62,13 @@ void HttpResponse::clear(void) {
 bool HttpResponse::isSuccessCode(void) const { return status_ <= C204; }
 
 std::string HttpResponse::generate(const HttpRequest& request, bool is_cgi,
-                                   const std::string& cgi_response) {
+                                   const std::string& cgi_response,
+                                   Session* session) {
   if (!isSuccessCode()) {
     return generateErrorPage(request);
   }
   if (is_cgi) {
-    return generateFromCgi(request, cgi_response);
+    return generateFromCgi(request, cgi_response, session);
   }
   if (request.getMethod() == METHODS[DELETE]) {
     return commonHeader(request) + CRLF;
@@ -102,8 +107,9 @@ std::string HttpResponse::generateResponse(const HttpRequest& request,
 }
 
 std::string HttpResponse::generateFromCgi(const HttpRequest& request,
-                                          std::string cgi_response) const {
-  std::string response = commonHeader(request);
+                                          std::string cgi_response,
+                                          Session* session) const {
+  std::string response = commonHeader(request, session);
   const std::string STATUS = "Status: ";
   std::size_t pos = cgi_response.find(STATUS);
   if (pos != std::string::npos) {
@@ -135,7 +141,8 @@ std::string HttpResponse::combine(const HttpRequest& request,
   return header + body;
 }
 
-std::string HttpResponse::commonHeader(const HttpRequest& request) const {
+std::string HttpResponse::commonHeader(const HttpRequest& request,
+                                       Session* session) const {
   // Status-Line
   std::string header = "HTTP/1.1 " + ResponseStatus::CODES[status_] + " " +
                        ResponseStatus::REASONS[status_] + CRLF;
@@ -155,9 +162,10 @@ std::string HttpResponse::commonHeader(const HttpRequest& request) const {
   }
   // response-header
   header += "Server: Webserv" + CRLF;
-  if (request.getCookie("Session-ID").empty()) {
-    header += "Set-Cookie: Session-ID=";
-    header += request.getSessionId() + CRLF;
+  if (request.getCookie("Session-ID").empty() ||
+      request.getCookie("Session-ID") != session->getID()) {
+    header += "Set-Cookie: Session-ID=" + session->getID() +
+              "; Max-Age=" + COOKIE_MAX_AGE + CRLF;
   }
   return header;
 }

@@ -152,7 +152,6 @@ void HttpParser::parseCookie(void) {
     request_cookie_list[trim(values[0])] = trim(values[1]);
   }
   request_.setCookie(request_cookie_list);
-  request_.setSessionId(request_.getCookie("Session-ID"));
 }
 
 void HttpParser::parseHeaderFields(const std::string& header_part) {

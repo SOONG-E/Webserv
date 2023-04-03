@@ -294,7 +294,7 @@ bool ServerHandler::isDuplicatedId(int server_block_key,
   for (ServerHandler::sessions_mapped_type::iterator it =
            sessions_[server_block_key].begin();
        it != sessions_[server_block_key].end(); ++it) {
-    if (it->second.getSessionID() == session_id) {
+    if (it->second.getID() == session_id) {
       return true;
     }
   }

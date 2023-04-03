@@ -23,6 +23,7 @@ const int METHODS_COUNT = 8;
 const std::size_t NPOS = -1;
 
 const std::string BASE10 = "0123456789";
+const std::string COOKIE_MAX_AGE = "3600";
 const std::string CRLF = "\r\n";
 const std::string DEFAULT_PATH = "conf/tester.conf";
 const std::string DEFAULT_PORT = "80";

@@ -1,17 +1,15 @@
 #include "Session.hpp"
 
-Session::Session(const std::string& session_id) : session_id_(session_id) {
-  setTimeout();
-}
+Session::Session(const std::string& id) : id_(id) { setTimeout(); }
 
 Session::Session(const Session& src)
-    : session_id_(src.session_id_),
+    : id_(src.id_),
       timeout_(src.timeout_),
       upload_filenames_(src.upload_filenames_) {}
 
 Session::~Session() {}
 
-const std::string& Session::getSessionID() const { return session_id_; }
+const std::string& Session::getID() const { return id_; }
 
 time_t Session::getTimeout() const { return timeout_; }
 

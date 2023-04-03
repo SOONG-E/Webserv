@@ -20,7 +20,6 @@ class HttpRequest {
   const std::string& getUri(void) const;
   const std::string& getQueryString(void) const;
   const std::string& getHost(void) const;
-  const std::string& getSessionId(void) const;
   std::size_t getContentLength(void) const;
   std::string getHeader(const std::string& key) const;
   std::string getCookie(const std::string& name) const;
@@ -28,7 +27,6 @@ class HttpRequest {
 
   void setMethod(const std::string& method);
   void setUri(const std::string& uri);
-  void setSessionId(const std::string& session_id);
   void setQueryString(const std::string& query_string);
   void setHost(const std::string& host);
   void setCookie(const cookie_list_type& cookie);
@@ -44,7 +42,6 @@ class HttpRequest {
   std::string host_;
   std::string query_string_;
   std::string port_;
-  std::string session_id_;
   std::size_t content_length_;
   headers_type headers_;
   cookie_list_type cookie_;

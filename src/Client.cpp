@@ -100,7 +100,7 @@ std::string Client::receive() const {
 void Client::send() {
   if (!isPartialWritten()) {
     buf_ = response_obj_.generate(parser_.getRequestObj(), isCgi(),
-                                  cgi_.getResponse());
+                                  cgi_.getResponse(), session_);
   }
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
 
