@@ -105,8 +105,7 @@ void Client::send() {
 
   Log::header("Send Information");
   logAddressInfo();
-  // std::cout << "[Send Data] " << '\n' << buf_.substr(0, write_bytes) <<
-  // '\n';
+  std::cout << "[Send Data] " << '\n' << buf_.substr(0, write_bytes) << '\n';
   Log::footer("Send");
 
   buf_.erase(0, write_bytes);
