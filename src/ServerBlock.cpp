@@ -9,13 +9,15 @@
 ServerBlock::ServerBlock() {}
 
 ServerBlock::ServerBlock(const ServerBlock& origin)
-    : listens_(origin.listens_),
+    : key_(origin.key_),
+      listens_(origin.listens_),
       server_names_(origin.server_names_),
       error_pages_(origin.error_pages_),
       location_blocks_(origin.location_blocks_) {}
 
 ServerBlock& ServerBlock::operator=(const ServerBlock& origin) {
   if (this != &origin) {
+    key_ = origin.key_;
     listens_ = origin.listens_;
     server_names_ = origin.server_names_;
     error_pages_ = origin.error_pages_;
