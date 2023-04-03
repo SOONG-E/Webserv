@@ -290,8 +290,25 @@ void ServerHandler::generateSession(Client& client) {
       std::make_pair(session_key, Session(session_id)));
 }
 
+bool ServerHandler::isDuplicatedId(int server_block_key,
+                                   std::string session_id) {
+  for (ServerHandler::sessions_mapped_type::iterator it =
+           sessions_[server_block_key].begin();
+       it != sessions_[server_block_key].end(); ++it) {
+    if (it->second.getSessionID() == session_id) {
+      return true;
+    }
+  }
+  return false;
+}
+
 std::string ServerHandler::generateSessionID(int server_block_key) {
-  return toString(avail_session_id_[server_block_key]++);
+  std::string session_id;
+
+  do {
+    session_id = toString(rand());
+  } while (isDuplicatedId(server_block_key, session_id) == true);
+  return session_id;
 }
 
 bool ServerHandler::isValidSessionID(const Client& client) {

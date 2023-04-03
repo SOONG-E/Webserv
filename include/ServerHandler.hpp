@@ -50,6 +50,7 @@ class ServerHandler {
   void generateSession(Client& client);
   std::string generateSessionID(int server_block_key);
   bool isValidSessionID(const Client& client);
+  bool isDuplicatedId(int server_block_key, std::string session_id);
   Session& findSession(const Client& client);
 
   server_blocks_type server_blocks_;
