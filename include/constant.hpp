@@ -18,7 +18,7 @@ enum MethodIndex {
 const std::size_t BUF_SIZE = 65536;
 const int DEFAULT_FD = -1;
 const std::time_t KEEPALIVE_TIMEOUT = 30;
-const std::time_t SESSION_TIMEOUT = 3600;
+const std::time_t SESSION_TIMEOUT = 40;
 const int METHODS_COUNT = 8;
 const std::size_t NPOS = -1;
 

@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <ctime>
 #include <iostream>
 
 #include "Error.hpp"
@@ -12,7 +13,7 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-ServerHandler::ServerHandler() {}
+ServerHandler::ServerHandler() { std::srand(std::time(NULL)); }
 
 ServerHandler::ServerHandler(const ServerHandler& src)
     : server_blocks_(src.server_blocks_),
@@ -266,9 +267,10 @@ void ServerHandler::deleteTimeoutSessions() {
       session = &mapped_it->second;
       if (session->getTimeout() < std::time(NULL)) {
         delete_sessions.push_back(&mapped_it->first);
-        std::string path = "./upload_file/" + toString(sessions_it->first) +
-                           "/" + session->getID();
-        remove(path.c_str());
+        std::string path = "rm -rf ./upload_file/" +
+                           toString(sessions_it->first) + "/" +
+                           session->getID();
+        system(path.c_str());
       }
     }
     if (!delete_sessions.empty()) {
