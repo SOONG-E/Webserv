@@ -16,7 +16,7 @@
 
 class ServerHandler {
  public:
-  ServerHandler(std::size_t server_block_count);
+  ServerHandler();
   ServerHandler(const ServerHandler& src);
   ~ServerHandler();
 
@@ -34,7 +34,6 @@ class ServerHandler {
   typedef Selector selector_type;
   typedef std::map<std::string, Session> sessions_mapped_type;
   typedef std::map<int, sessions_mapped_type> sessions_type;
-  typedef std::vector<unsigned long long> avail_session_id_type;
 
   void receiveRequest(Client& client);
   void sendResponse(Client& client);
@@ -59,7 +58,6 @@ class ServerHandler {
   selector_type server_selector_;
   selector_type client_selector_;
   sessions_type sessions_;
-  avail_session_id_type avail_session_id_;
 };
 
 #endif

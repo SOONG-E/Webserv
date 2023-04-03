@@ -11,8 +11,7 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-ServerHandler::ServerHandler(std::size_t server_block_count)
-    : avail_session_id_(avail_session_id_type(server_block_count, 1)) {}
+ServerHandler::ServerHandler() {}
 
 ServerHandler::ServerHandler(const ServerHandler& src)
     : server_blocks_(src.server_blocks_),
@@ -306,7 +305,7 @@ std::string ServerHandler::generateSessionID(int server_block_key) {
   std::string session_id;
 
   do {
-    session_id = toString(rand());
+    session_id = toString(std::rand());
   } while (isDuplicatedId(server_block_key, session_id) == true);
   return session_id;
 }

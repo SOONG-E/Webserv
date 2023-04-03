@@ -20,10 +20,6 @@ const std::vector<ServerBlock>& Config::getServerBlocks(void) const {
   return server_blocks_;
 }
 
-std::size_t Config::getServerBlockCount() const {
-  return server_blocks_.size();
-}
-
 void Config::addServerBlock(const ServerBlock& server_block) {
   server_blocks_.push_back(server_block);
   std::set<std::string> keys = server_block.keys();
