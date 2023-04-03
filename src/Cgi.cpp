@@ -30,6 +30,7 @@ Cgi& Cgi::operator=(const Cgi& src) {
 Cgi::~Cgi() {}
 
 void Cgi::runCgiScript(const HttpRequest& request_obj,
+                       const HttpResponse& response_obj,
                        const SocketAddress& cli_addr,
                        const SocketAddress& serv_addr,
                        const std::string& cgi_path) {
@@ -48,7 +49,7 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
 
   char* argv[3] = {const_cast<char*>(cgi_path.c_str()),
                    const_cast<char*>(abs_uri.c_str()), NULL};
-  char** envp = generateEnvp(request_obj, cli_addr, serv_addr);
+  char** envp = generateEnvp(request_obj, response_obj, cli_addr, serv_addr);
 
   pid_ = fork();
 
@@ -143,6 +144,7 @@ void Cgi::clear() {
 }
 
 char** Cgi::generateEnvp(const HttpRequest& request_obj,
+                         const HttpResponse& response_obj,
                          const SocketAddress& cli_addr,
                          const SocketAddress& serv_addr) const {
   std::map<std::string, std::string> env_map;
@@ -165,6 +167,9 @@ char** Cgi::generateEnvp(const HttpRequest& request_obj,
   env_map["SERVER_PROTOCOL"] = "HTTP/1.1";
   env_map["SERVER_PORT"] = serv_addr.getPort();
   env_map["SERVER_SOFTWARE"] = "webserv/1.1";
+  env_map["HTTP_X_SERVER_KEY"] =
+      toString(response_obj.getServerBlock()->getKey());
+  env_map["HTTP_X_SESSION_ID"] = response_obj.getSession().getID();
   env_map["HTTP_X_SECRET_HEADER_FOR_TEST"] =
       request_obj.getHeader("X-SECRET-HEADER-FOR-TEST");
 

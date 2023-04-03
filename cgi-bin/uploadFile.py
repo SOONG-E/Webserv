@@ -1,7 +1,7 @@
 from os import environ
 from os.path import exists
 from os.path import isdir
-from os import mkdir
+from os import makedirs
 import sys
 import cgi
 from validateEnviron import validateEnviron
@@ -18,11 +18,11 @@ def validateRequest(form):
 def split_filename(filename):
 	if filename.count(".") == 0:
 		return filename, ""
-	
+
 	boundary = filename.rfind(".")
 	if boundary == 0:
 		return filename, ""
-	
+
 	base_name = filename[:boundary]
 	extension = filename[boundary:]
 
@@ -31,7 +31,7 @@ def split_filename(filename):
 def recreate_filename(path, filename):
 	if not exists(path + filename):
 		return filename
-	
+
 	filename, extension = split_filename(filename)
 
 	for num in range(1, sys.maxsize):
@@ -40,10 +40,6 @@ def recreate_filename(path, filename):
 			return filename + suffix + extension
 	raise Exception("There are too many duplicated name.")
 
-def guaranteeDirectoryExistance(directory):
-	if isdir(directory) == False:
-		mkdir(directory)
-
 try:
 	validateEnviron()
 
@@ -51,8 +47,8 @@ try:
 	validateRequest(form)
 	uploaded_file = form['upload_file']
 
-	path = "./upload_file/"
-	guaranteeDirectoryExistance(path)
+	path = "./upload_file/" + environ["HTTP_X_SERVER_KEY"] + "/" + environ["HTTP_X_SESSION_ID"] + "/"
+	makedirs(path, exist_ok=True)
 
 	assert isdir(path)
 

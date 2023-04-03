@@ -9,6 +9,7 @@
 #include <string>
 
 #include "HttpRequest.hpp"
+#include "HttpResponse.hpp"
 #include "SocketAddress.hpp"
 #include "utility.hpp"
 
@@ -22,6 +23,7 @@ class Cgi {
   ~Cgi();
 
   void runCgiScript(const HttpRequest& request_obj,
+                    const HttpResponse& response_obj,
                     const SocketAddress& cli_addr,
                     const SocketAddress& serv_addr,
                     const std::string& cgi_path);
@@ -35,6 +37,7 @@ class Cgi {
 
  private:
   char** generateEnvp(const HttpRequest& request_obj,
+                      const HttpResponse& response_obj,
                       const SocketAddress& cli_addr,
                       const SocketAddress& serv_addr) const;
   void deleteEnvp(char** envp) const;

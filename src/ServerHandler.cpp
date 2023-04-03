@@ -165,9 +165,9 @@ void ServerHandler::receiveRequest(Client& client) {
       }
 
       if (client.isCgi()) {
-        client.getCgi().runCgiScript(request_obj, client.getClientAddress(),
-                                     client.getServerAddress(),
-                                     location_block.getCgiParam("CGI_PATH"));
+        client.getCgi().runCgiScript(
+            request_obj, response_obj, client.getClientAddress(),
+            client.getServerAddress(), location_block.getCgiParam("CGI_PATH"));
       }
     }
   } catch (const ResponseException& e) {

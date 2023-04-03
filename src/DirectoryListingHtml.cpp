@@ -2,17 +2,15 @@
 
 #include "utility.hpp"
 
-std::string DirectoryListingHtml::generate(const std::string& url,
-                                           const std::set<File>& entries) {
-  return head(url) + body(url, entries) + "\n";
+std::string DirectoryListingHtml::generate(const std::set<File>& entries) {
+  return head() + body(entries) + "\n";
 }
 
-std::string DirectoryListingHtml::head(const std::string& url) {
+std::string DirectoryListingHtml::head(void) {
   return "<!DOCTYPE html>"
          "<html>"
          "  <head>"
-         "    <title>Index of " +
-         url +
+         "    <title>Index"
          "</title>"
          "    <style>"
          "      body {"
@@ -38,12 +36,10 @@ std::string DirectoryListingHtml::head(const std::string& url) {
          "  </head>";
 }
 
-std::string DirectoryListingHtml::body(const std::string& url,
-                                       const std::set<File>& entries) {
+std::string DirectoryListingHtml::body(const std::set<File>& entries) {
   std::string html =
       "  <body>"
-      "    <h1>Index of " +
-      url +
+      "    <h1>Index"
       "</h1>"
       "    <table>"
       "      <tr>"
@@ -55,10 +51,8 @@ std::string DirectoryListingHtml::body(const std::string& url,
        entry_iter != entries.end(); ++entry_iter) {
     html +=
         "      <tr>"
-        "        <td>"
-        "          <a href=\"" +
-        entry_iter->name + "\">" + entry_iter->name +
-        "</a>"
+        "        <td>" +
+        entry_iter->name +
         "        </td>"
         "        <td>" +
         formatTime("%Y-%m-%d %H:%M:%S", entry_iter->last_modified) +

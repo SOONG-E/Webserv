@@ -28,6 +28,7 @@ const std::string CRLF = "\r\n";
 const std::string DEFAULT_PATH = "conf/tester.conf";
 const std::string DEFAULT_PORT = "80";
 const std::string DOUBLE_CRLF = "\r\n\r\n";
+const std::string LF = "\n";
 const std::string WHITESPACE = " \t\n\v\f\r";
 const std::string METHODS[] = {
     "GET", "POST", "DELETE", "HEAD", "OPTIONS", "PUT", "TRACE", "CONNECT",

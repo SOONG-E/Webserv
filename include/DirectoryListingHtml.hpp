@@ -7,11 +7,9 @@
 #include "File.hpp"
 
 struct DirectoryListingHtml {
-  static std::string generate(const std::string& url,
-                              const std::set<File>& entries);
-  static std::string head(const std::string& url);
-  static std::string body(const std::string& url,
-                          const std::set<File>& entries);
+  static std::string generate(const std::set<File>& entries);
+  static std::string head();
+  static std::string body(const std::set<File>& entries);
 };
 
 #endif

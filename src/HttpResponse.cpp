@@ -122,7 +122,13 @@ std::string HttpResponse::generateFromCgi(const HttpRequest& request,
   response += cgi_response;
   std::size_t bound_pos = response.find(DOUBLE_CRLF);
   if (bound_pos == std::string::npos) {
-    return response + CRLF;
+    response += CRLF;
+    if (response.find("HTTP/1.1 201 Created") != std::string::npos) {
+      response +=
+          directoryListing("upload_file/" + toString(server_block_->getKey()) +
+                           "/" + session_->getID() + "/");
+    }
+    return response;
   }
   // entity-header
   bound_pos += CRLF.size();
@@ -218,5 +224,5 @@ std::string HttpResponse::directoryListing(const std::string& url) const {
     entries.insert(file);
   }
   closedir(dir);
-  return DirectoryListingHtml::generate(url, entries);
+  return DirectoryListingHtml::generate(entries);
 }

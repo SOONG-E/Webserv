@@ -26,9 +26,7 @@ ServerBlock& ServerBlock::operator=(const ServerBlock& origin) {
 
 ServerBlock::~ServerBlock() {}
 
-int ServerBlock::getKey() const { return key_; }
-
-void ServerBlock::setKey(int key) { key_ = key; }
+int ServerBlock::getKey(void) const { return key_; }
 
 const std::vector<Listen>& ServerBlock::getListens(void) const {
   return listens_;
@@ -48,6 +46,8 @@ const std::string& ServerBlock::getErrorPage(const std::string& code) const {
 const std::vector<LocationBlock>& ServerBlock::getLocationBlocks(void) const {
   return location_blocks_;
 }
+
+void ServerBlock::setKey(const int key) { key_ = key; }
 
 void ServerBlock::addListen(const std::string& server_socket_key) {
   listens_.push_back(Listen(server_socket_key));
