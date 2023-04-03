@@ -33,7 +33,7 @@ HttpResponse::HttpResponse(const HttpResponse& origin)
 
 HttpResponse::~HttpResponse() {}
 
-Session& HttpResponse::getSession(void) const { return *session_; }
+Session* HttpResponse::getSession(void) const { return session_; }
 
 const ServerBlock* HttpResponse::getServerBlock(void) const {
   return server_block_;

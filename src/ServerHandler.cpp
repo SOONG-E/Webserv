@@ -129,6 +129,7 @@ void ServerHandler::handleTimeout() {
 }
 
 void ServerHandler::receiveRequest(Client& client) {
+  HttpResponse& response_obj = client.getResponseObj();
   try {
     std::string request = client.receive();
     client.setTimeout();
@@ -143,19 +144,16 @@ void ServerHandler::receiveRequest(Client& client) {
       const LocationBlock& location_block =
           server_block.findLocationBlock(request_obj.getUri());
 
-      HttpResponse& response_obj = client.getResponseObj();
       response_obj.setServerBlock(&server_block);
       response_obj.setLocationBlock(&location_block);
 
       validateRequest(request_obj, location_block);
 
-      Session* session;
       if (!client.hasCookie() || !isValidSessionID(client)) {
-        session = generateSession(client);
+        response_obj.setSession(generateSession(client));
       } else {
-        session = findSession(client);
+        response_obj.setSession(findSession(client));
       }
-      response_obj.setSession(session);
 
       if (request_obj.getMethod() == METHODS[DELETE]) {
         if (unlink(("." + request_obj.getUri()).c_str()) == ERROR<int>()) {
@@ -173,25 +171,37 @@ void ServerHandler::receiveRequest(Client& client) {
       }
     }
   } catch (const ResponseException& e) {
-    client.getResponseObj().setStatus(e.status);
+    response_obj.setStatus(e.status);
+  } catch (const Client::ConnectionClosedException& e) {
+    throw Client::ConnectionClosedException();
+  } catch (const std::exception& e) {
+    response_obj.setStatus(C500);
   }
 }
 
 void ServerHandler::sendResponse(Client& client) {
-  client.send();
-  if (!client.isPartialWritten()) {
-    const HttpRequest& request_obj = client.getRequestObj();
-    const HttpResponse& response_obj = client.getResponseObj();
+  HttpResponse& response_obj = client.getResponseObj();
+  try {
+    client.send();
+    if (!client.isPartialWritten()) {
+      const HttpRequest& request_obj = client.getRequestObj();
 
-    if (request_obj.getHeader("CONNECTION") == "close" ||
-        !response_obj.isSuccessCode()) {
-      throw Client::ConnectionClosedException();
+      if (request_obj.getHeader("CONNECTION") == "close" ||
+          !response_obj.isSuccessCode()) {
+        throw Client::ConnectionClosedException();
+      }
+      client.clear();
     }
-    client.clear();
+    client.setTimeout();
+    Session* session = response_obj.getSession();
+    if (session) {
+      session->setTimeout();
+    }
+  } catch (const Client::ConnectionClosedException& e) {
+    throw Client::ConnectionClosedException();
+  } catch (const std::exception& e) {
+    response_obj.setStatus(C500);
   }
-  client.setTimeout();
-  Session& session = client.getResponseObj().getSession();
-  session.setTimeout();
 }
 
 const ServerBlock& ServerHandler::findServerBlock(

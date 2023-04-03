@@ -19,7 +19,7 @@ class HttpResponse {
   HttpResponse(const HttpResponse& origin);
   ~HttpResponse();
 
-  Session& getSession(void) const;
+  Session* getSession(void) const;
   const ServerBlock* getServerBlock(void) const;
   const LocationBlock* getLocationBlock(void) const;
 
