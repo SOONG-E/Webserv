@@ -306,7 +306,7 @@ std::string ServerHandler::generateSessionID(int server_block_key) {
 
   do {
     session_id = toString(std::rand());
-  } while (isDuplicatedId(server_block_key, session_id) == true);
+  } while (isDuplicatedId(server_block_key, session_id));
   return session_id;
 }
 
