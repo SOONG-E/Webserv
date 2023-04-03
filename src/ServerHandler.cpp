@@ -265,6 +265,9 @@ void ServerHandler::deleteTimeoutSessions() {
       session = &mapped_it->second;
       if (session->getTimeout() < std::time(NULL)) {
         delete_sessions.push_back(&mapped_it->first);
+        std::string path = "./upload_file/" + toString(sessions_it->first) +
+                           "/" + session->getID();
+        std::remove(path.c_str());
       }
     }
     if (!delete_sessions.empty()) {
