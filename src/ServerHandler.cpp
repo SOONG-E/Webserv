@@ -35,9 +35,9 @@ void ServerHandler::configureServer(const Config& config) {
 
   for (std::size_t i = 0; i < serv_blocks.size(); ++i) {
     const std::vector<Listen>& listens = serv_blocks[i].getListens();
-    for (std::size_t i = 0; i < listens.size(); ++i) {
+    for (std::size_t j = 0; j < listens.size(); ++j) {
       try {
-        server_blocks_[listens[i].server_socket_key].push_back(serv_blocks[i]);
+        server_blocks_[listens[j].server_socket_key].push_back(serv_blocks[i]);
       } catch (const std::exception& e) {
         Error::log("configureServer() failed", e.what(), EXIT_FAILURE);
       }
