@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 
@@ -267,7 +268,7 @@ void ServerHandler::deleteTimeoutSessions() {
         delete_sessions.push_back(&mapped_it->first);
         std::string path = "./upload_file/" + toString(sessions_it->first) +
                            "/" + session->getID();
-        std::remove(path.c_str());
+        remove(path.c_str());
       }
     }
     if (!delete_sessions.empty()) {
