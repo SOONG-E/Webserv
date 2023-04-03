@@ -24,7 +24,7 @@ class HttpResponse {
   const LocationBlock* getLocationBlock(void) const;
 
   void setStatus(const int status);
-  void setSession(Session& session);
+  void setSession(Session* session);
   void setServerBlock(const ServerBlock* server_block);
   void setLocationBlock(const LocationBlock* location_block);
 

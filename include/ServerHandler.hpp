@@ -46,11 +46,11 @@ class ServerHandler {
   void deleteClients(const std::vector<int>& delete_clients);
   void deleteSessions(sessions_mapped_type& dest,
                       const std::vector<const std::string*>& delete_sessions);
-  void generateSession(Client& client);
+  Session* generateSession(Client& client);
   std::string generateSessionID(int server_block_key);
   bool isValidSessionID(const Client& client);
   bool isDuplicatedId(int server_block_key, std::string session_id);
-  Session& findSession(const Client& client);
+  Session* findSession(const Client& client);
 
   server_blocks_type server_blocks_;
   server_sockets_type server_sockets_;

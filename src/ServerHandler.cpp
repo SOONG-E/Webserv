@@ -149,10 +149,12 @@ void ServerHandler::receiveRequest(Client& client) {
 
       validateRequest(request_obj, location_block);
 
+      Session* session;
       if (!client.hasCookie() || !isValidSessionID(client)) {
-        generateSession(client);
+        session = generateSession(client);
+      } else {
+        session = findSession(client);
       }
-      Session& session = findSession(client);
       response_obj.setSession(session);
 
       if (request_obj.getMethod() == METHODS[DELETE]) {
@@ -277,9 +279,7 @@ void ServerHandler::deleteSessions(
   }
 }
 
-void ServerHandler::generateSession(Client& client) {
-  static std::vector<unsigned long long> avail_session_id;
-
+Session* ServerHandler::generateSession(Client& client) {
   int server_block_key = client.getServerBlockKey();
   std::string session_id = generateSessionID(server_block_key);
   std::string session_key = session_id + ":" +
@@ -288,6 +288,7 @@ void ServerHandler::generateSession(Client& client) {
 
   sessions_[server_block_key].insert(
       std::make_pair(session_key, Session(session_id)));
+  return &sessions_[server_block_key].find(session_key)->second;
 }
 
 bool ServerHandler::isDuplicatedId(int server_block_key,
@@ -323,9 +324,9 @@ bool ServerHandler::isValidSessionID(const Client& client) {
   return true;
 }
 
-Session& ServerHandler::findSession(const Client& client) {
+Session* ServerHandler::findSession(const Client& client) {
   int server_block_key = client.getServerBlockKey();
   std::string session_key = client.getSessionKey();
 
-  return sessions_[server_block_key].find(session_key)->second;
+  return &sessions_[server_block_key].find(session_key)->second;
 }
