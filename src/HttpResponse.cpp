@@ -127,8 +127,12 @@ std::string HttpResponse::generateFromCgi(const HttpRequest& request,
   // entity-header
   bound_pos += CRLF.size();
   std::size_t body_size = response.size() - bound_pos - CRLF.size();
-  response.insert(bound_pos, "Content-Length: " + toString(body_size) + CRLF);
-  response.insert(bound_pos, "Content-Type: text/html" + CRLF);
+  if (response.find("Content-Length: ") == std::string::npos) {
+    response.insert(bound_pos, "Content-Length: " + toString(body_size) + CRLF);
+  }
+  if (response.find("Content-Type: ") == std::string::npos) {
+    response.insert(bound_pos, "Content-Type: text/html" + CRLF);
+  }
   return response;
 }
 
