@@ -152,15 +152,6 @@ void ServerHandler::receiveRequest(Client& client) {
         response_obj.setSession(findSession(client));
       }
 
-      if (request_obj.getMethod() == METHODS[DELETE]) {
-        if (unlink(("." + request_obj.getUri()).c_str()) == ERROR<int>()) {
-          response_obj.setStatus(C404);
-        } else {
-          response_obj.setStatus(C204);
-        }
-        return;
-      }
-
       if (client.isCgi()) {
         Cgi& cgi = client.getCgi();
         cgi.runCgiScript(request_obj, response_obj, client.getClientAddress(),
