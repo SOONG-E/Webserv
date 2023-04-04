@@ -77,6 +77,10 @@
     "set": "cpp",
     "__functional_03": "cpp",
     "memory_resource": "cpp",
-    "list": "cpp"
+    "list": "cpp",
+    "csignal": "cpp",
+    "fstream": "cpp",
+    "stack": "cpp",
+    "filesystem": "cpp"
   },
 }
