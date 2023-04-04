@@ -18,8 +18,9 @@ enum PipeFD { READ = 0, WRITE = 1 };
 
 class Cgi {
  public:
-  Cgi(Selector& selector);
+  Cgi();
   Cgi(const Cgi& src);
+  Cgi& operator=(const Cgi& src);
   ~Cgi();
 
   void runCgiScript(const HttpRequest& request_obj,
@@ -27,14 +28,13 @@ class Cgi {
                     const SocketAddress& cli_addr,
                     const SocketAddress& serv_addr,
                     const std::string& cgi_path);
-  void writeToPipe();
-  void readToPipe();
+  void writeToPipe(Selector& selector);
+  void readToPipe(Selector& selector);
   bool isCompleted() const;
   bool hasBody() const;
   const std::string& getResponse() const;
   int getWriteFD() const;
   int getReadFD() const;
-  const int* getPipeFds() const;
   void clear();
 
  private:
@@ -45,7 +45,6 @@ class Cgi {
   void deleteEnvp(char** envp) const;
   std::string getAbsolutePath(const std::string& uri) const;
 
-  Selector &selector_;
   bool is_completed_;
   int pipe_fds_[2];
   std::string body_;

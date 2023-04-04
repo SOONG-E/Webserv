@@ -75,7 +75,7 @@ void ServerHandler::acceptConnections() {
   try {
     for (std::size_t i = 0; i < server_sockets_.size(); ++i) {
       if (selector_.isReadable(server_sockets_[i].getFD())) {
-        Client new_client = server_sockets_[i].accept(selector_);
+        Client new_client = server_sockets_[i].accept();
         int client_fd = new_client.getFD();
 
         selector_.registerFD(client_fd);
@@ -83,7 +83,7 @@ void ServerHandler::acceptConnections() {
       }
     }
   } catch (const std::exception& e) {
-    Error::log("acceptConnections() failed", e.what());
+    // Error::log("acceptConnections() failed", e.what());
   }
 }
 
@@ -118,7 +118,7 @@ void ServerHandler::respondToClients() {
     }
     registerReserveClients();
   } catch (const std::exception& e) {
-    Error::log("respondToClients() failed", e.what());
+    // Error::log("respondToClients() failed", e.what());
   }
 }
 

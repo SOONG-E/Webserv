@@ -16,7 +16,7 @@
 
 class Client {
  public:
-  Client(int fd, const ServerBlock& default_server, Selector& selector,
+  Client(int fd, const ServerBlock& default_server,
          const SocketAddress& cli_addr, const SocketAddress& serv_addr);
   Client(const Client& src);
   ~Client();

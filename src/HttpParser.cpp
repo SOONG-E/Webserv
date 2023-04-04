@@ -80,7 +80,7 @@ void HttpParser::handlePost(void) {
       try {
         request_.setContentLength(::stoi(request_.getHeader("CONTENT-LENGTH")));
       } catch (std::invalid_argument& e) {
-        Error::log(e.what());
+        // Error::log(e.what());
         throw ResponseException(C400);
       }
     }

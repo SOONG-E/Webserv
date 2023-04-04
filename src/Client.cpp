@@ -9,15 +9,14 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-Client::Client(int fd, const ServerBlock& default_server, Selector& selector,
+Client::Client(int fd, const ServerBlock& default_server,
                const SocketAddress& cli_addr, const SocketAddress& serv_addr)
     : fd_(fd),
       cli_address_(cli_addr),
       serv_address_(serv_addr),
-      response_obj_(default_server),
-      cgi_(selector) {
+      response_obj_(default_server) {
   setTimeout();
-  logConnectionInfo();
+  // logConnectionInfo();
 }
 
 Client::Client(const Client& src)
@@ -81,14 +80,14 @@ std::string Client::receive() const {
   std::size_t read_bytes = recv(fd_, &buf, BUF_SIZE, 0);
 
   if (read_bytes == ERROR<std::size_t>()) {
-    Error::log(Error::INFO[ERECV], std::strerror(errno));
+    // Error::log(Error::INFO[ERECV], std::strerror(errno));
     throw ConnectionClosedException();
   }
   if (read_bytes == 0) {
     throw ConnectionClosedException();
   }
   std::string request(buf, read_bytes);
-  logReceiveInfo(request);
+  // logReceiveInfo(request);
   return request;
 }
 
@@ -100,14 +99,14 @@ void Client::send() {
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
 
   if (write_bytes == ERROR<std::size_t>()) {
-    Error::log(Error::INFO[ESEND], std::strerror(errno));
+    // Error::log(Error::INFO[ESEND], std::strerror(errno));
     throw ConnectionClosedException();
   }
 
-  Log::header("Send Information");
-  logAddressInfo();
+  // Log::header("Send Information");
+  // logAddressInfo();
   // std::cout << "[Send Data] " << '\n' << buf_.substr(0, write_bytes) << '\n';
-  Log::footer("Send");
+  // Log::footer("Send");
 
   buf_.erase(0, write_bytes);
 }
@@ -115,23 +114,23 @@ void Client::send() {
 void Client::executeCgiIO(Selector& selector) {
   try {
     if (cgi_.hasBody() && selector.isWritable(cgi_.getWriteFD())) {
-      cgi_.writeToPipe();
+      cgi_.writeToPipe(selector);
     }
     if (selector.isReadable(cgi_.getReadFD())) {
-      cgi_.readToPipe();
+      cgi_.readToPipe(selector);
     }
   } catch (const ResponseException& e) {
     response_obj_.setStatus(e.status);
-    Error::log(Error::INFO[ECGI], e.what());
+    // Error::log(Error::INFO[ECGI], e.what());
   }
 }
 
 void Client::closeConnection() const {
   close(fd_);
 
-  Log::header("Close Connection Information");
-  logAddressInfo();
-  Log::footer("Close Connection");
+  // Log::header("Close Connection Information");
+  // logAddressInfo();
+  // Log::footer("Close Connection");
 }
 
 void Client::clear() {
@@ -203,7 +202,7 @@ void Client::logReceiveInfo(const std::string& request) const {
   Log::header("Receive Information");
   logAddressInfo();
   static_cast<void>(request);
-  // std::cout << "[Receive data]" << '\n' << request << '\n';
+  std::cout << "[Receive data]" << '\n' << request << '\n';
   Log::footer();
 }
 
