@@ -26,8 +26,8 @@ int main(int argc, char* argv[]) {
 
   while (1) {
     if (handler.select() > 0) {
-      handler.acceptConnections();
       handler.respondToClients();
+      handler.acceptConnections();
     }
     handler.handleTimeout();
   }

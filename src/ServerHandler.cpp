@@ -19,7 +19,6 @@ ServerHandler::ServerHandler(const ServerHandler& src)
     : server_blocks_(src.server_blocks_),
       server_sockets_(src.server_sockets_),
       clients_(src.clients_),
-      reserve_clients_(src.reserve_clients_),
       selector_(src.selector_),
       sessions_(src.sessions_) {}
 
@@ -77,7 +76,9 @@ void ServerHandler::acceptConnections() {
       if (selector_.isReadable(server_sockets_[i].getFD())) {
         Client new_client = server_sockets_[i].accept();
 
-        reserve_clients_.push_back(new_client);
+        int client_fd = new_client.getFD();
+        selector_.registerFD(client_fd);
+        clients_.insert(std::make_pair(client_fd, new_client));
       }
     }
   } catch (const std::exception& e) {
@@ -97,11 +98,11 @@ void ServerHandler::respondToClients() {
       client = &it->second;
       int client_fd = client->getFD();
       try {
-        if (selector_.isReadable(client_fd)) {
-          receiveRequest(*client);
-        }
         if (client->isReadyToCgiIO()) {
           client->executeCgiIO(selector_);
+        }
+        if (selector_.isReadable(client_fd)) {
+          receiveRequest(*client);
         }
         if (selector_.isWritable(client_fd) && client->isReadyToSend()) {
           sendResponse(*client);
@@ -111,7 +112,6 @@ void ServerHandler::respondToClients() {
         client->closeConnection();
       }
     }
-    registerReserveClients();
     if (!delete_clients.empty()) {
       deleteClients(delete_clients);
     }
@@ -122,7 +122,7 @@ void ServerHandler::respondToClients() {
 
 void ServerHandler::handleTimeout() {
   deleteTimeoutClients();
-  deleteTimeoutSessions();
+  // deleteTimeoutSessions();
 }
 
 void ServerHandler::receiveRequest(Client& client) {
@@ -146,11 +146,11 @@ void ServerHandler::receiveRequest(Client& client) {
 
       validateRequest(request_obj, location_block);
 
-      if (!client.hasCookie() || !isValidSessionID(client)) {
-        response_obj.setSession(generateSession(client));
-      } else {
-        response_obj.setSession(findSession(client));
-      }
+      // if (!client.hasCookie() || !isValidSessionID(client)) {
+      //   response_obj.setSession(generateSession(client));
+      // } else {
+      //   response_obj.setSession(findSession(client));
+      // }
 
       if (client.isCgi()) {
         Cgi& cgi = client.getCgi();
@@ -186,26 +186,15 @@ void ServerHandler::sendResponse(Client& client) {
       client.clear();
     }
     client.setTimeout();
-    Session* session = response_obj.getSession();
-    if (session) {
-      session->setTimeout();
-    }
+    // Session* session = response_obj.getSession();
+    // if (session) {
+    //   session->setTimeout();
+    // }
   } catch (const Client::ConnectionClosedException& e) {
     throw Client::ConnectionClosedException();
   } catch (const std::exception& e) {
     response_obj.setStatus(C500);
   }
-}
-
-void ServerHandler::registerReserveClients() {
-  for (std::size_t i = 0; i < reserve_clients_.size(); ++i) {
-    Client reserve_client = reserve_clients_[i];
-    int fd = reserve_client.getFD();
-
-    selector_.registerFD(fd);
-    clients_.insert(std::make_pair(fd, reserve_client));
-  }
-  reserve_clients_.clear();
 }
 
 const ServerBlock& ServerHandler::findServerBlock(

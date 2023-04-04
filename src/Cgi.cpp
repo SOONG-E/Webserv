@@ -43,6 +43,8 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
                        const std::string& cgi_path) {
   int pipe_fds[2][2];
 
+  std::string uri = getAbsolutePath(request_obj.getUri());
+
   if (pipe(pipe_fds[0]) == ERROR<int>()) {
     throw ResponseException(C500);
   }
@@ -52,10 +54,8 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
     throw ResponseException(C500);
   }
 
-  std::string abs_uri = getAbsolutePath(request_obj.getUri());
-
   char* argv[3] = {const_cast<char*>(cgi_path.c_str()),
-                   const_cast<char*>(abs_uri.c_str()), NULL};
+                   const_cast<char*>(uri.c_str()), NULL};
   char** envp = generateEnvp(request_obj, response_obj, cli_addr, serv_addr);
 
   pid_ = fork();
@@ -86,15 +86,14 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
 
   if (fcntl(pipe_fds_[READ], F_SETFL, O_NONBLOCK) == ERROR<int>() ||
       fcntl(pipe_fds_[WRITE], F_SETFL, O_NONBLOCK) == ERROR<int>()) {
+    kill(pid_, SIGKILL);
     close(pipe_fds_[READ]);
     close(pipe_fds_[WRITE]);
-    kill(pid_, SIGTERM);
     throw ResponseException(C500);
   }
 
   if (request_obj.getMethod() != "POST") {
     close(pipe_fds_[WRITE]);
-    pipe_fds_[WRITE] = -1;
   }
   body_ = request_obj.getBody();
 }
@@ -104,11 +103,11 @@ void Cgi::writeToPipe(Selector& selector) {
       write(pipe_fds_[WRITE], body_.c_str(), body_.size());
 
   if (write_bytes == ERROR<std::size_t>()) {
+    kill(pid_, SIGKILL);
     close(pipe_fds_[READ]);
     close(pipe_fds_[WRITE]);
     selector.unregisterFD(pipe_fds_[READ]);
     selector.unregisterFD(pipe_fds_[WRITE]);
-    kill(pid_, SIGTERM);
     throw ResponseException(C500);
   }
   if (write_bytes == body_.size()) {
@@ -125,9 +124,11 @@ void Cgi::readToPipe(Selector& selector) {
   std::size_t read_bytes = read(pipe_fds_[READ], buf, BUF_SIZE);
 
   if (read_bytes == ERROR<std::size_t>()) {
+    kill(pid_, SIGKILL);
     close(pipe_fds_[READ]);
+    close(pipe_fds_[WRITE]);
     selector.unregisterFD(pipe_fds_[READ]);
-    kill(pid_, SIGTERM);
+    selector.unregisterFD(pipe_fds_[WRITE]);
     throw ResponseException(C500);
   }
   if (read_bytes == 0) {
@@ -164,8 +165,11 @@ char** Cgi::generateEnvp(const HttpRequest& request_obj,
                          const SocketAddress& serv_addr) const {
   std::map<std::string, std::string> env_map;
 
+  std::size_t content_length = request_obj.getContentLength();
+  if (content_length > 0) {
+    env_map["CONTENT_LENGTH"] = toString(content_length);
+  }
   env_map["AUTH_TYPE"] = "";
-  env_map["CONTENT_LENGTH"] = toString(request_obj.getContentLength());
   env_map["CONTENT_TYPE"] = request_obj.getHeader("CONTENT-TYPE");
   env_map["GATEWAY_INTERFACE"] = "CGI/1.1";
   env_map["PATH_INFO"] = request_obj.getUri();
@@ -182,9 +186,10 @@ char** Cgi::generateEnvp(const HttpRequest& request_obj,
   env_map["SERVER_PROTOCOL"] = "HTTP/1.1";
   env_map["SERVER_PORT"] = serv_addr.getPort();
   env_map["SERVER_SOFTWARE"] = "webserv/1.1";
-  env_map["HTTP_X_SERVER_KEY"] =
-      toString(response_obj.getServerBlock()->getKey());
-  env_map["HTTP_X_SESSION_ID"] = response_obj.getSession()->getID();
+  (void)response_obj;
+  // env_map["HTTP_X_SERVER_KEY"] =
+  //     toString(response_obj.getServerBlock()->getKey());
+  // env_map["HTTP_X_SESSION_ID"] = response_obj.getSession()->getID();
   env_map["HTTP_X_SECRET_HEADER_FOR_TEST"] =
       request_obj.getHeader("X-SECRET-HEADER-FOR-TEST");
 
