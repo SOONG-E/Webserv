@@ -187,10 +187,10 @@ bool Client::hasCookie() const {
 }
 
 void Client::logAddressInfo() const {
-  std::cout << "[Client address]" << cli_address_.getIP() << ":"
-            << cli_address_.getPort() << '\n'
-            << "[Server address]" << serv_address_.getIP() << ":"
-            << serv_address_.getPort() << '\n';
+  std::cout << "[Client address]" << '\n'
+            << cli_address_.getIP() << ":" << cli_address_.getPort() << '\n'
+            << "[Server address]" << '\n'
+            << serv_address_.getIP() << ":" << serv_address_.getPort() << '\n';
 }
 
 void Client::logConnectionInfo() const {
