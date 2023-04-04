@@ -94,6 +94,7 @@ std::string HttpResponse::generateErrorPage(const HttpRequest& request) {
   // test
   if (request.getMethod() == METHODS[PUT]) {
     setStatus(C200);
+    body = "";
   }
   //
   return generateResponse(request, body);

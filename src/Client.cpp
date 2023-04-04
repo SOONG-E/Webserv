@@ -106,7 +106,7 @@ void Client::send() {
 
   Log::header("Send Information");
   logAddressInfo();
-  std::cout << "[Send Data] " << '\n' << buf_.substr(0, write_bytes) << '\n';
+  // std::cout << "[Send Data] " << '\n' << buf_.substr(0, write_bytes) << '\n';
   Log::footer("Send");
 
   buf_.erase(0, write_bytes);
@@ -187,10 +187,10 @@ bool Client::hasCookie() const {
 }
 
 void Client::logAddressInfo() const {
-  std::cout << "[Client address]" << '\n'
-            << cli_address_.getIP() << ":" << cli_address_.getPort() << '\n'
-            << "[Server address]" << '\n'
-            << serv_address_.getIP() << ":" << serv_address_.getPort() << '\n';
+  std::cout << "[Client address]" << cli_address_.getIP() << ":"
+            << cli_address_.getPort() << '\n'
+            << "[Server address]" << serv_address_.getIP() << ":"
+            << serv_address_.getPort() << '\n';
 }
 
 void Client::logConnectionInfo() const {
@@ -203,7 +203,7 @@ void Client::logReceiveInfo(const std::string& request) const {
   Log::header("Receive Information");
   logAddressInfo();
   static_cast<void>(request);
-  std::cout << "[Receive data]" << '\n' << request << '\n';
+  // std::cout << "[Receive data]" << '\n' << request << '\n';
   Log::footer();
 }
 
