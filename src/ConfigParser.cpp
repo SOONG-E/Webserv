@@ -81,7 +81,6 @@ void ConfigParser::parseListen(void) {
 
 void ConfigParser::parseServerName(void) {
   expect("server_name");
-  server_block_.clear();
   while (peek() != ";") {
     server_block_.addServerName(expect());
   }
