@@ -10,6 +10,8 @@
 #include "LocationBlock.hpp"
 
 class ServerBlock {
+  static const int DEFAULT_KEY;
+
  public:
   ServerBlock();
   ServerBlock(const ServerBlock& origin);
@@ -28,8 +30,9 @@ class ServerBlock {
   void addErrorPage(const std::string& code, const std::string& page);
   void addLocationBlock(const LocationBlock& location_block);
 
-  const LocationBlock& findLocationBlock(const std::string& request_uri) const;
   std::set<std::string> keys(void) const;
+  const LocationBlock& findLocationBlock(const std::string& request_uri) const;
+  void setDefault(void);
   void clear(void);
 
  private:

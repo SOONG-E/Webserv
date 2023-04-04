@@ -19,8 +19,9 @@ class Config {
   void addServerBlock(const ServerBlock& server_block);
 
  private:
+  void validate(const ServerBlock& server_block) const;
+
   std::vector<ServerBlock> server_blocks_;
-  std::map<std::string, ServerBlock> servers_table_;
 };
 
 #endif

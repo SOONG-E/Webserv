@@ -1,15 +1,16 @@
 #include "Config.hpp"
 
+#include <cstdlib>
+
+#include "Error.hpp"
+
 Config::Config() {}
 
-Config::Config(const Config& origin)
-    : server_blocks_(origin.server_blocks_),
-      servers_table_(origin.servers_table_) {}
+Config::Config(const Config& origin) : server_blocks_(origin.server_blocks_) {}
 
 Config& Config::operator=(const Config& origin) {
   if (this != &origin) {
     server_blocks_ = origin.server_blocks_;
-    servers_table_ = origin.servers_table_;
   }
   return *this;
 }
@@ -21,10 +22,17 @@ const std::vector<ServerBlock>& Config::getServerBlocks(void) const {
 }
 
 void Config::addServerBlock(const ServerBlock& server_block) {
+  validate(server_block);
   server_blocks_.push_back(server_block);
-  std::set<std::string> keys = server_block.keys();
-  for (std::set<std::string>::const_iterator keys_iter = keys.begin();
-       keys_iter != keys.end(); ++keys_iter) {
-    servers_table_.insert(std::make_pair(*keys_iter, server_block));
+}
+
+void Config::validate(const ServerBlock& server_block) const {
+  static std::size_t total_count;
+  static std::set<std::string> total_keys;
+  std::set<std::string> each_keys = server_block.keys();
+  total_count += each_keys.size();
+  total_keys.insert(each_keys.begin(), each_keys.end());
+  if (total_count != total_keys.size()) {
+    Error::log(Error::INFO[ETOKEN], "", EXIT_FAILURE);
   }
 }

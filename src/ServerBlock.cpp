@@ -6,7 +6,9 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-ServerBlock::ServerBlock() {}
+const int ServerBlock::DEFAULT_KEY = -1;
+
+ServerBlock::ServerBlock() : key_(DEFAULT_KEY) {}
 
 ServerBlock::ServerBlock(const ServerBlock& origin)
     : key_(origin.key_),
@@ -88,23 +90,6 @@ const LocationBlock& ServerBlock::findLocationBlock(
   }
 }
 
-std::size_t ServerBlock::find(const std::string& uri) const {
-  for (std::size_t i = 0; i < location_blocks_.size(); ++i) {
-    if (uri == location_blocks_[i].getUri()) {
-      return i;
-    }
-  }
-  return NPOS;
-}
-
-const LocationBlock& ServerBlock::redirect(
-    const LocationBlock& location) const {
-  if (location.getReturnUrl().empty()) {
-    return location;
-  }
-  return findLocationBlock(location.getReturnUrl());
-}
-
 std::set<std::string> ServerBlock::keys(void) const {
   std::set<std::string> keys;
   for (std::size_t i = 0; i < listens_.size(); ++i) {
@@ -122,4 +107,33 @@ void ServerBlock::clear(void) {
   server_names_.clear();
   error_pages_.clear();
   location_blocks_.clear();
+}
+
+std::size_t ServerBlock::find(const std::string& uri) const {
+  for (std::size_t i = 0; i < location_blocks_.size(); ++i) {
+    if (uri == location_blocks_[i].getUri()) {
+      return i;
+    }
+  }
+  return NPOS;
+}
+
+const LocationBlock& ServerBlock::redirect(
+    const LocationBlock& location) const {
+  if (location.getReturnUrl().empty()) {
+    return location;
+  }
+  return findLocationBlock(location.getReturnUrl());
+}
+
+void ServerBlock::setDefault(void) {
+  if (listens_.empty()) {
+    listens_.push_back(Listen());
+  }
+  if (server_names_.empty()) {
+    server_names_.insert(std::string());
+  }
+  if (location_blocks_.size() == 0) {
+    location_blocks_.push_back(LocationBlock());
+  }
 }
