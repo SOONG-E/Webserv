@@ -76,9 +76,7 @@ void ServerHandler::acceptConnections() {
     for (std::size_t i = 0; i < server_sockets_.size(); ++i) {
       if (selector_.isReadable(server_sockets_[i].getFD())) {
         Client new_client = server_sockets_[i].accept();
-        int client_fd = new_client.getFD();
 
-        selector_.registerFD(client_fd);
         reserve_clients_.push_back(new_client);
       }
     }
@@ -113,10 +111,10 @@ void ServerHandler::respondToClients() {
         client->closeConnection();
       }
     }
+    registerReserveClients();
     if (!delete_clients.empty()) {
       deleteClients(delete_clients);
     }
-    registerReserveClients();
   } catch (const std::exception& e) {
     // Error::log("respondToClients() failed", e.what());
   }
@@ -211,7 +209,10 @@ void ServerHandler::sendResponse(Client& client) {
 void ServerHandler::registerReserveClients() {
   for (std::size_t i = 0; i < reserve_clients_.size(); ++i) {
     Client reserve_client = reserve_clients_[i];
-    clients_.insert(std::make_pair(reserve_client.getFD(), reserve_client));
+    int fd = reserve_client.getFD();
+
+    selector_.registerFD(fd);
+    clients_.insert(std::make_pair(fd, reserve_client));
   }
   reserve_clients_.clear();
 }
