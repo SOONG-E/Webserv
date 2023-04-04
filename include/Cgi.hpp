@@ -10,6 +10,7 @@
 
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
+#include "Selector.hpp"
 #include "SocketAddress.hpp"
 #include "utility.hpp"
 
@@ -17,9 +18,8 @@ enum PipeFD { READ = 0, WRITE = 1 };
 
 class Cgi {
  public:
-  Cgi();
+  Cgi(Selector& selector);
   Cgi(const Cgi& src);
-  Cgi& operator=(const Cgi& src);
   ~Cgi();
 
   void runCgiScript(const HttpRequest& request_obj,
@@ -45,6 +45,7 @@ class Cgi {
   void deleteEnvp(char** envp) const;
   std::string getAbsolutePath(const std::string& uri) const;
 
+  Selector &selector_;
   bool is_completed_;
   int pipe_fds_[2];
   std::string body_;

@@ -9,12 +9,13 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-Client::Client(int fd, const ServerBlock& default_server,
+Client::Client(int fd, const ServerBlock& default_server, Selector& selector,
                const SocketAddress& cli_addr, const SocketAddress& serv_addr)
     : fd_(fd),
       cli_address_(cli_addr),
       serv_address_(serv_addr),
-      response_obj_(default_server) {
+      response_obj_(default_server),
+      cgi_(selector) {
   setTimeout();
   logConnectionInfo();
 }

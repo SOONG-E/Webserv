@@ -28,7 +28,6 @@ int main(int argc, char* argv[]) {
     if (handler.select() > 0) {
       handler.acceptConnections();
       handler.respondToClients();
-      std::cout << "asdfasdf" << std::endl;
     }
     handler.handleTimeout();
   }

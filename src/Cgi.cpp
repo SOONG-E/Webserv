@@ -8,23 +8,20 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-Cgi::Cgi() : is_completed_(false), pid_(-1) {
+Cgi::Cgi(Selector& selector)
+    : selector_(selector), is_completed_(false), pid_(-1) {
   pipe_fds_[READ] = -1;
   pipe_fds_[WRITE] = -1;
 }
 
-Cgi::Cgi(const Cgi& src) { *this = src; }
-
-Cgi& Cgi::operator=(const Cgi& src) {
-  if (this != &src) {
-    is_completed_ = src.is_completed_;
-    pipe_fds_[READ] = src.pipe_fds_[READ];
-    pipe_fds_[WRITE] = src.pipe_fds_[WRITE];
-    body_ = src.body_;
-    response_ = src.response_;
-    pid_ = src.pid_;
-  }
-  return *this;
+Cgi::Cgi(const Cgi& src)
+    : selector_(src.selector_),
+      is_completed_(src.is_completed_),
+      body_(src.body_),
+      response_(src.response_),
+      pid_(src.pid_) {
+  pipe_fds_[READ] = src.pipe_fds_[READ];
+  pipe_fds_[WRITE] = src.pipe_fds_[WRITE];
 }
 
 Cgi::~Cgi() {}
@@ -91,7 +88,7 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
   }
   body_ = request_obj.getBody();
 }
-#include <iostream>
+
 void Cgi::writeToPipe() {
   std::size_t write_bytes =
       write(pipe_fds_[WRITE], body_.c_str(), body_.size());
@@ -99,16 +96,17 @@ void Cgi::writeToPipe() {
   if (write_bytes == ERROR<std::size_t>()) {
     close(pipe_fds_[READ]);
     close(pipe_fds_[WRITE]);
+    selector_.unregisterFD(pipe_fds_[READ]);
+    selector_.unregisterFD(pipe_fds_[WRITE]);
     kill(pid_, SIGTERM);
     throw ResponseException(C500);
   }
   if (write_bytes == body_.size()) {
     close(pipe_fds_[WRITE]);
+    selector_.unregisterFD(pipe_fds_[WRITE]);
     pipe_fds_[WRITE] = -1;
   }
   body_.erase(0, write_bytes);
-
-  std::cout << "body size: " << body_.size() << std::endl;
 }
 
 void Cgi::readToPipe() {
@@ -118,16 +116,17 @@ void Cgi::readToPipe() {
 
   if (read_bytes == ERROR<std::size_t>()) {
     close(pipe_fds_[READ]);
+    selector_.unregisterFD(pipe_fds_[READ]);
     kill(pid_, SIGTERM);
     throw ResponseException(C500);
   }
   if (read_bytes == 0) {
     is_completed_ = true;
     close(pipe_fds_[READ]);
+    selector_.unregisterFD(pipe_fds_[READ]);
     pipe_fds_[READ] = -1;
   }
   response_ += std::string(buf, read_bytes);
-  std::cout << "response size: " << response_.size() << std::endl;
 }
 
 const int* Cgi::getPipeFds() const { return pipe_fds_; }

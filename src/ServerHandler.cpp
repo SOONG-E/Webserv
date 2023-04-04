@@ -75,7 +75,7 @@ void ServerHandler::acceptConnections() {
   try {
     for (std::size_t i = 0; i < server_sockets_.size(); ++i) {
       if (selector_.isReadable(server_sockets_[i].getFD())) {
-        Client new_client = server_sockets_[i].accept();
+        Client new_client = server_sockets_[i].accept(selector_);
         int client_fd = new_client.getFD();
 
         selector_.registerFD(client_fd);
@@ -185,18 +185,11 @@ void ServerHandler::receiveRequest(Client& client) {
 }
 
 void ServerHandler::sendResponse(Client& client) {
-  const HttpRequest& request_obj = client.getRequestObj();
   HttpResponse& response_obj = client.getResponseObj();
   try {
-    Cgi& cgi = client.getCgi();
-    if (cgi.isCompleted()) {
-      selector_.unregisterFD(cgi.getReadFD());
-      if (request_obj.getMethod() == "POST") {
-        selector_.unregisterFD(cgi.getWriteFD());
-      }
-    }
     client.send();
     if (!client.isPartialWritten()) {
+      const HttpRequest& request_obj = client.getRequestObj();
       if (request_obj.getHeader("CONNECTION") == "close" ||
           !response_obj.isSuccessCode()) {
         throw Client::ConnectionClosedException();

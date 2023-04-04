@@ -4,6 +4,7 @@
 #include <exception>
 
 #include "Client.hpp"
+#include "Selector.hpp"
 #include "ServerBlock.hpp"
 #include "SocketAddress.hpp"
 
@@ -15,7 +16,7 @@ class ServerSocket {
 
   void open();
   void bind(const SocketAddress& address, int backlog);
-  Client accept() const;
+  Client accept(Selector& selector) const;
   int getFD() const;
 
  private:
