@@ -25,8 +25,11 @@ int main(int argc, char* argv[]) {
   handler.createServers();
 
   while (1) {
-    handler.acceptConnections();
-    handler.respondToClients();
+    if (handler.select() > 0) {
+      handler.acceptConnections();
+      handler.respondToClients();
+      std::cout << "asdfasdf" << std::endl;
+    }
     handler.handleTimeout();
   }
   return EXIT_SUCCESS;

@@ -19,8 +19,8 @@ ServerHandler::ServerHandler(const ServerHandler& src)
     : server_blocks_(src.server_blocks_),
       server_sockets_(src.server_sockets_),
       clients_(src.clients_),
-      server_selector_(src.server_selector_),
-      client_selector_(src.client_selector_),
+      reserve_clients_(src.reserve_clients_),
+      selector_(src.selector_),
       sessions_(src.sessions_) {}
 
 ServerHandler::~ServerHandler() {}
@@ -62,24 +62,24 @@ void ServerHandler::createServers() {
       server_socket.bind(SocketAddress(ip, port), 128);
 
       server_sockets_.push_back(server_socket);
-      server_selector_.registerFD(server_socket.getFD());
+      selector_.registerFD(server_socket.getFD());
     } catch (const std::exception& e) {
       Error::log("createServers() failed", e.what(), EXIT_FAILURE);
     }
   }
 }
 
+int ServerHandler::select() { return selector_.select(); }
+
 void ServerHandler::acceptConnections() {
   try {
-    if (server_selector_.select() > 0) {
-      for (std::size_t i = 0; i < server_sockets_.size(); ++i) {
-        if (server_selector_.isReadable(server_sockets_[i].getFD())) {
-          Client new_client = server_sockets_[i].accept();
-          int client_fd = new_client.getFD();
+    for (std::size_t i = 0; i < server_sockets_.size(); ++i) {
+      if (selector_.isReadable(server_sockets_[i].getFD())) {
+        Client new_client = server_sockets_[i].accept();
+        int client_fd = new_client.getFD();
 
-          client_selector_.registerFD(client_fd);
-          clients_.insert(std::make_pair(client_fd, new_client));
-        }
+        selector_.registerFD(client_fd);
+        reserve_clients_.push_back(new_client);
       }
     }
   } catch (const std::exception& e) {
@@ -89,37 +89,34 @@ void ServerHandler::acceptConnections() {
 
 void ServerHandler::respondToClients() {
   try {
-    if (client_selector_.select() > 0) {
-      Client* client;
-      std::vector<int> delete_clients;
+    Client* client;
+    std::vector<int> delete_clients;
 
-      delete_clients.reserve(clients_.size());
+    delete_clients.reserve(clients_.size());
 
-      for (clients_type::iterator it = clients_.begin(); it != clients_.end();
-           ++it) {
-        client = &it->second;
-        int client_fd = client->getFD();
-        try {
-          if (client_selector_.isReadable(client_fd)) {
-            receiveRequest(*client);
-          }
-          if (client->isReadyToCgiIO()) {
-            client->executeCgiIO();
-          }
-          if (client_selector_.isWritable(client_fd) &&
-              client->isReadyToSend()) {
-            sendResponse(*client);
-          }
-        } catch (const Client::ConnectionClosedException& e) {
-          delete_clients.push_back(client_fd);
-          client->closeConnection();
+    for (clients_type::iterator it = clients_.begin(); it != clients_.end();
+         ++it) {
+      client = &it->second;
+      int client_fd = client->getFD();
+      try {
+        if (selector_.isReadable(client_fd)) {
+          receiveRequest(*client);
         }
-      }
-
-      if (!delete_clients.empty()) {
-        deleteClients(delete_clients);
+        if (client->isReadyToCgiIO()) {
+          client->executeCgiIO(selector_);
+        }
+        if (selector_.isWritable(client_fd) && client->isReadyToSend()) {
+          sendResponse(*client);
+        }
+      } catch (const Client::ConnectionClosedException& e) {
+        delete_clients.push_back(client_fd);
+        client->closeConnection();
       }
     }
+    if (!delete_clients.empty()) {
+      deleteClients(delete_clients);
+    }
+    registerReserveClients();
   } catch (const std::exception& e) {
     Error::log("respondToClients() failed", e.what());
   }
@@ -167,9 +164,15 @@ void ServerHandler::receiveRequest(Client& client) {
       }
 
       if (client.isCgi()) {
-        client.getCgi().runCgiScript(
-            request_obj, response_obj, client.getClientAddress(),
-            client.getServerAddress(), location_block.getCgiParam("CGI_PATH"));
+        Cgi& cgi = client.getCgi();
+        cgi.runCgiScript(request_obj, response_obj, client.getClientAddress(),
+                         client.getServerAddress(),
+                         location_block.getCgiParam("CGI_PATH"));
+
+        selector_.registerFD(cgi.getReadFD());
+        if (request_obj.getMethod() == "POST") {
+          selector_.registerFD(cgi.getWriteFD());
+        }
       }
     }
   } catch (const ResponseException& e) {
@@ -182,12 +185,18 @@ void ServerHandler::receiveRequest(Client& client) {
 }
 
 void ServerHandler::sendResponse(Client& client) {
+  const HttpRequest& request_obj = client.getRequestObj();
   HttpResponse& response_obj = client.getResponseObj();
   try {
+    Cgi& cgi = client.getCgi();
+    if (cgi.isCompleted()) {
+      selector_.unregisterFD(cgi.getReadFD());
+      if (request_obj.getMethod() == "POST") {
+        selector_.unregisterFD(cgi.getWriteFD());
+      }
+    }
     client.send();
     if (!client.isPartialWritten()) {
-      const HttpRequest& request_obj = client.getRequestObj();
-
       if (request_obj.getHeader("CONNECTION") == "close" ||
           !response_obj.isSuccessCode()) {
         throw Client::ConnectionClosedException();
@@ -204,6 +213,14 @@ void ServerHandler::sendResponse(Client& client) {
   } catch (const std::exception& e) {
     response_obj.setStatus(C500);
   }
+}
+
+void ServerHandler::registerReserveClients() {
+  for (std::size_t i = 0; i < reserve_clients_.size(); ++i) {
+    Client reserve_client = reserve_clients_[i];
+    clients_.insert(std::make_pair(reserve_client.getFD(), reserve_client));
+  }
+  reserve_clients_.clear();
 }
 
 const ServerBlock& ServerHandler::findServerBlock(
@@ -283,7 +300,7 @@ void ServerHandler::deleteTimeoutSessions() {
 void ServerHandler::deleteClients(const std::vector<int>& delete_clients) {
   for (std::size_t i = 0; i < delete_clients.size(); ++i) {
     clients_.erase(delete_clients[i]);
-    client_selector_.unregisterFD(delete_clients[i]);
+    selector_.unregisterFD(delete_clients[i]);
   }
 }
 

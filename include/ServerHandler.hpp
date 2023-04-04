@@ -23,6 +23,7 @@ class ServerHandler {
   void registerSignalHandlers() const;
   void configureServer(const Config& config);
   void createServers();
+  int select();
   void acceptConnections();
   void respondToClients();
   void handleTimeout();
@@ -31,12 +32,14 @@ class ServerHandler {
   typedef std::map<std::string, std::vector<ServerBlock> > server_blocks_type;
   typedef std::vector<ServerSocket> server_sockets_type;
   typedef std::map<int, Client> clients_type;
+  typedef std::vector<Client> reserve_clients_type;
   typedef Selector selector_type;
   typedef std::map<std::string, Session> sessions_mapped_type;
   typedef std::map<int, sessions_mapped_type> sessions_type;
 
   void receiveRequest(Client& client);
   void sendResponse(Client& client);
+  void registerReserveClients();
   const ServerBlock& findServerBlock(const std::string& server_socket_key,
                                      const std::string& server_name);
   void validateRequest(const HttpRequest& request_obj,
@@ -55,8 +58,8 @@ class ServerHandler {
   server_blocks_type server_blocks_;
   server_sockets_type server_sockets_;
   clients_type clients_;
-  selector_type server_selector_;
-  selector_type client_selector_;
+  reserve_clients_type reserve_clients_;
+  selector_type selector_;
   sessions_type sessions_;
 };
 

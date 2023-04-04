@@ -39,7 +39,7 @@ class Client {
 
   std::string receive() const;
   void send();
-  void executeCgiIO();
+  void executeCgiIO(Selector& selector);
   void closeConnection() const;
   void clear();
 

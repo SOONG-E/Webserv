@@ -87,10 +87,11 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
 
   if (request_obj.getMethod() != "POST") {
     close(pipe_fds_[WRITE]);
+    pipe_fds_[WRITE] = -1;
   }
   body_ = request_obj.getBody();
 }
-
+#include <iostream>
 void Cgi::writeToPipe() {
   std::size_t write_bytes =
       write(pipe_fds_[WRITE], body_.c_str(), body_.size());
@@ -106,6 +107,8 @@ void Cgi::writeToPipe() {
     pipe_fds_[WRITE] = -1;
   }
   body_.erase(0, write_bytes);
+
+  std::cout << "body size: " << body_.size() << std::endl;
 }
 
 void Cgi::readToPipe() {
@@ -124,11 +127,16 @@ void Cgi::readToPipe() {
     pipe_fds_[READ] = -1;
   }
   response_ += std::string(buf, read_bytes);
+  std::cout << "response size: " << response_.size() << std::endl;
 }
 
 const int* Cgi::getPipeFds() const { return pipe_fds_; }
 
 const std::string& Cgi::getResponse() const { return response_; }
+
+int Cgi::getWriteFD() const { return pipe_fds_[WRITE]; }
+
+int Cgi::getReadFD() const { return pipe_fds_[READ]; }
 
 bool Cgi::isCompleted() const { return is_completed_; }
 

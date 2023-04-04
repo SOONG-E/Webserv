@@ -4,6 +4,7 @@
 #include <sys/select.h>
 
 #include <exception>
+#include <vector>
 
 class Selector {
  public:

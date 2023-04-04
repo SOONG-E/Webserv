@@ -32,6 +32,8 @@ class Cgi {
   bool isCompleted() const;
   bool hasBody() const;
   const std::string& getResponse() const;
+  int getWriteFD() const;
+  int getReadFD() const;
   const int* getPipeFds() const;
   void clear();
 

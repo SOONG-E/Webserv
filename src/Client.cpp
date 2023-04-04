@@ -87,7 +87,7 @@ std::string Client::receive() const {
     throw ConnectionClosedException();
   }
   std::string request(buf, read_bytes);
-  // logReceiveInfo(request);
+  logReceiveInfo(request);
   return request;
 }
 
@@ -103,29 +103,21 @@ void Client::send() {
     throw ConnectionClosedException();
   }
 
-  // Log::header("Send Information");
-  // logAddressInfo();
-  // std::cout << "[Send Data] " << '\n' << buf_.substr(0, write_bytes) << '\n';
-  // Log::footer("Send");
+  Log::header("Send Information");
+  logAddressInfo();
+  std::cout << "[Send Data] " << '\n' << buf_.substr(0, write_bytes) << '\n';
+  Log::footer("Send");
 
   buf_.erase(0, write_bytes);
 }
 
-void Client::executeCgiIO() {
+void Client::executeCgiIO(Selector& selector) {
   try {
-    Selector cgi_selector;
-    const int* pipe_fds = cgi_.getPipeFds();
-
-    cgi_selector.registerFD(pipe_fds[WRITE]);
-    cgi_selector.registerFD(pipe_fds[READ]);
-
-    if (cgi_selector.select() > 0) {
-      if (cgi_.hasBody() && cgi_selector.isWritable(pipe_fds[WRITE])) {
-        cgi_.writeToPipe();
-      }
-      if (cgi_selector.isReadable(pipe_fds[READ])) {
-        cgi_.readToPipe();
-      }
+    if (cgi_.hasBody() && selector.isWritable(cgi_.getWriteFD())) {
+      cgi_.writeToPipe();
+    }
+    if (selector.isReadable(cgi_.getReadFD())) {
+      cgi_.readToPipe();
     }
   } catch (const ResponseException& e) {
     response_obj_.setStatus(e.status);
