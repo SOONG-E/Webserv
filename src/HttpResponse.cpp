@@ -215,7 +215,7 @@ std::string HttpResponse::directoryListing(const std::string& url) const {
   struct dirent* entry;
   while ((entry = readdir(dir))) {
     std::string name = entry->d_name;
-    if (name == ".") continue;
+    if (name == "." || name == "..") continue;
     struct stat statbuf;
     if (stat((url + name).c_str(), &statbuf) < 0) {
       throw FileOpenException(strerror(errno));
