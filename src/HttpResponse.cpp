@@ -71,12 +71,14 @@ std::string HttpResponse::generate(const HttpRequest& request, bool is_cgi,
   if (is_cgi) {
     return generateFromCgi(request, cgi_response);
   }
+  std::string uri = rootUri(request.getUri());
   if (request.getMethod() == METHODS[DELETE]) {
+    deleteFile(uri);
     return commonHeader(request) + CRLF;
   }
   std::string body;
   try {
-    body = rootUri(request.getUri());
+    body = getFile(uri);
   } catch (FileOpenException& e) {
     setStatus(C404);
     body =
@@ -185,11 +187,7 @@ std::string HttpResponse::rootUri(std::string uri) const {
     root += '/';
   }
   uri.replace(0, location_block_->getUri().size(), root);
-  if (isDirectory(uri)) {
-    uri = (*uri.rbegin() == '/') ? uri : uri + '/';
-    return readIndexFile(uri);
-  }
-  return readFile(uri);
+  return uri;
 }
 
 std::string HttpResponse::readIndexFile(const std::string& url) const {
@@ -225,4 +223,20 @@ std::string HttpResponse::directoryListing(const std::string& url) const {
   }
   closedir(dir);
   return DirectoryListingHtml::generate(entries);
+}
+
+std::string HttpResponse::getFile(std::string& uri) const {
+  if (isDirectory(uri)) {
+    uri = (*uri.rbegin() == '/') ? uri : uri + '/';
+    return readIndexFile(uri);
+  }
+  return readFile(uri);
+}
+
+void HttpResponse::deleteFile(const std::string& uri) {
+  if (unlink(uri.c_str()) == ERROR<int>()) {
+    status_ = C404;
+    return;
+  }
+  status_ = C204;
 }

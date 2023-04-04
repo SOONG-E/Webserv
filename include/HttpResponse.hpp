@@ -45,6 +45,8 @@ class HttpResponse {
   std::string rootUri(std::string uri) const;
   std::string readIndexFile(const std::string& url) const;
   std::string directoryListing(const std::string& url) const;
+  std::string getFile(std::string& uri) const;
+  void deleteFile(const std::string& uri);
 
   int status_;
   Session* session_;
