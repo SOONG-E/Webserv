@@ -122,7 +122,7 @@ void ServerManager::respondToClients() {
 
 void ServerManager::handleTimeout() {
   deleteTimeoutClients();
-  // session_handler_.deleteTimeoutSessions();
+  session_handler_.deleteTimeoutSessions();
 }
 
 void ServerManager::receiveRequest(Client& client) {
@@ -169,6 +169,9 @@ void ServerManager::receiveRequest(Client& client) {
 void ServerManager::sendResponse(Client& client) {
   HttpResponse& response_obj = client.getResponseObj();
   try {
+    client.setTimeout();
+    client.setSessionTimeout();
+
     client.send();
     if (!client.isPartialWritten()) {
       if (client.getRequestObj().getHeader("CONNECTION") == "close" ||
@@ -176,11 +179,6 @@ void ServerManager::sendResponse(Client& client) {
         throw Client::ConnectionClosedException();
       }
       client.clear();
-      client.setTimeout();
-      // Session* session = response_obj.getSession();
-      // if (session) {
-      //   session->setTimeout();
-      // }
     }
   } catch (const Client::ConnectionClosedException& e) {
     throw Client::ConnectionClosedException();
@@ -227,7 +225,7 @@ void ServerManager::deleteTimeoutClients() {
   for (clients_type::iterator it = clients_.begin(); it != clients_.end();
        ++it) {
     client = &it->second;
-    if (client->getTimeout() < std::time(0) && !client->isResponseWaiting()) {
+    if (client->getTimeout() < std::time(0)) {
       client->closeConnection();
       delete_clients.push_back(client->getFD());
     }

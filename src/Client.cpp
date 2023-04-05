@@ -74,6 +74,13 @@ void Client::setTimeout(std::time_t time) {
   timeout_ = time + KEEPALIVE_TIMEOUT;
 }
 
+void Client::setSessionTimeout() {
+  Session* session = response_obj_.getSession();
+  if (session) {
+    session->setTimeout();
+  }
+}
+
 std::string Client::receive() const {
   char buf[BUF_SIZE];
 
@@ -127,9 +134,11 @@ void Client::executeCgiIO(Selector& selector) {
   try {
     if (cgi_.hasBody() && selector.isWritable(cgi_.getWriteFD())) {
       cgi_.write(selector);
+      setSessionTimeout();
     }
     if (selector.isReadable(cgi_.getReadFD())) {
       cgi_.read(selector);
+      setSessionTimeout();
     }
   } catch (const ResponseException& e) {
     response_obj_.setStatus(e.status);
@@ -177,13 +186,6 @@ bool Client::isReadyToCgiIO() const {
 bool Client::isReadyToSend() const {
   if (!response_obj_.isSuccessCode() ||
       (parser_.isCompleted() && (!isCgi() || cgi_.isCompleted()))) {
-    return true;
-  }
-  return false;
-}
-
-bool Client::isResponseWaiting() const {
-  if (parser_.isCompleted() || !response_obj_.isSuccessCode()) {
     return true;
   }
   return false;

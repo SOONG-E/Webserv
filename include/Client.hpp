@@ -36,7 +36,7 @@ class Client {
   const SocketAddress& getClientAddress() const;
   std::time_t getTimeout() const;
   void setTimeout(std::time_t time = std::time(NULL));
-
+  void setSessionTimeout();
   std::string receive() const;
   void send();
   void runCgiProcess(Selector& selector);
@@ -48,7 +48,6 @@ class Client {
   bool isPartialWritten() const;
   bool isReadyToCgiIO() const;
   bool isReadyToSend() const;
-  bool isResponseWaiting() const;
 
   void logAddressInfo() const;
   void logConnectionInfo() const;
