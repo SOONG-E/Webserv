@@ -189,11 +189,12 @@ std::string HttpResponse::commonHeader(const HttpRequest& request) const {
         "Transfer-Encoding: " + request.getHeader("Transfer-Encoding") + CRLF;
   }
   // response-header
+  header += "Cache-Control: no-cache, no-store, must-revalidate" + CRLF;
   header += "Server: Webserv" + CRLF;
   if (session_ && (request.getCookie("Session-ID").empty() ||
                    request.getCookie("Session-ID") != session_->getID())) {
     header += "Set-Cookie: Session-ID=" + session_->getID() +
-              "; Max-Age=" + COOKIE_MAX_AGE + CRLF;
+              "; Max-Age=" + COOKIE_MAX_AGE + "; HttpOnly;" + CRLF;
   }
   return header;
 }
