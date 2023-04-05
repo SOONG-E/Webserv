@@ -148,6 +148,11 @@ void Client::executeCgiIO(Selector& selector) {
 void Client::closeConnection() const {
   close(fd_);
 
+  Session* session = response_obj_.getSession();
+  if (session) {
+    session->setClient(NULL);
+  }
+
   // Log::header("Close Connection Information");
   // logAddressInfo();
   // Log::footer("Close Connection");

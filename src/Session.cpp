@@ -1,7 +1,7 @@
 #include "Session.hpp"
 
 Session::Session(const std::string& id, Client& client)
-    : id_(id), client_(client) {
+    : id_(id), client_(&client) {
   setTimeout();
 }
 
@@ -10,7 +10,9 @@ Session::Session(const Session& src)
 
 Session::~Session() {}
 
-Client& Session::getClient() { return client_; }
+Client* Session::getClient() { return client_; }
+
+void Session::setClient(Client* client) { client_ = client; }
 
 const std::string& Session::getID() const { return id_; }
 
