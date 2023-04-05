@@ -152,8 +152,8 @@ std::string HttpResponse::listAllowMethod() const {
     allow_method_list += *it + ", ";
   }
   if (2 < allow_method_list.length()) {
-    allow_method_list.pop_back();
-    allow_method_list.pop_back();
+    allow_method_list.erase(allow_method_list.end() - 1);
+    allow_method_list.erase(allow_method_list.end() - 1);
   }
   return allow_method_list;
 }
