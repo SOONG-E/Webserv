@@ -146,12 +146,11 @@ void ServerManager::receiveRequest(Client& client) {
 
       validateRequest(request_obj, location_block);
 
-      // if (!request_obj.hasCookie() ||
-      //     !session_handler_.isValidSessionID(client)) {
-      //   response_obj.setSession(session_handler_.generateSession(client));
-      // } else {
-      //   response_obj.setSession(session_handler_.findSession(client));
-      // }
+      Session* session = session_handler_.findSession(client);
+      if (!session) {
+        session = session_handler_.generateSession(client);
+      }
+      response_obj.setSession(session);
 
       if (client.isCgi()) {
         client.runCgiProcess(selector_);

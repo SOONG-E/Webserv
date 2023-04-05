@@ -48,8 +48,7 @@ int Client::getServerBlockKey() const {
 std::string Client::getSessionKey() const {
   const HttpRequest& request_obj = parser_.getRequestObj();
 
-  return request_obj.getCookie("Session-ID") + ":" + cli_address_.getIP() +
-         ":" + request_obj.getHeader("USER-AGENT");
+  return cli_address_.getIP() + ":" + request_obj.getHeader("USER-AGENT");
 }
 
 const HttpRequest& Client::getRequestObj() const {

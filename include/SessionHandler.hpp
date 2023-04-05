@@ -20,14 +20,15 @@ class SessionHandler {
 
   Session* generateSession(Client& client);
   Session* findSession(const Client& client);
-  bool isValidSessionID(const Client& client);
   void deleteTimeoutSessions();
 
  private:
   std::string generateSessionID(int server_block_key);
   bool isDuplicatedId(int server_block_key, const std::string& session_id);
-  void deleteSessions(sessions_mapped_type& dest,
+  void deleteSessions(sessions_mapped_type& sessions,
                       const std::vector<const std::string*>& delete_sessions);
+  void deleteSession(sessions_mapped_type& sessions,
+                     const std::string& session_id);
 
   sessions_type sessions_;
 };

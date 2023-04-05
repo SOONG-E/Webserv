@@ -192,7 +192,7 @@ std::string HttpResponse::commonHeader(const HttpRequest& request) const {
   header += "Cache-Control: no-cache, no-store, must-revalidate" + CRLF;
   header += "Server: Webserv" + CRLF;
   if (session_ && (request.getCookie("Session-ID").empty() ||
-                   request.getCookie("Session-ID") != session_->getID())) {
+                   request.getCookie("") != session_->getID())) {
     header += "Set-Cookie: Session-ID=" + session_->getID() +
               "; Max-Age=" + COOKIE_MAX_AGE + "; HttpOnly;" + CRLF;
   }

@@ -7,6 +7,7 @@ SessionHandler::SessionHandler() { std::srand(std::time(NULL)); }
 
 SessionHandler::SessionHandler(const SessionHandler& src)
     : sessions_(src.sessions_) {}
+
 SessionHandler& SessionHandler::operator=(const SessionHandler& src) {
   if (this != &src) {
     sessions_ = src.sessions_;
@@ -18,10 +19,8 @@ SessionHandler::~SessionHandler() {}
 
 Session* SessionHandler::generateSession(Client& client) {
   int server_block_key = client.getServerBlockKey();
+  std::string session_key = client.getSessionKey();
   std::string session_id = generateSessionID(server_block_key);
-  std::string session_key = session_id + ":" +
-                            client.getClientAddress().getIP() + ":" +
-                            client.getRequestObj().getHeader("USER-AGENT");
 
   sessions_[server_block_key].insert(
       std::make_pair(session_key, Session(session_id, client)));
@@ -32,19 +31,26 @@ Session* SessionHandler::findSession(const Client& client) {
   int server_block_key = client.getServerBlockKey();
   std::string session_key = client.getSessionKey();
 
-  return &sessions_[server_block_key].find(session_key)->second;
-}
+  sessions_mapped_type& sessions = sessions_[server_block_key];
+  sessions_mapped_type::iterator session_iter = sessions.find(session_key);
+  std::string request_session_id =
+      client.getRequestObj().getCookie("Session-ID");
 
-bool SessionHandler::isValidSessionID(const Client& client) {
-  int server_block_key = client.getServerBlockKey();
-  std::string session_key = client.getSessionKey();
-
-  try {
-    sessions_[server_block_key].at(session_key);
-  } catch (const std::out_of_range& e) {
-    return false;
+  if (session_iter == sessions.end()) {
+    if (!request_session_id.empty()) {
+      deleteSession(sessions, request_session_id);
+    }
+    return NULL;
   }
-  return true;
+
+  Session& session = session_iter->second;
+  if (session.getID() != request_session_id) {
+    deleteSession(sessions, request_session_id);
+    sessions.erase(session_key);
+    return NULL;
+  }
+
+  return &session;
 }
 
 void SessionHandler::deleteTimeoutSessions() {
@@ -95,9 +101,21 @@ bool SessionHandler::isDuplicatedId(int server_block_key,
 }
 
 void SessionHandler::deleteSessions(
-    sessions_mapped_type& dest,
+    sessions_mapped_type& sessions,
     const std::vector<const std::string*>& delete_sessions) {
   for (std::size_t i = 0; i < delete_sessions.size(); ++i) {
-    dest.erase(*delete_sessions[i]);
+    sessions.erase(*delete_sessions[i]);
+  }
+}
+
+void SessionHandler::deleteSession(sessions_mapped_type& sessions,
+                                   const std::string& session_id) {
+  for (sessions_mapped_type::iterator it = sessions.begin();
+       it != sessions.end(); ++it) {
+    if (it->second.getID() == session_id) {
+      const std::string& session_key = it->first;
+      sessions.erase(session_key);
+      return;
+    }
   }
 }

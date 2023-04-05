@@ -185,10 +185,9 @@ char** Cgi::generateEnvp(const HttpRequest& request_obj,
   env_map["SERVER_PROTOCOL"] = "HTTP/1.1";
   env_map["SERVER_PORT"] = serv_addr.getPort();
   env_map["SERVER_SOFTWARE"] = "webserv/1.1";
-  (void)response_obj;
-  // env_map["HTTP_X_SERVER_KEY"] =
-  //     toString(response_obj.getServerBlock()->getKey());
-  // env_map["HTTP_X_SESSION_ID"] = response_obj.getSession()->getID();
+  env_map["HTTP_X_SERVER_KEY"] =
+      toString(response_obj.getServerBlock()->getKey());
+  env_map["HTTP_X_SESSION_ID"] = response_obj.getSession()->getID();
   env_map["HTTP_X_SECRET_HEADER_FOR_TEST"] =
       request_obj.getHeader("X-SECRET-HEADER-FOR-TEST");
 
