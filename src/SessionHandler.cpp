@@ -30,24 +30,23 @@ Session* SessionHandler::generateSession(Client& client) {
 Session* SessionHandler::findSession(const Client& client) {
   int server_block_key = client.getServerBlockKey();
   std::string session_key = client.getSessionKey();
-
-  sessions_mapped_type& sessions = sessions_[server_block_key];
   std::string request_session_id =
       client.getRequestObj().getCookie("Session-ID");
+
+  sessions_mapped_type& sessions = sessions_[server_block_key];
   try {
     Session& session = sessions.at(session_key);
-    if (session.getID() != request_session_id) {
-      deleteSession(sessions, request_session_id);
-      sessions.erase(session_key);
-      return NULL;
+    if (session.getID() == request_session_id) {
+      return &session;
     }
-    return &session;
+    deleteSession(sessions, request_session_id);
+    sessions.erase(session_key);
   } catch (const std::out_of_range& e) {
     if (!request_session_id.empty()) {
       deleteSession(sessions, request_session_id);
     }
-    return NULL;
   }
+  return NULL;
 }
 
 void SessionHandler::deleteTimeoutSessions() {
