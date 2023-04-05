@@ -23,7 +23,7 @@ Session* SessionHandler::generateSession(Client& client) {
   std::string session_id = generateSessionID(server_block_key);
 
   sessions_[server_block_key].insert(
-      std::make_pair(session_key, Session(session_id, client)));
+      std::make_pair(session_key, Session(session_id)));
   return &sessions_[server_block_key].find(session_key)->second;
 }
 
@@ -32,25 +32,22 @@ Session* SessionHandler::findSession(const Client& client) {
   std::string session_key = client.getSessionKey();
 
   sessions_mapped_type& sessions = sessions_[server_block_key];
-  sessions_mapped_type::iterator session_iter = sessions.find(session_key);
   std::string request_session_id =
       client.getRequestObj().getCookie("Session-ID");
-
-  if (session_iter == sessions.end()) {
+  try {
+    Session& session = sessions.at(session_key);
+    if (session.getID() != request_session_id) {
+      deleteSession(sessions, request_session_id);
+      sessions.erase(session_key);
+      return NULL;
+    }
+    return &session;
+  } catch (const std::out_of_range& e) {
     if (!request_session_id.empty()) {
       deleteSession(sessions, request_session_id);
     }
     return NULL;
   }
-
-  Session& session = session_iter->second;
-  if (session.getID() != request_session_id) {
-    deleteSession(sessions, request_session_id);
-    sessions.erase(session_key);
-    return NULL;
-  }
-
-  return &session;
 }
 
 void SessionHandler::deleteTimeoutSessions() {
@@ -69,10 +66,6 @@ void SessionHandler::deleteTimeoutSessions() {
                            toString(sessions_it->first) + "/" +
                            session->getID();
         std::system(path.c_str());
-        Client* client = session->getClient();
-        if (client) {
-          client->getResponseObj().setSession(NULL);
-        }
         delete_sessions.push_back(&mapped_it->first);
       }
     }
