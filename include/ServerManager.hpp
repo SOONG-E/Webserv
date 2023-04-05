@@ -2,6 +2,7 @@
 #define SERVER_MANAGER_HPP_
 
 #include <map>
+#include <queue>
 #include <string>
 #include <vector>
 
@@ -42,7 +43,7 @@ class ServerManager {
                                      const std::string& server_name);
   void validateRequest(const HttpRequest& request_obj,
                        const LocationBlock& location_block);
-  void deleteClients(const std::vector<int>& delete_clients);
+  void deleteClients(std::queue<int>& delete_clients);
   void deleteTimeoutClients();
 
   server_blocks_type server_blocks_;

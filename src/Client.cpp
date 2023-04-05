@@ -120,8 +120,7 @@ void Client::send() {
 void Client::runCgiProcess(Selector& selector) {
   const HttpRequest& request_obj = parser_.getRequestObj();
 
-  cgi_.execute(request_obj, response_obj_, cli_address_, serv_address_,
-               response_obj_.getLocationBlock()->getCgiParam("CGI_PATH"));
+  cgi_.execute(request_obj, response_obj_, cli_address_, serv_address_);
 
   selector.registerFD(cgi_.getReadFD());
   if (request_obj.getMethod() == "POST") {
@@ -133,11 +132,9 @@ void Client::executeCgiIO(Selector& selector) {
   try {
     if (cgi_.hasBody() && selector.isWritable(cgi_.getWriteFD())) {
       cgi_.write(selector);
-      setSessionTimeout();
     }
     if (selector.isReadable(cgi_.getReadFD())) {
       cgi_.read(selector);
-      setSessionTimeout();
     }
   } catch (const ResponseException& e) {
     response_obj_.setStatus(e.status);
@@ -147,6 +144,11 @@ void Client::executeCgiIO(Selector& selector) {
 
 void Client::closeConnection() const {
   close(fd_);
+
+  Session* session = response_obj_.getSession();
+  if (session) {
+    session->setClient(NULL);
+  }
 
   // Log::header("Close Connection Information");
   // logAddressInfo();

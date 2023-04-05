@@ -87,9 +87,7 @@ void ServerManager::acceptConnections() {
 void ServerManager::respondToClients() {
   try {
     Client* client;
-    std::vector<int> delete_clients;
-
-    delete_clients.reserve(clients_.size());
+    std::queue<int> delete_clients;
 
     for (clients_type::iterator it = clients_.begin(); it != clients_.end();
          ++it) {
@@ -106,13 +104,11 @@ void ServerManager::respondToClients() {
           sendResponse(*client);
         }
       } catch (const Client::ConnectionClosedException& e) {
-        delete_clients.push_back(client_fd);
+        delete_clients.push(client_fd);
         client->closeConnection();
       }
     }
-    if (!delete_clients.empty()) {
-      deleteClients(delete_clients);
-    }
+    deleteClients(delete_clients);
   } catch (const std::exception& e) {
     // Error::log("respondToClients() failed", e.what());
   }
@@ -215,26 +211,23 @@ void ServerManager::validateRequest(const HttpRequest& request_obj,
 
 void ServerManager::deleteTimeoutClients() {
   Client* client;
-  std::vector<int> delete_clients;
-
-  delete_clients.reserve(clients_.size());
+  std::queue<int> delete_clients;
 
   for (clients_type::iterator it = clients_.begin(); it != clients_.end();
        ++it) {
     client = &it->second;
     if (client->getTimeout() < std::time(0)) {
       client->closeConnection();
-      delete_clients.push_back(client->getFD());
+      delete_clients.push(client->getFD());
     }
   }
-  if (!delete_clients.empty()) {
-    deleteClients(delete_clients);
-  }
+  deleteClients(delete_clients);
 }
 
-void ServerManager::deleteClients(const std::vector<int>& delete_clients) {
-  for (std::size_t i = 0; i < delete_clients.size(); ++i) {
-    clients_.erase(delete_clients[i]);
-    selector_.unregisterFD(delete_clients[i]);
+void ServerManager::deleteClients(std::queue<int>& delete_clients) {
+  while (!delete_clients.empty()) {
+    clients_.erase(delete_clients.front());
+    selector_.unregisterFD(delete_clients.front());
+    delete_clients.pop();
   }
 }

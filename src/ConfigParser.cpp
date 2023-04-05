@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <vector>
 
@@ -10,7 +11,11 @@
 #include "utility.hpp"
 
 ConfigParser::ConfigParser(const std::string& filename) : pos_(0) {
-  content_ = readFile(filename);
+  try {
+    content_ = readFile(filename);
+  } catch (const std::exception& e) {
+    Error::log(Error::INFO[EOPEN], filename, EXIT_FAILURE);
+  }
 }
 
 ConfigParser::ConfigParser(const ConfigParser& origin)

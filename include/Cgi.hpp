@@ -24,8 +24,7 @@ class Cgi {
   ~Cgi();
 
   void execute(const HttpRequest& request_obj, const HttpResponse& response_obj,
-               const SocketAddress& cli_addr, const SocketAddress& serv_addr,
-               const std::string& cgi_path);
+               const SocketAddress& cli_addr, const SocketAddress& serv_addr);
   void write(Selector& selector);
   void read(Selector& selector);
   bool isCompleted() const;

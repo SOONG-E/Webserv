@@ -38,10 +38,12 @@ Cgi::~Cgi() {}
 
 void Cgi::execute(const HttpRequest& request_obj,
                   const HttpResponse& response_obj,
-                  const SocketAddress& cli_addr, const SocketAddress& serv_addr,
-                  const std::string& cgi_path) {
+                  const SocketAddress& cli_addr,
+                  const SocketAddress& serv_addr) {
   int pipe_fds[2][2];
 
+  std::string cgi_path =
+      response_obj.getLocationBlock()->getCgiParam("CGI_PATH");
   std::string uri = getAbsolutePath(request_obj.getUri());
 
   if (pipe(pipe_fds[0]) == ERROR<int>()) {
@@ -85,7 +87,7 @@ void Cgi::execute(const HttpRequest& request_obj,
 
   if (fcntl(pipe_fds_[READ], F_SETFL, O_NONBLOCK) == ERROR<int>() ||
       fcntl(pipe_fds_[WRITE], F_SETFL, O_NONBLOCK) == ERROR<int>()) {
-    kill(pid_, SIGKILL);
+    kill(pid_, SIGTERM);
     close(pipe_fds_[READ]);
     close(pipe_fds_[WRITE]);
     throw ResponseException(C500);
@@ -102,7 +104,7 @@ void Cgi::write(Selector& selector) {
       ::write(pipe_fds_[WRITE], body_.c_str(), body_.size());
 
   if (write_bytes == ERROR<std::size_t>()) {
-    kill(pid_, SIGKILL);
+    kill(pid_, SIGTERM);
     close(pipe_fds_[READ]);
     close(pipe_fds_[WRITE]);
     selector.unregisterFD(pipe_fds_[READ]);
@@ -123,7 +125,7 @@ void Cgi::read(Selector& selector) {
   std::size_t read_bytes = ::read(pipe_fds_[READ], buf, BUF_SIZE);
 
   if (read_bytes == ERROR<std::size_t>()) {
-    kill(pid_, SIGKILL);
+    kill(pid_, SIGTERM);
     close(pipe_fds_[READ]);
     close(pipe_fds_[WRITE]);
     selector.unregisterFD(pipe_fds_[READ]);
@@ -187,7 +189,10 @@ char** Cgi::generateEnvp(const HttpRequest& request_obj,
   env_map["SERVER_SOFTWARE"] = "webserv/1.1";
   env_map["HTTP_X_SERVER_KEY"] =
       toString(response_obj.getServerBlock()->getKey());
-  env_map["HTTP_X_SESSION_ID"] = response_obj.getSession()->getID();
+  Session* session = response_obj.getSession();
+  if (session) {
+    env_map["HTTP_X_SESSION_ID"] = session->getID();
+  }
   env_map["HTTP_X_SECRET_HEADER_FOR_TEST"] =
       request_obj.getHeader("X-SECRET-HEADER-FOR-TEST");
 
