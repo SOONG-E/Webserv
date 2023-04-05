@@ -25,7 +25,7 @@ std::string trim(const std::string& str);
 template <typename T>
 std::string join(const T& strings, const std::string& delim) {
   std::string joined;
-  for (T::const_iterator str_iter = strings.begin(); str_iter != strings.end();
+  for (typename T::const_iterator str_iter = strings.begin(); str_iter != strings.end();
        ++str_iter) {
     if (str_iter != strings.begin()) {
       joined += delim;
