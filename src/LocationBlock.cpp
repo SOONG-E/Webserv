@@ -68,6 +68,10 @@ std::set<std::string>& LocationBlock::getAllowedMethods(void) {
   return allowed_methods_;
 }
 
+const std::set<std::string>& LocationBlock::getAllowedMethods(void) const {
+  return allowed_methods_;
+}
+
 const std::string& LocationBlock::getReturnUrl(void) const {
   return return_url_;
 }

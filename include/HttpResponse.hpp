@@ -32,6 +32,7 @@ class HttpResponse {
   bool isSuccessCode(void) const;
   std::string generate(const HttpRequest& request, bool is_cgi,
                        const std::string& cgi_response);
+  std::string listAllowMethod() const;
 
  private:
   std::string generateErrorPage(const HttpRequest& request);

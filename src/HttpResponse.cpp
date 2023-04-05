@@ -144,9 +144,26 @@ std::string HttpResponse::generateFromCgi(const HttpRequest& request,
   return response;
 }
 
+std::string HttpResponse::listAllowMethod() const {
+  std::string allow_method_list;
+  std::set<std::string> allow_method = location_block_->getAllowedMethods();
+  for (std::set<std::string>::iterator it = allow_method.begin();
+       it != allow_method.end(); ++it) {
+    allow_method_list += *it + ", ";
+  }
+  if (2 < allow_method_list.length()) {
+    allow_method_list.pop_back();
+    allow_method_list.pop_back();
+  }
+  return allow_method_list;
+}
+
 std::string HttpResponse::combine(const HttpRequest& request,
                                   const std::string& body) const {
   std::string header = commonHeader(request);
+  if (status_ == C405) {
+    header += "Allow: " + listAllowMethod() + CRLF;
+  }
   // entity-header
   header += "Content-Length: " + toString(body.size()) + CRLF;
   header += "Content-Type: text/html" + DOUBLE_CRLF;
