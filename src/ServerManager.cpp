@@ -1,7 +1,5 @@
 #include "ServerManager.hpp"
 
-#include <unistd.h>
-
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>

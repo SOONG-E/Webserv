@@ -33,6 +33,6 @@ void Config::validate(const ServerBlock& server_block) const {
   total_count += each_keys.size();
   total_keys.insert(each_keys.begin(), each_keys.end());
   if (total_count != total_keys.size()) {
-    Error::log(Error::INFO[ETOKEN], "", EXIT_FAILURE);
+    Error::log("Server configuration duplicated", "", EXIT_FAILURE);
   }
 }
