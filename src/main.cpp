@@ -6,7 +6,7 @@
 #include "Config.hpp"
 #include "ConfigParser.hpp"
 #include "Error.hpp"
-#include "ServerHandler.hpp"
+#include "ServerManager.hpp"
 #include "constant.hpp"
 
 int main(int argc, char* argv[]) {
@@ -19,17 +19,17 @@ int main(int argc, char* argv[]) {
   ConfigParser config_parser(filename);
   const Config& config = config_parser.parse();
 
-  ServerHandler handler;
-  handler.registerSignalHandlers();
-  handler.configureServer(config);
-  handler.createServers();
+  ServerManager manager;
+  manager.registerSignalHandlers();
+  manager.configureServer(config);
+  manager.createServers();
 
   while (1) {
-    if (handler.select() > 0) {
-      handler.respondToClients();
-      handler.acceptConnections();
+    if (manager.select() > 0) {
+      manager.respondToClients();
+      manager.acceptConnections();
     }
-    handler.handleTimeout();
+    manager.handleTimeout();
   }
   return EXIT_SUCCESS;
 }

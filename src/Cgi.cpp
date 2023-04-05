@@ -36,11 +36,10 @@ Cgi& Cgi::operator=(const Cgi& src) {
 
 Cgi::~Cgi() {}
 
-void Cgi::runCgiScript(const HttpRequest& request_obj,
-                       const HttpResponse& response_obj,
-                       const SocketAddress& cli_addr,
-                       const SocketAddress& serv_addr,
-                       const std::string& cgi_path) {
+void Cgi::execute(const HttpRequest& request_obj,
+                  const HttpResponse& response_obj,
+                  const SocketAddress& cli_addr, const SocketAddress& serv_addr,
+                  const std::string& cgi_path) {
   int pipe_fds[2][2];
 
   std::string uri = getAbsolutePath(request_obj.getUri());
@@ -98,9 +97,9 @@ void Cgi::runCgiScript(const HttpRequest& request_obj,
   body_ = request_obj.getBody();
 }
 
-void Cgi::writeToPipe(Selector& selector) {
+void Cgi::write(Selector& selector) {
   std::size_t write_bytes =
-      write(pipe_fds_[WRITE], body_.c_str(), body_.size());
+      ::write(pipe_fds_[WRITE], body_.c_str(), body_.size());
 
   if (write_bytes == ERROR<std::size_t>()) {
     kill(pid_, SIGKILL);
@@ -118,10 +117,10 @@ void Cgi::writeToPipe(Selector& selector) {
   body_.erase(0, write_bytes);
 }
 
-void Cgi::readToPipe(Selector& selector) {
+void Cgi::read(Selector& selector) {
   char buf[BUF_SIZE];
 
-  std::size_t read_bytes = read(pipe_fds_[READ], buf, BUF_SIZE);
+  std::size_t read_bytes = ::read(pipe_fds_[READ], buf, BUF_SIZE);
 
   if (read_bytes == ERROR<std::size_t>()) {
     kill(pid_, SIGKILL);

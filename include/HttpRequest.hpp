@@ -9,6 +9,8 @@ class HttpRequest {
   static const std::size_t DEFAULT_CONTENT_LENGTH;
 
  public:
+  typedef std::map<std::string, std::vector<std::string> > headers_type;
+
   HttpRequest();
   HttpRequest(const HttpRequest& origin);
   HttpRequest operator=(const HttpRequest& origin);
@@ -33,10 +35,9 @@ class HttpRequest {
   void setContentLength(std::size_t content_length);
   void addHeader(const std::string& key, const std::string& value);
   void setBody(const std::string& body);
+  bool hasCookie() const;
 
  private:
-  typedef std::map<std::string, std::vector<std::string> > headers_type;
-
   std::string method_;
   std::string uri_;
   std::string host_;

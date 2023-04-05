@@ -92,3 +92,10 @@ void HttpRequest::setContentLength(std::size_t content_length) {
 void HttpRequest::addHeader(const std::string& key, const std::string& value) {
   headers_[key].push_back(value);
 }
+
+bool HttpRequest::hasCookie() const {
+  if (getHeader("COOKIE").empty() || getCookie("Session-ID").empty()) {
+    return false;
+  }
+  return true;
+}

@@ -23,13 +23,11 @@ class Cgi {
   Cgi& operator=(const Cgi& src);
   ~Cgi();
 
-  void runCgiScript(const HttpRequest& request_obj,
-                    const HttpResponse& response_obj,
-                    const SocketAddress& cli_addr,
-                    const SocketAddress& serv_addr,
-                    const std::string& cgi_path);
-  void writeToPipe(Selector& selector);
-  void readToPipe(Selector& selector);
+  void execute(const HttpRequest& request_obj, const HttpResponse& response_obj,
+               const SocketAddress& cli_addr, const SocketAddress& serv_addr,
+               const std::string& cgi_path);
+  void write(Selector& selector);
+  void read(Selector& selector);
   bool isCompleted() const;
   bool hasBody() const;
   const std::string& getResponse() const;

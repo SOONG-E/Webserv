@@ -111,13 +111,25 @@ void Client::send() {
   buf_.erase(0, write_bytes);
 }
 
+void Client::runCgiProcess(Selector& selector) {
+  const HttpRequest& request_obj = parser_.getRequestObj();
+
+  cgi_.execute(request_obj, response_obj_, cli_address_, serv_address_,
+               response_obj_.getLocationBlock()->getCgiParam("CGI_PATH"));
+
+  selector.registerFD(cgi_.getReadFD());
+  if (request_obj.getMethod() == "POST") {
+    selector.registerFD(cgi_.getWriteFD());
+  }
+}
+
 void Client::executeCgiIO(Selector& selector) {
   try {
     if (cgi_.hasBody() && selector.isWritable(cgi_.getWriteFD())) {
-      cgi_.writeToPipe(selector);
+      cgi_.write(selector);
     }
     if (selector.isReadable(cgi_.getReadFD())) {
-      cgi_.readToPipe(selector);
+      cgi_.read(selector);
     }
   } catch (const ResponseException& e) {
     response_obj_.setStatus(e.status);
@@ -175,14 +187,6 @@ bool Client::isResponseWaiting() const {
     return true;
   }
   return false;
-}
-
-bool Client::hasCookie() const {
-  if (getRequestObj().getHeader("COOKIE").empty() ||
-      getRequestObj().getCookie("Session-ID").empty()) {
-    return false;
-  }
-  return true;
 }
 
 void Client::logAddressInfo() const {

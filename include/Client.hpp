@@ -39,6 +39,7 @@ class Client {
 
   std::string receive() const;
   void send();
+  void runCgiProcess(Selector& selector);
   void executeCgiIO(Selector& selector);
   void closeConnection() const;
   void clear();
@@ -48,7 +49,6 @@ class Client {
   bool isReadyToCgiIO() const;
   bool isReadyToSend() const;
   bool isResponseWaiting() const;
-  bool hasCookie() const;
 
   void logAddressInfo() const;
   void logConnectionInfo() const;
