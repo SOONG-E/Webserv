@@ -97,6 +97,7 @@ std::string HttpResponse::generateErrorPage(const HttpRequest& request) {
   // test
   if (request.getMethod() == METHODS[PUT]) {
     setStatus(C200);
+    body = readFile("html/error_tester.html");
   }
   //
   return generateResponse(request, body);
