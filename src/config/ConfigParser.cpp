@@ -1,19 +1,19 @@
 #include "ConfigParser.hpp"
 
 #include <cstdlib>
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <vector>
 
 #include "Error.hpp"
-#include "exception.hpp"
 #include "utility.hpp"
 
 ConfigParser::ConfigParser(const std::string& filename) : pos_(0) {
   try {
     content_ = readFile(filename);
-  } catch (const FileOpenException& e) {
+  } catch (const std::exception& e) {
     Error::log(e.what(), filename, EXIT_FAILURE);
   }
 }
