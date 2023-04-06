@@ -7,7 +7,4 @@
 
   /* Clang-Format */
   "C_Cpp.clang_format_fallbackStyle": "Google",
-  "files.associations": {
-    "stdexcept": "cpp"
-  },
 }
