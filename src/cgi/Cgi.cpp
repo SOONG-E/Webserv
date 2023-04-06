@@ -166,8 +166,9 @@ char** Cgi::generateEnvp(const HttpRequest& request_obj,
                          const SocketAddress& serv_addr) const {
   std::map<std::string, std::string> env_map;
 
+  const std::string& method = request_obj.getMethod();
   std::size_t content_length = request_obj.getContentLength();
-  if (content_length > 0) {
+  if (method == "POST" && content_length > 0) {
     env_map["CONTENT_LENGTH"] = toString(content_length);
   }
   env_map["AUTH_TYPE"] = "";
@@ -180,7 +181,7 @@ char** Cgi::generateEnvp(const HttpRequest& request_obj,
   env_map["REMOTE_ADDR"] = cli_addr.getIP();
   env_map["REMOTE_USER"] = "";
   env_map["REMOTE_IDENT"] = "";
-  env_map["REQUEST_METHOD"] = request_obj.getMethod();
+  env_map["REQUEST_METHOD"] = method;
   env_map["REQUEST_URI"] = request_obj.getUri();
   env_map["SCRIPT_NAME"] = request_obj.getUri();
   env_map["SERVER_NAME"] = serv_addr.getIP();
