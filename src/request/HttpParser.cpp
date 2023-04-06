@@ -114,10 +114,11 @@ void HttpParser::parseQueryString(void) {
   if (uri == "?" || query_boundary == std::string::npos) {
     return;
   }
+  std::string query_string = uri.substr(query_boundary + 1);
   request_.setUri(uri.substr(0, query_boundary));
   if (request_.getMethod() == METHODS[GET] ||
       request_.getMethod() == METHODS[HEAD]) {
-    request_.setQueryString(uri.substr(query_boundary));
+    request_.setQueryString(query_string);
   }
 }
 
