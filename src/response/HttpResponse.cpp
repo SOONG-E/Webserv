@@ -7,6 +7,7 @@
 #include <cerrno>
 #include <cstring>
 #include <set>
+#include <stdexcept>
 
 #include "DirectoryListingHtml.hpp"
 #include "File.hpp"
@@ -84,6 +85,9 @@ std::string HttpResponse::generate(const HttpRequest& request, bool is_cgi,
     setStatus(C404);
     body =
         readFile(server_block_->getErrorPage(ResponseStatus::CODES[status_]));
+  } catch (std::exception& e) {
+    setStatus(C500);
+    return generateErrorPage(request);
   }
   return generateResponse(request, body);
 }
@@ -215,7 +219,7 @@ std::string HttpResponse::readIndexFile(const std::string& url) const {
 std::string HttpResponse::directoryListing(const std::string& url) const {
   DIR* dir = opendir(url.c_str());
   if (!dir) {
-    throw FileOpenException(strerror(errno));
+    throw std::runtime_error(strerror(errno));
   }
   std::set<File> entries;
   struct dirent* entry;
@@ -224,7 +228,7 @@ std::string HttpResponse::directoryListing(const std::string& url) const {
     if (name == "." || name == "..") continue;
     struct stat statbuf;
     if (stat((url + name).c_str(), &statbuf) == ERROR<int>()) {
-      throw FileOpenException(strerror(errno));
+      throw std::runtime_error(strerror(errno));
     }
     File file = {name, statbuf.st_mtime, statbuf.st_size};
     entries.insert(file);
