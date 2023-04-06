@@ -13,8 +13,8 @@
 ConfigParser::ConfigParser(const std::string& filename) : pos_(0) {
   try {
     content_ = readFile(filename);
-  } catch (const std::exception& e) {
-    Error::log(Error::INFO[EOPEN], filename, EXIT_FAILURE);
+  } catch (const FileOpenException& e) {
+    Error::log(e.what(), filename, EXIT_FAILURE);
   }
 }
 

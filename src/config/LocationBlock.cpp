@@ -3,12 +3,10 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
-#include <stdexcept>
 
 #include "ByteUnits.hpp"
 #include "Error.hpp"
 #include "constant.hpp"
-#include "exception.hpp"
 
 const std::string LocationBlock::DEFAULTS[] = {
     "100m",        // CLIENT_MAX_BODY_SIZE

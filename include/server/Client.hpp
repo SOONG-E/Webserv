@@ -12,7 +12,6 @@
 #include "ServerBlock.hpp"
 #include "Session.hpp"
 #include "SocketAddress.hpp"
-#include "exception.hpp"
 
 class Client {
  public:

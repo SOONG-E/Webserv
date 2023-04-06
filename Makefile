@@ -1,14 +1,17 @@
 NAME = webserv
 
 CXX = c++
+
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -MMD -MP -g# --save-temps
+INCFLAGS = $(addprefix -I,$(INCS))
 
 SRCDIR = src
 INCDIR = include
 TMPDIR = tmp
 
-SRCS = $(wildcard $(SRCDIR)/*.cpp)
-OBJS = $(patsubst $(SRCDIR)/%.cpp, $(TMPDIR)/%.o, $(SRCS))
+SRCS = $(shell find $(SRCDIR) -type f -name '*.cpp')
+INCS = $(shell find $(INCDIR) -type d)
+OBJS = $(patsubst $(SRCDIR)/%.cpp,$(TMPDIR)/%.o,$(SRCS))
 DEPS = $(OBJS:.o=.d)
 
 .DEFAULT_GOAL = all
@@ -16,25 +19,22 @@ DEPS = $(OBJS:.o=.d)
 -include $(DEPS)
 
 all: $(NAME)
-#	sudo chown root:root $(NAME)
-#	sudo chmod +s $(NAME)
+ifeq ($(shell uname),Linux)
+	sudo chown root:root $(NAME)
+	sudo chmod +s $(NAME)
+endif
 
 $(NAME): $(OBJS)
 	@$(CXX) -o $@ $^
 
-$(OBJS): | $(TMPDIR)
-
-$(TMPDIR):
-	mkdir -p $@
-
 $(TMPDIR)/%.o: $(SRCDIR)/%.cpp
-	$(CXX) -I$(INCDIR) $(CXXFLAGS) -c -o $@ $<
+	@mkdir -p $(dir $@)
+	$(CXX) $(INCFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 clean:
 	rm -rf $(TMPDIR)
 
-fclean:
-	$(MAKE) -s clean
+fclean: clean
 	$(RM) $(NAME)
 
 re:

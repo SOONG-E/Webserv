@@ -4,7 +4,6 @@
 
 #include "Error.hpp"
 #include "constant.hpp"
-#include "exception.hpp"
 #include "utility.hpp"
 
 const std::string Listen::DEFAULT_HOST = "0.0.0.0";
