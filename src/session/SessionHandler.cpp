@@ -59,10 +59,10 @@ void SessionHandler::deleteTimeoutSessions() {
          mapped_it != sessions_it->second.end(); ++mapped_it) {
       session = &mapped_it->second;
       if (session->getTimeout() < std::time(NULL)) {
-        std::string path = "rm -rf ./upload_file/" +
-                           toString(sessions_it->first) + "/" +
-                           session->getID();
-        std::system(path.c_str());
+        // std::string path = "rm -rf ./upload_file/" +
+        //                    toString(sessions_it->first) + "/" +
+        //                    session->getID();
+        // std::system(path.c_str());
         delete_sessions.push(mapped_it->first);
         Client* client = session->getClient();
         if (client) {
