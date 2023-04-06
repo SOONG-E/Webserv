@@ -6,7 +6,6 @@
 
 #include "Client.hpp"
 #include "Session.hpp"
-#include "utility.hpp"
 
 class SessionHandler {
  public:
