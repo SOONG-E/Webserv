@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "ByteUnits.hpp"
+#include "ByteUnit.hpp"
 #include "Error.hpp"
 #include "constant.hpp"
 
@@ -94,7 +94,7 @@ std::string LocationBlock::getCgiParam(const std::string& key) const {
 void LocationBlock::setUri(const std::string& uri) { uri_ = uri; }
 
 void LocationBlock::setBodyLimit(const std::string& raw) {
-  static const ByteUnits UNITS;
+  static const ByteUnit UNITS;
   char* unit;
   body_limit_ = std::strtoul(raw.c_str(), &unit, 10);
   if (errno == ERANGE) {
