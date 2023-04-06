@@ -1,11 +1,14 @@
 #include "utility.hpp"
 
+#include <dirent.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
+#include <cerrno>
+#include <cstring>
 #include <fstream>
 #include <stdexcept>
 
-#include "constant.hpp"
 #include "exception.hpp"
 
 std::string formatTime(const char* format, std::time_t timestamp) {
@@ -42,6 +45,31 @@ std::string readFile(const std::string& filename) {
   content << file.rdbuf();
   file.close();
   return content.str();
+}
+
+void removeDirectory(const std::string& path) {
+  DIR* dir = opendir(path.c_str());
+  if (!dir) {
+    throw FileOpenException(strerror(errno));
+  }
+  struct dirent* entry;
+  while ((entry = readdir(dir))) {
+    std::string name = entry->d_name;
+    if (name == "." || name == "..") continue;
+    std::string subpath = (*path.rbegin() == '/') ? path : path + '/';
+    subpath += name;
+    if (isDirectory(subpath)) {
+      removeDirectory(subpath);
+      continue;
+    }
+    if (unlink(subpath.c_str()) == ERROR<int>()) {
+      throw FileOpenException(strerror(errno));
+    }
+  }
+  closedir(dir);
+  if (rmdir(path.c_str()) == ERROR<int>()) {
+    throw FileOpenException(strerror(errno));
+  }
 }
 
 std::vector<std::string> split(const std::string& content,

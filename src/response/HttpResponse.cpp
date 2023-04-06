@@ -2,6 +2,7 @@
 
 #include <dirent.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include <cerrno>
 #include <cstring>
@@ -222,7 +223,7 @@ std::string HttpResponse::directoryListing(const std::string& url) const {
     std::string name = entry->d_name;
     if (name == "." || name == "..") continue;
     struct stat statbuf;
-    if (stat((url + name).c_str(), &statbuf) < 0) {
+    if (stat((url + name).c_str(), &statbuf) == ERROR<int>()) {
       throw FileOpenException(strerror(errno));
     }
     File file = {name, statbuf.st_mtime, statbuf.st_size};
