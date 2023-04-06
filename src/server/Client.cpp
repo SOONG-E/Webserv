@@ -133,12 +133,10 @@ void Client::executeCgiIO(Selector& selector) {
     if (cgi_.hasBody() && selector.isWritable(cgi_.getWriteFD())) {
       cgi_.write(selector);
       setTimeout();
-      setSessionTimeout();
     }
     if (selector.isReadable(cgi_.getReadFD())) {
       cgi_.read(selector);
       setTimeout();
-      setSessionTimeout();
     }
   } catch (const ResponseException& e) {
     response_obj_.setStatus(e.status);
