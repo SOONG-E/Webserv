@@ -7,7 +7,6 @@
 #include <cerrno>
 #include <cstring>
 #include <fstream>
-#include <stdexcept>
 
 #include "exception.hpp"
 
@@ -47,29 +46,29 @@ std::string readFile(const std::string& filename) {
   return content.str();
 }
 
-void removeDirectory(const std::string& path) {
+int removeDirectory(const std::string& path) {
   DIR* dir = opendir(path.c_str());
   if (!dir) {
-    throw FileOpenException(strerror(errno));
+    return ERROR<int>();
   }
+  int error = 0;
   struct dirent* entry;
-  while ((entry = readdir(dir))) {
+  while (!error && (entry = readdir(dir))) {
     std::string name = entry->d_name;
     if (name == "." || name == "..") continue;
     std::string subpath = (*path.rbegin() == '/') ? path : path + '/';
     subpath += name;
     if (isDirectory(subpath)) {
-      removeDirectory(subpath);
-      continue;
-    }
-    if (unlink(subpath.c_str()) == ERROR<int>()) {
-      throw FileOpenException(strerror(errno));
+      error = removeDirectory(subpath);
+    } else {
+      error = unlink(subpath.c_str());
     }
   }
   closedir(dir);
-  if (rmdir(path.c_str()) == ERROR<int>()) {
-    throw FileOpenException(strerror(errno));
+  if (!error) {
+    error = rmdir(path.c_str());
   }
+  return error;
 }
 
 std::vector<std::string> split(const std::string& content,

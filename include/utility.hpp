@@ -15,7 +15,7 @@ std::size_t hexToInt(const std::string& value);
 bool isDirectory(const std::string& path);
 bool isNumber(const std::string& str);
 std::string readFile(const std::string& filename);
-void removeDirectory(const std::string& path);
+int removeDirectory(const std::string& path);
 std::vector<std::string> split(const std::string& content,
                                const std::string& delim = WHITESPACE);
 std::size_t stoi(const std::string& value);
