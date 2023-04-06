@@ -2,7 +2,7 @@ NAME = webserv
 
 CXX = c++
 
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -MMD -MP -g# --save-temps
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -MMD -MP# -g --save-temps
 INCFLAGS = $(addprefix -I,$(INCS))
 
 SRCDIR = src
