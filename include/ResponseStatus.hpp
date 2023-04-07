@@ -15,6 +15,7 @@ enum StatusIndex {
   C413,
   C500,
   C501,
+  C504,
   C505,
 };
 

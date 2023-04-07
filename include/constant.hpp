@@ -18,9 +18,10 @@ enum MethodIndex {
 const std::size_t BUF_SIZE = 65536;
 const int DEFAULT_FD = -1;
 const std::time_t KEEPALIVE_TIMEOUT = 30;
+const std::time_t SESSION_TIMEOUT = 1800;
+const std::time_t CGI_TIMEOUT = 30;
 const int METHODS_COUNT = 8;
 const std::size_t NPOS = -1;
-const std::time_t SESSION_TIMEOUT = 60;
 
 const std::string BASE10 = "0123456789";
 const std::string COOKIE_MAX_AGE = "3600";

@@ -98,24 +98,24 @@ void ServerManager::respondToClients() {
           client->executeCgiIO(selector_);
         }
         if (selector_.isReadable(client_fd)) {
-          receiveRequest(*client);
+          this->receiveRequest(*client);
         }
         if (selector_.isWritable(client_fd) && client->isReadyToSend()) {
-          sendResponse(*client);
+          this->sendResponse(*client);
         }
       } catch (const Client::ConnectionClosedException& e) {
         delete_clients.push(client_fd);
         client->closeConnection();
       }
     }
-    deleteClients(delete_clients);
+    this->deleteClients(delete_clients);
   } catch (const std::exception& e) {
     // Error::log("respondToClients() failed", e.what());
   }
 }
 
 void ServerManager::handleTimeout() {
-  deleteTimeoutClients();
+  this->deleteTimeoutClients();
   session_handler_.deleteTimeoutSessions();
 }
 
@@ -130,7 +130,7 @@ void ServerManager::receiveRequest(Client& client) {
 
     if (parser.isCompleted()) {
       const HttpRequest& request_obj = client.getRequestObj();
-      const ServerBlock& server_block = findServerBlock(
+      const ServerBlock& server_block = this->findServerBlock(
           client.getServerSocketKey(), request_obj.getHeader("HOST"));
       const LocationBlock& location_block =
           server_block.findLocationBlock(request_obj.getUri());
@@ -138,7 +138,7 @@ void ServerManager::receiveRequest(Client& client) {
       response_obj.setServerBlock(&server_block);
       response_obj.setLocationBlock(&location_block);
 
-      validateRequest(request_obj, location_block);
+      this->validateRequest(request_obj, location_block);
 
       Session* session = session_handler_.findSession(client);
       if (!session) {
@@ -221,7 +221,7 @@ void ServerManager::deleteTimeoutClients() {
       delete_clients.push(client->getFD());
     }
   }
-  deleteClients(delete_clients);
+  this->deleteClients(delete_clients);
 }
 
 void ServerManager::deleteClients(std::queue<int>& delete_clients) {

@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include <csignal>
+#include <ctime>
 #include <map>
 #include <string>
 
@@ -32,7 +33,9 @@ class Cgi {
   const std::string& getResponse() const;
   int getWriteFD() const;
   int getReadFD() const;
+  std::time_t getTimeout() const;
   void clear();
+  void cleanUp(Selector& selector) const;
 
  private:
   char** generateEnvp(const HttpRequest& request_obj,
@@ -47,6 +50,7 @@ class Cgi {
   std::string body_;
   std::string response_;
   pid_t pid_;
+  std::time_t timeout_;
 };
 
 #endif

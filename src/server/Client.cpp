@@ -15,7 +15,7 @@ Client::Client(int fd, const ServerBlock& default_server,
       cli_address_(cli_addr),
       serv_address_(serv_addr),
       response_obj_(default_server) {
-  setTimeout();
+  this->setTimeout();
   // logConnectionInfo();
 }
 
@@ -132,16 +132,20 @@ void Client::executeCgiIO(Selector& selector) {
   try {
     if (cgi_.hasBody() && selector.isWritable(cgi_.getWriteFD())) {
       cgi_.write(selector);
-      setTimeout();
     }
     if (selector.isReadable(cgi_.getReadFD())) {
       cgi_.read(selector);
-      setTimeout();
+    }
+    else if (cgi_.getTimeout() < std::time(NULL))
+    {
+      cgi_.cleanUp(selector);
+      throw ResponseException(C504);
     }
   } catch (const ResponseException& e) {
     response_obj_.setStatus(e.status);
     // Error::log(Error::INFO[ECGI], e.what());
   }
+  this->setTimeout();
 }
 
 void Client::closeConnection() const {
@@ -203,14 +207,13 @@ void Client::logAddressInfo() const {
 
 void Client::logConnectionInfo() const {
   Log::header("Connection Information");
-  logAddressInfo();
+  this->logAddressInfo();
   Log::footer();
 }
 
 void Client::logReceiveInfo(const std::string& request) const {
   Log::header("Receive Information");
-  logAddressInfo();
-  static_cast<void>(request);
+  this->logAddressInfo();
   std::cout << "[Receive data]" << '\n' << request << '\n';
   Log::footer();
 }

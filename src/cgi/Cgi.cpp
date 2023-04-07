@@ -8,16 +8,14 @@
 #include "constant.hpp"
 #include "exception.hpp"
 
-Cgi::Cgi() : is_completed_(false), pid_(-1) {
-  pipe_fds_[READ] = -1;
-  pipe_fds_[WRITE] = -1;
-}
+Cgi::Cgi() : is_completed_(false) {}
 
 Cgi::Cgi(const Cgi& src)
     : is_completed_(src.is_completed_),
       body_(src.body_),
       response_(src.response_),
-      pid_(src.pid_) {
+      pid_(src.pid_),
+      timeout_(src.timeout_) {
   pipe_fds_[READ] = src.pipe_fds_[READ];
   pipe_fds_[WRITE] = src.pipe_fds_[WRITE];
 }
@@ -28,6 +26,7 @@ Cgi& Cgi::operator=(const Cgi& src) {
     body_ = src.body_;
     response_ = src.response_;
     pid_ = src.pid_;
+    timeout_ = src.timeout_;
     pipe_fds_[READ] = src.pipe_fds_[READ];
     pipe_fds_[WRITE] = src.pipe_fds_[WRITE];
   }
@@ -87,7 +86,7 @@ void Cgi::execute(const HttpRequest& request_obj,
 
   if (fcntl(pipe_fds_[READ], F_SETFL, O_NONBLOCK) == ERROR<int>() ||
       fcntl(pipe_fds_[WRITE], F_SETFL, O_NONBLOCK) == ERROR<int>()) {
-    kill(pid_, SIGTERM);
+    kill(pid_, SIGKILL);
     close(pipe_fds_[READ]);
     close(pipe_fds_[WRITE]);
     throw ResponseException(C500);
@@ -97,6 +96,7 @@ void Cgi::execute(const HttpRequest& request_obj,
     close(pipe_fds_[WRITE]);
   }
   body_ = request_obj.getBody();
+  timeout_ = std::time(NULL) + CGI_TIMEOUT;
 }
 
 void Cgi::write(Selector& selector) {
@@ -104,7 +104,7 @@ void Cgi::write(Selector& selector) {
       ::write(pipe_fds_[WRITE], body_.c_str(), body_.size());
 
   if (write_bytes == ERROR<std::size_t>()) {
-    kill(pid_, SIGTERM);
+    kill(pid_, SIGKILL);
     close(pipe_fds_[READ]);
     close(pipe_fds_[WRITE]);
     selector.unregisterFD(pipe_fds_[READ]);
@@ -114,7 +114,6 @@ void Cgi::write(Selector& selector) {
   if (write_bytes == body_.size()) {
     close(pipe_fds_[WRITE]);
     selector.unregisterFD(pipe_fds_[WRITE]);
-    pipe_fds_[WRITE] = -1;
   }
   body_.erase(0, write_bytes);
 }
@@ -125,7 +124,7 @@ void Cgi::read(Selector& selector) {
   std::size_t read_bytes = ::read(pipe_fds_[READ], buf, BUF_SIZE);
 
   if (read_bytes == ERROR<std::size_t>()) {
-    kill(pid_, SIGTERM);
+    kill(pid_, SIGKILL);
     close(pipe_fds_[READ]);
     close(pipe_fds_[WRITE]);
     selector.unregisterFD(pipe_fds_[READ]);
@@ -136,9 +135,9 @@ void Cgi::read(Selector& selector) {
     is_completed_ = true;
     close(pipe_fds_[READ]);
     selector.unregisterFD(pipe_fds_[READ]);
-    pipe_fds_[READ] = -1;
   }
   response_ += std::string(buf, read_bytes);
+  timeout_ = std::time(NULL) + CGI_TIMEOUT;
 }
 
 const std::string& Cgi::getResponse() const { return response_; }
@@ -147,17 +146,28 @@ int Cgi::getWriteFD() const { return pipe_fds_[WRITE]; }
 
 int Cgi::getReadFD() const { return pipe_fds_[READ]; }
 
+std::time_t Cgi::getTimeout() const { return timeout_;}
+
 bool Cgi::isCompleted() const { return is_completed_; }
 
 bool Cgi::hasBody() const { return !body_.empty(); }
 
 void Cgi::clear() {
   is_completed_ = false;
-  pipe_fds_[READ] = -1;
-  pipe_fds_[WRITE] = -1;
-  pid_ = -1;
-  body_.clear();
   response_.clear();
+}
+
+void Cgi::cleanUp(Selector& selector) const
+{
+  kill(pid_, SIGKILL);
+  if (pipe_fds_[READ] != -1) {
+    close(pipe_fds_[READ]);
+    selector.unregisterFD(pipe_fds_[READ]);
+  }
+  if (pipe_fds_[WRITE] != -1) {
+    close(pipe_fds_[WRITE]);
+    selector.unregisterFD(pipe_fds_[WRITE]);
+  }
 }
 
 char** Cgi::generateEnvp(const HttpRequest& request_obj,
