@@ -18,9 +18,11 @@
 
 class ServerManager {
  public:
-  typedef std::map<std::string, std::vector<ServerBlock> > server_blocks_type;
+  typedef std::string server_socket_key_type;
+  typedef std::map<server_socket_key_type, std::vector<ServerBlock> > server_blocks_type;
   typedef std::vector<ServerSocket> server_sockets_type;
-  typedef std::map<int, Client> clients_type;
+  typedef int client_fd_type;
+  typedef std::map<client_fd_type, Client> clients_type;
   typedef Selector selector_type;
   typedef SessionHandler session_handler_type;
 

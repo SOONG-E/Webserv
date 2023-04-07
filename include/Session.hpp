@@ -15,14 +15,14 @@ class Session {
   ~Session();
 
   const std::string& getID() const;
-  time_t getTimeout() const;
+  std::time_t getTimeout() const;
   void setTimeout(std::time_t time = std::time(NULL));
   Client* getClient();
   void setClient(Client* client);
 
  private:
   const std::string id_;
-  time_t timeout_;
+  std::time_t timeout_;
   Client* client_;
 };
 

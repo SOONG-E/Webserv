@@ -9,8 +9,10 @@
 
 class SessionHandler {
  public:
-  typedef std::map<std::string, Session> sessions_mapped_type;
-  typedef std::map<int, sessions_mapped_type> sessions_type;
+  typedef std::string session_key_type;
+  typedef std::map<session_key_type, Session> sessions_mapped_type;
+  typedef int server_block_key_type;
+  typedef std::map<server_block_key_type, sessions_mapped_type> sessions_type;
 
   SessionHandler();
   SessionHandler(const SessionHandler& src);

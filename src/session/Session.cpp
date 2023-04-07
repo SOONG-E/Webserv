@@ -12,9 +12,9 @@ Session::~Session() {}
 
 const std::string& Session::getID() const { return id_; }
 
-time_t Session::getTimeout() const { return timeout_; }
+std::time_t Session::getTimeout() const { return timeout_; }
 
-void Session::setTimeout(time_t time) { timeout_ = time + SESSION_TIMEOUT; }
+void Session::setTimeout(std::time_t time) { timeout_ = time + SESSION_TIMEOUT; }
 
 Client* Session::getClient() { return client_; }
 
