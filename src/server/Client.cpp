@@ -146,6 +146,7 @@ void Client::executeCgiIO(Selector& selector) {
     // Error::log(Error::INFO[ECGI], e.what());
   }
   this->setTimeout();
+  this->setSessionTimeout();
 }
 
 void Client::closeConnection() const {

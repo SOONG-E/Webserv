@@ -96,7 +96,7 @@ void Cgi::execute(const HttpRequest& request_obj,
     close(pipe_fds_[WRITE]);
   }
   body_ = request_obj.getBody();
-  timeout_ = std::time(NULL) + CGI_TIMEOUT;
+  timeout_ = std::time(NULL) + CGI_TIMEOUT + 10L;
 }
 
 void Cgi::write(Selector& selector) {
