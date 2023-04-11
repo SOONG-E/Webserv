@@ -6,9 +6,14 @@
 #include <string>
 #include <vector>
 
+#include "Config.hpp"
 #include "ResponseStatus.hpp"
+#include "ServerManager.hpp"
 #include "constant.hpp"
 
+/*====================*/
+//     utility.cpp    //
+/*====================*/
 std::string formatTime(const char* format,
                        std::time_t timestamp = std::time(NULL));
 std::size_t hexToInt(const std::string& value);
@@ -20,6 +25,18 @@ std::vector<std::string> split(const std::string& content,
                                const std::string& delim = WHITESPACE);
 std::size_t stoi(const std::string& value);
 std::string trim(const std::string& str);
+
+/*====================*/
+//   bootServer.cpp   //
+/*====================*/
+void checkArgs(int argc);
+void printLogo();
+Config createConfig(int argc, char** argv);
+ServerManager setServer(const Config& config);
+
+/*========================*/
+//   Template functions   //
+/*========================*/
 
 template <typename T>
 std::string join(const T& strings, const std::string& delim) {
