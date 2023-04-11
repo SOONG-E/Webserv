@@ -10,35 +10,21 @@ class HttpParser {
   static const std::size_t HEADER_MAX_SIZE;
 
  public:
-  explicit HttpParser(const std::string& socket_buffer = "");
-  HttpParser(const HttpParser& origin);
-  HttpParser& operator=(const HttpParser& origin);
-  ~HttpParser();
-
-  std::size_t getContentLength(void);
-  HttpRequest& getRequestObj(void);
-  const HttpRequest& getRequestObj(void) const;
-  const std::string& getBuffer(void) const;
-
-  void appendRequest(const std::string& socket_buffer);
-  bool isCompleted(void) const;
-  void clear(void);
+  static void parseRequest(HttpRequest& request);
 
  private:
-  bool isHeaderSet(void) const;
-  void setHeader(void);
-  void handlePost(void);
-  void parseHeader(const std::string& header_part);
-  void parseCookie(void);
-  void parseQueryString(void);
-  void parseRequestLine(const std::string& request_line);
-  void parseHeaderFields(const std::string& header_part);
-  void unchunkMessage(const std::string& body_part);
-  std::vector<std::string> splitByCRLF(const std::string& content);
-
-  HttpRequest request_;
-  std::string buffer_;
-  std::size_t bound_pos_;
+  static void parseHeader(HttpRequest& request);
+  static void parsebBody(HttpRequest& request);
+  static void separateHeader(HttpRequest& request,
+                             const std::string& header_part);
+  static void parseCookie(HttpRequest& request);
+  static void parseQueryString(HttpRequest& request);
+  static void parseRequestLine(HttpRequest& request,
+                               const std::string& request_line);
+  static void parseHeaderFields(HttpRequest& request,
+                                const std::string& header_part);
+  static void unchunkMessage(HttpRequest& request);
+  static std::vector<std::string> splitByCRLF(const std::string& content);
 };
 
 #endif
