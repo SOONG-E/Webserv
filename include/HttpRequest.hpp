@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+#include "HttpParser.hpp"
+#include "HttpResponse.hpp"
+
 class HttpRequest {
   static const std::size_t DEFAULT_CONTENT_LENGTH;
 
@@ -18,6 +21,7 @@ class HttpRequest {
 
   typedef std::map<std::string, std::string> cookie_list_type;
 
+  void parse(void);
   const std::string& getMethod(void) const;
   const std::string& getUri(void) const;
   const std::string& getQueryString(void) const;
@@ -38,6 +42,7 @@ class HttpRequest {
   bool hasCookie() const;
 
  private:
+  friend class HttpParser;
   std::string method_;
   std::string uri_;
   std::string host_;
@@ -47,6 +52,10 @@ class HttpRequest {
   headers_type headers_;
   cookie_list_type cookie_;
   std::string body_;
+  HttpResponse response_;
+  bool isHeaderSet;
+
+  std::string buffer_;
 };
 
 #endif

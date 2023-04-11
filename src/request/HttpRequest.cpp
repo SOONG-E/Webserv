@@ -16,7 +16,8 @@ HttpRequest::HttpRequest(const HttpRequest& origin)
       host_(origin.host_),
       content_length_(origin.content_length_),
       headers_(origin.headers_),
-      body_(origin.body_) {}
+      body_(origin.body_),
+      isHeaderSet(false) {}
 
 HttpRequest HttpRequest::operator=(const HttpRequest& origin) {
   if (this != &origin) {
@@ -31,6 +32,8 @@ HttpRequest HttpRequest::operator=(const HttpRequest& origin) {
 }
 
 HttpRequest::~HttpRequest() {}
+
+void HttpRequest::parse(void) { HttpParser::parseRequest(*this); }
 
 const std::string& HttpRequest::getMethod(void) const { return method_; }
 
