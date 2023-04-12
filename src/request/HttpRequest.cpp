@@ -128,4 +128,4 @@ bool HttpRequest::hasCookie() const {
   return true;
 }
 
-bool HttpRequest::isCompletedRequest() const { return isCompletedRequest_; }
+bool HttpRequest::isCompleted() const { return isCompletedRequest_; }

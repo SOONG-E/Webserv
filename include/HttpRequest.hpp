@@ -45,7 +45,7 @@ class HttpRequest {
   void setBody(const std::string& body);
 
   bool hasCookie() const;
-  bool isCompletedRequest() const;
+  bool isCompleted() const;
 
  private:
   friend class HttpParser;
