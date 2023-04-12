@@ -21,21 +21,22 @@ class Client {
   ~Client();
 
   int getFD() const;
-  HttpParser& getParser();
-  const HttpParser& getParser() const;
   std::string getServerSocketKey() const;
   int getServerBlockKey() const;
   std::string getSessionKey() const;
-  const HttpRequest& getRequestObj() const;
-  HttpResponse& getResponseObj();
-  const HttpResponse& getResponseObj() const;
+  HttpRequest& getRequest();
+  const HttpRequest& getRequest() const;
+  HttpResponse& getResponse();
+  const HttpResponse& getResponse() const;
   Cgi& getCgi();
   const Cgi& getCgi() const;
   const SocketAddress& getServerAddress() const;
   const SocketAddress& getClientAddress() const;
   std::time_t getTimeout() const;
+
   void setTimeout(std::time_t time = std::time(NULL));
   void setSessionTimeout();
+
   std::string receive() const;
   void send();
   void runCgiProcess(Selector& selector);
@@ -44,7 +45,7 @@ class Client {
   void clear();
 
   bool isCgi() const;
-  bool isPartialWritten() const;
+  bool isPartialResponse() const;
   bool isReadyToCgiIO() const;
   bool isReadyToSend() const;
 
@@ -61,8 +62,7 @@ class Client {
   int fd_;
   SocketAddress cli_address_;
   SocketAddress serv_address_;
-  HttpParser parser_;
-  HttpResponse response_obj_;
+  HttpRequest request_;
   Cgi cgi_;
   std::string buf_;
   std::time_t timeout_;

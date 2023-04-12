@@ -13,7 +13,6 @@ Cgi::Cgi() : is_completed_(false) {}
 Cgi::Cgi(const Cgi& src)
     : is_completed_(src.is_completed_),
       body_(src.body_),
-      response_(src.response_),
       pid_(src.pid_),
       timeout_(src.timeout_) {
   pipe_fds_[READ] = src.pipe_fds_[READ];
@@ -24,7 +23,6 @@ Cgi& Cgi::operator=(const Cgi& src) {
   if (this != &src) {
     is_completed_ = src.is_completed_;
     body_ = src.body_;
-    response_ = src.response_;
     pid_ = src.pid_;
     timeout_ = src.timeout_;
     pipe_fds_[READ] = src.pipe_fds_[READ];
@@ -35,15 +33,17 @@ Cgi& Cgi::operator=(const Cgi& src) {
 
 Cgi::~Cgi() {}
 
-void Cgi::execute(const HttpRequest& request_obj,
-                  const HttpResponse& response_obj,
+/*==========================*/
+//      cgi functions       //
+/*==========================*/
+
+void Cgi::execute(const HttpRequest& request, const HttpResponse& response,
                   const SocketAddress& cli_addr,
                   const SocketAddress& serv_addr) {
-  int pipe_fds[2][2];
+  int pipe_fds[2][2];  // read, write
 
-  std::string cgi_path =
-      response_obj.getLocationBlock()->getCgiParam("CGI_PATH");
-  std::string uri = getAbsolutePath(request_obj.getUri());
+  std::string cgi_path = response.getLocationBlock().getCgiParam("CGI_PATH");
+  std::string uri = getAbsolutePath(request.getUri());
 
   if (pipe(pipe_fds[0]) == ERROR<int>()) {
     throw ResponseException(C500);
@@ -56,7 +56,7 @@ void Cgi::execute(const HttpRequest& request_obj,
 
   char* argv[3] = {const_cast<char*>(cgi_path.c_str()),
                    const_cast<char*>(uri.c_str()), NULL};
-  char** envp = generateEnvp(request_obj, response_obj, cli_addr, serv_addr);
+  char** envp = generateEnvp(request, response, cli_addr, serv_addr);
 
   pid_ = fork();
 
@@ -92,10 +92,10 @@ void Cgi::execute(const HttpRequest& request_obj,
     throw ResponseException(C500);
   }
 
-  if (request_obj.getMethod() != "POST") {
-    close(pipe_fds_[WRITE]);
-  }
-  body_ = request_obj.getBody();
+  // if (request.getMethod() != "POST") {
+  //   close(pipe_fds_[WRITE]);
+  // } method 검사는 스크립트에서
+  body_ = request.getBody();
   timeout_ = std::time(NULL) + CGI_TIMEOUT + 10L;
 }
 
@@ -118,7 +118,7 @@ void Cgi::write(Selector& selector) {
   body_.erase(0, write_bytes);
 }
 
-void Cgi::read(Selector& selector) {
+void Cgi::read(Selector& selector, HttpResponse& response) {
   char buf[BUF_SIZE];
 
   std::size_t read_bytes = ::read(pipe_fds_[READ], buf, BUF_SIZE);
@@ -136,29 +136,37 @@ void Cgi::read(Selector& selector) {
     close(pipe_fds_[READ]);
     selector.unregisterFD(pipe_fds_[READ]);
   }
-  response_ += std::string(buf, read_bytes);
+  response.setCgiResponse(response.getCgiResponse() +
+                          std::string(buf, read_bytes));
+  // response_ += std::string(buf, read_bytes);
   timeout_ = std::time(NULL) + CGI_TIMEOUT;
 }
 
-const std::string& Cgi::getResponse() const { return response_; }
+/*==========================*/
+//          Getter          //
+/*==========================*/
 
 int Cgi::getWriteFD() const { return pipe_fds_[WRITE]; }
 
 int Cgi::getReadFD() const { return pipe_fds_[READ]; }
 
-std::time_t Cgi::getTimeout() const { return timeout_;}
+std::time_t Cgi::getTimeout() const { return timeout_; }
+
+/*==========================*/
+//  check member variable   //
+/*==========================*/
 
 bool Cgi::isCompleted() const { return is_completed_; }
 
 bool Cgi::hasBody() const { return !body_.empty(); }
 
-void Cgi::clear() {
-  is_completed_ = false;
-  response_.clear();
-}
+/*==========================*/
+//    clean up resource     //
+/*==========================*/
 
-void Cgi::cleanUp(Selector& selector) const
-{
+void Cgi::clear() { is_completed_ = false; }
+
+void Cgi::cleanUp(Selector& selector) const {
   kill(pid_, SIGKILL);
   if (pipe_fds_[READ] != -1) {
     close(pipe_fds_[READ]);
@@ -170,42 +178,52 @@ void Cgi::cleanUp(Selector& selector) const
   }
 }
 
-char** Cgi::generateEnvp(const HttpRequest& request_obj,
-                         const HttpResponse& response_obj,
+void Cgi::deleteEnvp(char** envp) const {
+  for (int i = 0; envp[i]; ++i) {
+    delete[] envp[i];
+  }
+  delete[] envp;
+}
+
+/*==========================*/
+//          utils           //
+/*==========================*/
+
+char** Cgi::generateEnvp(const HttpRequest& request,
+                         const HttpResponse& response,
                          const SocketAddress& cli_addr,
                          const SocketAddress& serv_addr) const {
   std::map<std::string, std::string> env_map;
 
-  const std::string& method = request_obj.getMethod();
-  std::size_t content_length = request_obj.getContentLength();
+  const std::string& method = request.getMethod();
+  std::size_t content_length = request.getContentLength();
   if (method == "POST" && content_length > 0) {
     env_map["CONTENT_LENGTH"] = toString(content_length);
   }
   env_map["AUTH_TYPE"] = "";
-  env_map["CONTENT_TYPE"] = request_obj.getHeader("CONTENT-TYPE");
+  env_map["CONTENT_TYPE"] = request.getHeader("CONTENT-TYPE");
   env_map["GATEWAY_INTERFACE"] = "CGI/1.1";
-  env_map["PATH_INFO"] = request_obj.getUri();
-  env_map["PATH_TRANSLATED"] = getAbsolutePath(request_obj.getUri());
-  env_map["QUERY_STRING"] = request_obj.getQueryString();
+  env_map["PATH_INFO"] = request.getUri();
+  env_map["PATH_TRANSLATED"] = getAbsolutePath(request.getUri());
+  env_map["QUERY_STRING"] = request.getQueryString();
   env_map["REMOTE_HOST"] = "";
   env_map["REMOTE_ADDR"] = cli_addr.getIP();
   env_map["REMOTE_USER"] = "";
   env_map["REMOTE_IDENT"] = "";
   env_map["REQUEST_METHOD"] = method;
-  env_map["REQUEST_URI"] = request_obj.getUri();
-  env_map["SCRIPT_NAME"] = request_obj.getUri();
+  env_map["REQUEST_URI"] = request.getUri();
+  env_map["SCRIPT_NAME"] = request.getUri();
   env_map["SERVER_NAME"] = serv_addr.getIP();
   env_map["SERVER_PROTOCOL"] = "HTTP/1.1";
   env_map["SERVER_PORT"] = serv_addr.getPort();
   env_map["SERVER_SOFTWARE"] = "webserv/1.1";
-  env_map["HTTP_X_SERVER_KEY"] =
-      toString(response_obj.getServerBlock()->getKey());
-  Session* session = response_obj.getSession();
+  env_map["HTTP_X_SERVER_KEY"] = toString(response.getServerBlock().getKey());
+  Session* session = response.getSession();
   if (session) {
     env_map["HTTP_X_SESSION_ID"] = session->getID();
   }
   env_map["HTTP_X_SECRET_HEADER_FOR_TEST"] =
-      request_obj.getHeader("X-SECRET-HEADER-FOR-TEST");
+      request.getHeader("X-SECRET-HEADER-FOR-TEST");
 
   char** envp = new char*[env_map.size() + 1];
 
@@ -220,13 +238,6 @@ char** Cgi::generateEnvp(const HttpRequest& request_obj,
   }
   envp[i] = NULL;
   return envp;
-}
-
-void Cgi::deleteEnvp(char** envp) const {
-  for (int i = 0; envp[i]; ++i) {
-    delete[] envp[i];
-  }
-  delete[] envp;
 }
 
 std::string Cgi::getAbsolutePath(const std::string& uri) const {

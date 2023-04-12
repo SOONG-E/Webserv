@@ -24,22 +24,23 @@ class Cgi {
   Cgi& operator=(const Cgi& src);
   ~Cgi();
 
-  void execute(const HttpRequest& request_obj, const HttpResponse& response_obj,
+  void execute(const HttpRequest& request, const HttpResponse& response,
                const SocketAddress& cli_addr, const SocketAddress& serv_addr);
   void write(Selector& selector);
-  void read(Selector& selector);
-  bool isCompleted() const;
-  bool hasBody() const;
-  const std::string& getResponse() const;
+  void read(Selector& selector, HttpResponse& response);
+
   int getWriteFD() const;
   int getReadFD() const;
   std::time_t getTimeout() const;
+
+  bool isCompleted() const;
+  bool hasBody() const;
+
   void clear();
   void cleanUp(Selector& selector) const;
 
  private:
-  char** generateEnvp(const HttpRequest& request_obj,
-                      const HttpResponse& response_obj,
+  char** generateEnvp(const HttpRequest& request, const HttpResponse& response,
                       const SocketAddress& cli_addr,
                       const SocketAddress& serv_addr) const;
   void deleteEnvp(char** envp) const;
@@ -48,7 +49,6 @@ class Cgi {
   bool is_completed_;
   int pipe_fds_[2];
   std::string body_;
-  std::string response_;
   pid_t pid_;
   std::time_t timeout_;
 };

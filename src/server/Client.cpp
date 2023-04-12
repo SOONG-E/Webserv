@@ -11,10 +11,7 @@
 
 Client::Client(int fd, const ServerBlock& default_server,
                const SocketAddress& cli_addr, const SocketAddress& serv_addr)
-    : fd_(fd),
-      cli_address_(cli_addr),
-      serv_address_(serv_addr),
-      response_obj_(default_server) {
+    : fd_(fd), cli_address_(cli_addr), serv_address_(serv_addr) {
   this->setTimeout();
   // logConnectionInfo();
 }
@@ -23,41 +20,39 @@ Client::Client(const Client& src)
     : fd_(src.fd_),
       cli_address_(src.cli_address_),
       serv_address_(src.serv_address_),
-      parser_(src.parser_),
-      response_obj_(src.response_obj_),
       cgi_(src.cgi_),
       buf_(src.buf_),
       timeout_(src.timeout_) {}
 
 Client::~Client() {}
 
+/*==========================*/
+//         Getter           //
+/*==========================*/
+
 int Client::getFD() const { return fd_; }
-
-HttpParser& Client::getParser() { return parser_; }
-
-const HttpParser& Client::getParser() const { return parser_; }
 
 std::string Client::getServerSocketKey() const {
   return serv_address_.getIP() + ":" + serv_address_.getPort();
 }
 
 int Client::getServerBlockKey() const {
-  return response_obj_.getServerBlock()->getKey();
+  return getResponse().getServerBlock().getKey();
 }
 
 std::string Client::getSessionKey() const {
-  const HttpRequest& request_obj = parser_.getRequestObj();
-
-  return cli_address_.getIP() + ":" + request_obj.getHeader("USER-AGENT");
+  return cli_address_.getIP() + ":" + request_.getHeader("USER-AGENT");
 }
 
-const HttpRequest& Client::getRequestObj() const {
-  return parser_.getRequestObj();
+HttpRequest& Client::getRequest() { return request_; }
+
+const HttpRequest& Client::getRequest() const { return request_; }
+
+HttpResponse& Client::getResponse() { return request_.getResponse(); }
+
+const HttpResponse& Client::getResponse() const {
+  return request_.getResponse();
 }
-
-HttpResponse& Client::getResponseObj() { return response_obj_; }
-
-const HttpResponse& Client::getResponseObj() const { return response_obj_; }
 
 Cgi& Client::getCgi() { return cgi_; }
 
@@ -69,16 +64,24 @@ const SocketAddress& Client::getClientAddress() const { return cli_address_; }
 
 std::time_t Client::getTimeout() const { return timeout_; }
 
+/*==========================*/
+//         Setter           //
+/*==========================*/
+
 void Client::setTimeout(std::time_t time) {
   timeout_ = time + KEEPALIVE_TIMEOUT;
 }
 
 void Client::setSessionTimeout() {
-  Session* session = response_obj_.getSession();
+  Session* session = getResponse().getSession();
   if (session) {
     session->setTimeout();
   }
 }
+
+/*==========================*/
+//   interact with socket   //
+/*==========================*/
 
 std::string Client::receive() const {
   char buf[BUF_SIZE];
@@ -98,9 +101,8 @@ std::string Client::receive() const {
 }
 
 void Client::send() {
-  if (!isPartialWritten()) {
-    buf_ = response_obj_.generate(parser_.getRequestObj(), isCgi(),
-                                  cgi_.getResponse());
+  if (!isPartialResponse()) {
+    buf_ = ResponseGenerator::generateResponse(getRequest());
   }
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
 
@@ -117,10 +119,14 @@ void Client::send() {
   buf_.erase(0, write_bytes);
 }
 
-void Client::runCgiProcess(Selector& selector) {
-  const HttpRequest& request_obj = parser_.getRequestObj();
+/*===========================*/
+// run and interact with cgi //
+/*===========================*/
 
-  cgi_.execute(request_obj, response_obj_, cli_address_, serv_address_);
+void Client::runCgiProcess(Selector& selector) {
+  const HttpRequest& request_obj = getRequest();
+
+  cgi_.execute(request_obj, getResponse(), cli_address_, serv_address_);
 
   selector.registerFD(cgi_.getReadFD());
   if (request_obj.getMethod() == "POST") {
@@ -134,25 +140,27 @@ void Client::executeCgiIO(Selector& selector) {
       cgi_.write(selector);
     }
     if (selector.isReadable(cgi_.getReadFD())) {
-      cgi_.read(selector);
-    }
-    else if (cgi_.getTimeout() < std::time(NULL))
-    {
+      cgi_.read(selector, getRequest().getResponse());
+    } else if (cgi_.getTimeout() < std::time(NULL)) {
       cgi_.cleanUp(selector);
       throw ResponseException(C504);
     }
   } catch (const ResponseException& e) {
-    response_obj_.setStatus(e.status);
+    getResponse().setStatus(e.status);
     // Error::log(Error::INFO[ECGI], e.what());
   }
   this->setTimeout();
   this->setSessionTimeout();
 }
 
+/*===========================*/
+//         clear up          //
+/*===========================*/
+
 void Client::closeConnection() const {
   close(fd_);
 
-  Session* session = response_obj_.getSession();
+  Session* session = getResponse().getSession();
   if (session) {
     session->setClient(NULL);
   }
@@ -163,41 +171,45 @@ void Client::closeConnection() const {
 }
 
 void Client::clear() {
-  parser_.clear();
   cgi_.clear();
-  response_obj_.clear();
+  getResponse().clear();
 }
+
+/*===========================*/
+//      check condition      //
+/*===========================*/
 
 bool Client::isCgi() const {
-  const HttpRequest& request_obj = parser_.getRequestObj();
-  if (request_obj.getMethod() == METHODS[DELETE]) {
+  const HttpRequest& request = getRequest();
+  if (request.getMethod() == METHODS[DELETE]) {
     return false;
   }
-  const LocationBlock* location_block = response_obj_.getLocationBlock();
-  if (!location_block) {
-    return false;
-  }
-  return location_block->isCgi(request_obj.getUri(), request_obj.getMethod(),
-                               request_obj.getQueryString());
+  const LocationBlock location_block = getResponse().getLocationBlock();
+  return location_block.isCgi(request.getUri(), request.getMethod(),
+                              request.getQueryString());
 }
 
-bool Client::isPartialWritten() const { return !buf_.empty(); }
+bool Client::isPartialResponse() const { return !buf_.empty(); }
 
 bool Client::isReadyToCgiIO() const {
-  if (parser_.isCompleted() && isCgi() && !cgi_.isCompleted() &&
-      response_obj_.isSuccessCode()) {
+  if (getRequest().isCompleted() && isCgi() && !cgi_.isCompleted() &&
+      getResponse().isSuccessCode()) {
     return true;
   }
   return false;
 }
 
 bool Client::isReadyToSend() const {
-  if (!response_obj_.isSuccessCode() ||
-      (parser_.isCompleted() && (!isCgi() || cgi_.isCompleted()))) {
+  if (!getResponse().isSuccessCode() ||
+      (getRequest().isCompleted() && (!isCgi() || cgi_.isCompleted()))) {
     return true;
   }
   return false;
 }
+
+/*===========================*/
+//            log            //
+/*===========================*/
 
 void Client::logAddressInfo() const {
   std::cout << "[Client address]" << '\n'
