@@ -43,6 +43,7 @@ class HttpRequest {
   void setContentLength(std::size_t content_length);
   void addHeader(const std::string& key, const std::string& value);
   void setBody(const std::string& body);
+  void setStatus(const int status);
 
   bool hasCookie() const;
   bool isCompleted() const;
