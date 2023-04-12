@@ -160,7 +160,7 @@ void ServerManager::receiveRequest(Client& client) {
     request.tailRequest(receivedMessage);
     request.parse();
 
-    if (request.isCompletedRequest() == true) {
+    if (request.isCompleted() == true) {
       setBlock(client);
       validateRequest(request);
 
@@ -173,11 +173,11 @@ void ServerManager::receiveRequest(Client& client) {
       preprocess(client);
     }
   } catch (const ResponseException& e) {
-    request.setError(e.status);
+    request.setStatus(e.status);
   } catch (const Client::ConnectionClosedException& e) {
     throw Client::ConnectionClosedException();
   } catch (const std::exception& e) {
-    request.setError(C500);
+    request.setStatus(C500);
   }
 }
 
