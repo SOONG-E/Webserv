@@ -11,11 +11,26 @@
 
 const std::size_t HttpParser::HEADER_MAX_SIZE = 8192;
 
+/*===============================================================*/
+// parse Http request and create HttpRequest instance
+//
+// 1. parseHeader if isHeader is True
+//  1-1. separate request using DOUBLE_CRLF
+//  1-2. separate header part into request_line, headers
+//    1-2-a. validate the information
+//    1-2-b. throw exception once detecting any error
+//           (set error, status after catch)
+//  1-3. parse and validate the body only if method is POST
+//    1-3-a. if Transfer-Encoding is "chunked" and
+//           there isn't a Content-Length header
+//           then unchunk messages and calculate content length
+/*===============================================================*/
+
 void HttpParser::parseRequest(HttpRequest& request) {
-  if (request.isHeaderSet == false) {
+  if (request.isHeaderSet_ == false) {
     parseHeader(request);
   }
-  if (request.getMethod() == METHODS[POST]) {
+  if (request.isHeaderSet_ == true && request.isCompletedRequest_ == false) {
     parsebBody(request);
   }
 }
@@ -26,10 +41,10 @@ void HttpParser::parseHeader(HttpRequest& request) {
       bound_pos == std::string::npos) {
     return;
   }
-  if (bound_pos > HEADER_MAX_SIZE) {
+  if (HEADER_MAX_SIZE < bound_pos) {
     throw ResponseException(C413);
   }
-  request.isHeaderSet = true;
+  request.isHeaderSet_ = true;
   separateHeader(request, request.buffer_.substr(0, bound_pos));
   request.buffer_ = request.buffer_.substr(bound_pos + DOUBLE_CRLF.size());
 }
@@ -41,45 +56,6 @@ void HttpParser::separateHeader(HttpRequest& request,
   parseRequestLine(request, request_line);
   std::string headers = header_part.substr(boundary + CRLF.length());
   parseHeaderFields(request, headers);
-}
-
-void HttpParser::parsebBody(HttpRequest& request) {
-  if (!request.getHeader("CONTENT-LENGTH").empty()) {
-    if (request.getContentLength() == static_cast<std::size_t>(-1)) {
-      try {
-        request.setContentLength(::stoi(request.getHeader("CONTENT-LENGTH")));
-      } catch (std::invalid_argument& e) {
-        throw ResponseException(C400);
-      }
-    }
-    std::size_t content_length = request.getContentLength();
-    if (content_length < request.buffer_.size()) {
-      throw ResponseException(C413);
-    }
-    if (content_length == request.buffer_.size()) {
-      request.setBody(request.buffer_);
-    }
-    return;
-  }
-  if (request.getHeader("TRANSFER-ENCODING") != "chunked") {
-    throw ResponseException(C411);
-  }
-  if (request.buffer_.find(DOUBLE_CRLF) == std::string::npos) return;
-  unchunkMessage(request);
-}
-
-void HttpParser::parseQueryString(HttpRequest& request) {
-  const std::string& uri = request.getUri();
-  std::size_t query_boundary = uri.find("?");
-  if (uri == "?" || query_boundary == std::string::npos) {
-    return;
-  }
-  std::string query_string = uri.substr(query_boundary + 1);
-  request.setUri(uri.substr(0, query_boundary));
-  if (request.getMethod() == METHODS[GET] ||
-      request.getMethod() == METHODS[HEAD]) {
-    request.setQueryString(query_string);
-  }
 }
 
 void HttpParser::parseRequestLine(HttpRequest& request,
@@ -96,24 +72,6 @@ void HttpParser::parseRequestLine(HttpRequest& request,
   request.setMethod(request_words[0]);
   request.setUri(request_words[1]);
   parseQueryString(request);
-}
-
-void HttpParser::parseCookie(HttpRequest& request) {
-  HttpRequest::cookie_list_type request_cookie_list;
-
-  std::string cookies = request.getHeader("COOKIE");
-  std::vector<std::string> cookie_list = split(cookies, ";");
-  std::vector<std::string> values;
-
-  for (std::vector<std::string>::iterator it = cookie_list.begin();
-       it != cookie_list.end(); ++it) {
-    values = split(*it, "=");
-    if (values.size() != 2) {
-      throw ResponseException(C400);
-    }
-    request_cookie_list[trim(values[0])] = trim(values[1]);
-  }
-  request.setCookie(request_cookie_list);
 }
 
 void HttpParser::parseHeaderFields(HttpRequest& request,
@@ -139,6 +97,72 @@ void HttpParser::parseHeaderFields(HttpRequest& request,
   }
 }
 
+void HttpParser::parseCookie(HttpRequest& request) {
+  HttpRequest::cookie_list_type request_cookie_list;
+
+  std::string cookies = request.getHeader("COOKIE");
+  std::vector<std::string> cookie_list = split(cookies, ";");
+  std::vector<std::string> values;
+
+  for (std::vector<std::string>::iterator it = cookie_list.begin();
+       it != cookie_list.end(); ++it) {
+    values = split(*it, "=");
+    if (values.size() != 2) {
+      throw ResponseException(C400);
+    }
+    request_cookie_list[trim(values[0])] = trim(values[1]);
+  }
+  request.setCookie(request_cookie_list);
+}
+
+void HttpParser::parseQueryString(HttpRequest& request) {
+  const std::string& uri = request.getUri();
+  std::size_t query_boundary = uri.find("?");
+  if (uri == "?" || query_boundary == std::string::npos) {
+    return;
+  }
+  std::string query_string = uri.substr(query_boundary + 1);
+  request.setUri(uri.substr(0, query_boundary));
+  if (request.getMethod() == METHODS[GET] ||
+      request.getMethod() == METHODS[HEAD]) {
+    request.setQueryString(query_string);
+  }
+}
+
+/*==========================*/
+//    handle post method    //
+/*==========================*/
+
+void HttpParser::parsebBody(HttpRequest& request) {
+  if (request.isHeaderSet_ == true && request.getMethod() != METHODS[POST]) {
+    request.isCompletedRequest_ = true;
+    return;
+  }
+  if (!request.getHeader("CONTENT-LENGTH").empty()) {
+    if (request.getContentLength() == static_cast<std::size_t>(-1)) {
+      try {
+        request.setContentLength(::stoi(request.getHeader("CONTENT-LENGTH")));
+      } catch (std::invalid_argument& e) {
+        throw ResponseException(C400);
+      }
+    }
+    std::size_t content_length = request.getContentLength();
+    if (content_length < request.buffer_.size()) {
+      throw ResponseException(C413);
+    }
+    if (content_length == request.buffer_.size()) {
+      request.setBody(request.buffer_);
+      request.isCompletedRequest_ = true;
+    }
+    return;
+  }
+  if (request.getHeader("TRANSFER-ENCODING") != "chunked") {
+    throw ResponseException(C411);
+  }
+  if (request.buffer_.find(DOUBLE_CRLF) == std::string::npos) return;
+  unchunkMessage(request);
+}
+
 void HttpParser::unchunkMessage(HttpRequest& request) {
   std::string content;
   std::size_t content_length = 0;
@@ -155,7 +179,12 @@ void HttpParser::unchunkMessage(HttpRequest& request) {
   }
   request.setContentLength(content_length);
   request.setBody(content);
+  request.isCompletedRequest_ = true;
 }
+
+/*==========================*/
+//           util           //
+/*==========================*/
 
 std::vector<std::string> HttpParser::splitByCRLF(const std::string& content) {
   std::vector<std::string> substrings;

@@ -21,8 +21,10 @@ class HttpRequest {
 
   typedef std::map<std::string, std::string> cookie_list_type;
 
+  void tailRequest(std::string& message);
   void parse(void);
   const std::string& getMethod(void) const;
+  std::string& getUri(void);
   const std::string& getUri(void) const;
   const std::string& getQueryString(void) const;
   const std::string& getHost(void) const;
@@ -30,6 +32,8 @@ class HttpRequest {
   std::string getHeader(const std::string& key) const;
   std::string getCookie(const std::string& name) const;
   const std::string& getBody(void) const;
+  HttpResponse& getResponse();
+  const HttpResponse& getResponse() const;
 
   void setMethod(const std::string& method);
   void setUri(const std::string& uri);
@@ -39,7 +43,9 @@ class HttpRequest {
   void setContentLength(std::size_t content_length);
   void addHeader(const std::string& key, const std::string& value);
   void setBody(const std::string& body);
+
   bool hasCookie() const;
+  bool isCompletedRequest() const;
 
  private:
   friend class HttpParser;
@@ -53,7 +59,8 @@ class HttpRequest {
   cookie_list_type cookie_;
   std::string body_;
   HttpResponse response_;
-  bool isHeaderSet;
+  bool isHeaderSet_;
+  bool isCompletedRequest_;
 
   std::string buffer_;
 };

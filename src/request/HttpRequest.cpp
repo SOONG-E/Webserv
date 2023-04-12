@@ -17,7 +17,8 @@ HttpRequest::HttpRequest(const HttpRequest& origin)
       content_length_(origin.content_length_),
       headers_(origin.headers_),
       body_(origin.body_),
-      isHeaderSet(false) {}
+      isHeaderSet_(false),
+      isCompletedRequest_(false) {}
 
 HttpRequest HttpRequest::operator=(const HttpRequest& origin) {
   if (this != &origin) {
@@ -27,15 +28,27 @@ HttpRequest HttpRequest::operator=(const HttpRequest& origin) {
     content_length_ = origin.content_length_;
     headers_ = origin.headers_;
     body_ = origin.body_;
+    isHeaderSet_ = origin.isHeaderSet_;
+    isCompletedRequest_ = origin.isCompletedRequest_;
   }
   return *this;
 }
 
 HttpRequest::~HttpRequest() {}
 
+/*==========================*/
+//         Parse            //
+/*==========================*/
+void HttpRequest::tailRequest(std::string& message) { buffer_ += message; }
 void HttpRequest::parse(void) { HttpParser::parseRequest(*this); }
 
+/*==========================*/
+//         Getter           //
+/*==========================*/
+
 const std::string& HttpRequest::getMethod(void) const { return method_; }
+
+std::string& HttpRequest::getUri(void) { return uri_; }
 
 const std::string& HttpRequest::getUri(void) const { return uri_; }
 
@@ -64,6 +77,14 @@ std::string HttpRequest::getCookie(const std::string& name) const {
 }
 
 const std::string& HttpRequest::getBody(void) const { return body_; }
+
+HttpResponse& HttpRequest::getResponse() { return response_; }
+
+const HttpResponse& HttpRequest::getResponse() const { return response_; }
+
+/*==========================*/
+//         Setter           //
+/*==========================*/
 
 void HttpRequest::setMethod(const std::string& method) { method_ = method; }
 
@@ -96,9 +117,15 @@ void HttpRequest::addHeader(const std::string& key, const std::string& value) {
   headers_[key].push_back(value);
 }
 
+/*==========================*/
+//  Check member variable   //
+/*==========================*/
+
 bool HttpRequest::hasCookie() const {
   if (getHeader("COOKIE").empty() || getCookie("Session-ID").empty()) {
     return false;
   }
   return true;
 }
+
+bool HttpRequest::isCompletedRequest() const { return isCompletedRequest_; }

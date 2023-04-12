@@ -89,11 +89,3 @@ bool HttpResponse::isSuccessCode(void) const { return status_ <= C204; }
 //           directoryListing("upload_file/" + toString(server_block_->getKey())
 //           +
 //                            "/" + session_->getID() + "/");
-
-// void HttpResponse::deleteFile(const std::string& uri) {
-//   if (unlink(uri.c_str()) == ERROR<int>()) {
-//     status_ = C404;
-//     return;
-//   }
-//   status_ = C204;
-// }

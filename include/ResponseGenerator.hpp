@@ -16,6 +16,16 @@ class ResponseGenerator {
   static std::string generateHeader(HttpRequest &request,
                                     HttpResponse &response, std::string &header,
                                     const std::string &body);
+  static std::string generatePage(HttpRequest &request, HttpResponse &response,
+                                  std::string &body);
+  static std::string generateErrorPage(HttpResponse &response);
+
+  static void processCgiResponse(HttpResponse &response, std::string &header,
+                                 std::string &body);
+  static bool isCgi(HttpRequest &request, HttpResponse &response);
+  static void generateHeaderFromCgi(HttpResponse &response,
+                                    std::string &header);
+
   static std::string generateGeneralHeader(HttpRequest &request,
                                            HttpResponse &response,
                                            std::string &header);
@@ -23,24 +33,16 @@ class ResponseGenerator {
                                           HttpResponse &response,
                                           std::string &header,
                                           const std::string &body);
-  static std::string generatePage(HttpRequest &request, HttpResponse &response,
-                                  std::string &body);
-  static bool isCgi(HttpRequest &request, HttpResponse &response);
-  static void processCgiResponse(HttpResponse &response, std::string &header,
-                                 std::string &body);
-  static void generateHeaderFromCgi(HttpResponse &response,
-                                    std::string &header);
+  static std::string generateCookie(HttpRequest &request);
   static std::string getConnectionHeader(HttpRequest &request,
                                          HttpResponse &response);
-  static std::string getTransferEncodingHeader(HttpRequest &request);
-  static std::string generateCookie(HttpRequest &request);
   static std::string getDateHeader(void);
-  static void replaceNLtoCRLF(std::string &header);
-  static std::string generateErrorPage(HttpResponse &response);
-  static std::string readFile(HttpResponse &response, const std::string &uri);
+  static std::string getTransferEncodingHeader(HttpRequest &request);
+  static std::string directoryListing(const std::string &url);
   static std::string readIndexFile(HttpResponse &response,
                                    const std::string &url);
-  static std::string directoryListing(const std::string &url);
+  static std::string readFile(HttpResponse &response, const std::string &uri);
+  static void replaceNLtoCRLF(std::string &header);
 };
 
 #endif
