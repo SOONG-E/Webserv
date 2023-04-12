@@ -31,6 +31,8 @@ const LocationBlock& HttpResponse::getLocationBlock(void) const {
   return location_block_;
 }
 
+const std::string& HttpResponse::getFullUri(void) const { return fullUri_; }
+
 const std::string& HttpResponse::getCgiResponse(void) const {
   return cgiResponse_;
 }
@@ -49,6 +51,10 @@ void HttpResponse::setServerBlock(const ServerBlock& server_block) {
 
 void HttpResponse::setLocationBlock(const LocationBlock& location_block) {
   location_block_ = location_block;
+}
+
+void HttpResponse::setFullUri(const std::string& fullUri) {
+  fullUri_ = fullUri;
 }
 
 void HttpResponse::setCgiResponse(const std::string& cgiResponse) {
