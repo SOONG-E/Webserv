@@ -61,7 +61,7 @@ try:
 
 	save_file.write(uploaded_file.value)
 
-	print("Status:", "201", "Created", end="\r\n")
+	print("Status:", "201", "Created")
 
 except Exception as e:
-	print("Status:", "400", "Bad Request", end="\r\n")
+	print("Status:", "400", "Bad Request")
