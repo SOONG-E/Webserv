@@ -25,20 +25,10 @@ std::string ResponseGenerator::generateErrorPage(HttpResponse &response) {
   return body;
 }
 
-std::string ResponseGenerator::completeUri(
-    std::string &uri, const LocationBlock &location_block) {
-  std::string root = location_block.getRoot();
-  if (*root.rbegin() != '/') {
-    root += "/";
-  }
-  uri.replace(0, location_block.getUri().size(), root);
-  return uri;
-}
-
 std::string ResponseGenerator::generatePage(HttpRequest &request,
                                             HttpResponse &response,
                                             std::string &body) {
-  std::string uri = completeUri(request.getUri(), response.getLocationBlock());
+  std::string uri = response.getFullUri();
   try {
     body = readFile(response, uri);
   } catch (FileOpenException &e) {

@@ -119,55 +119,77 @@ void ServerManager::handleTimeout() {
   session_handler_.deleteTimeoutSessions();
 }
 
+void ServerManager::setBlock(Client& client) {
+  HttpRequest& request = client.getRequest();
+  HttpResponse& response = request.getResponse();
+
+  const ServerBlock server_block = this->findServerBlock(
+      client.getServerSocketKey(), request.getHeader("HOST"));
+  const LocationBlock location_block =
+      server_block.findLocationBlock(request.getUri());
+
+  response.setServerBlock(server_block);
+  response.setLocationBlock(location_block);
+  response.setFullUri(completeUri(request.getUri(), location_block));
+}
+
+void ServerManager::deleteFile(HttpResponse& response) {
+  const std::string uri = response.getFullUri();
+  if (unlink(uri.c_str()) == ERROR<int>()) {
+    response.setStatus(C404);
+    return;
+  }
+  response.setStatus(C204);
+}
+
+void ServerManager::preprocess(Client& client) {
+  if (client.getRequest().getMethod() == METHODS[DELETE]) {
+    deleteFile(client.getRequest().getResponse());
+  }
+  if (client.isCgi()) {
+    client.runCgiProcess(selector_);
+  }
+}
+
 void ServerManager::receiveRequest(Client& client) {
-  HttpResponse& response_obj = client.getResponseObj();
+  HttpRequest& request = client.getRequest();
   try {
-    std::string request = client.receive();
+    std::string receivedMessage = client.receive();
     client.setTimeout();
 
-    HttpParser& parser = client.getParser();
-    parser.appendRequest(request);
+    request.tailRequest(receivedMessage);
+    request.parse();
 
-    if (parser.isCompleted()) {
-      const HttpRequest& request_obj = client.getRequestObj();
-      const ServerBlock& server_block = this->findServerBlock(
-          client.getServerSocketKey(), request_obj.getHeader("HOST"));
-      const LocationBlock& location_block =
-          server_block.findLocationBlock(request_obj.getUri());
-
-      response_obj.setServerBlock(&server_block);
-      response_obj.setLocationBlock(&location_block);
-
-      this->validateRequest(request_obj, location_block);
+    if (request.isCompletedRequest() == true) {
+      setBlock(client);
+      validateRequest(request);
 
       Session* session = session_handler_.findSession(client);
       if (!session) {
         session = session_handler_.generateSession(client);
       }
-      response_obj.setSession(session);
+      // response_obj.setSession(session);
 
-      if (client.isCgi()) {
-        client.runCgiProcess(selector_);
-      }
+      preprocess(client);
     }
   } catch (const ResponseException& e) {
-    response_obj.setStatus(e.status);
+    request.setError(e.status);
   } catch (const Client::ConnectionClosedException& e) {
     throw Client::ConnectionClosedException();
   } catch (const std::exception& e) {
-    response_obj.setStatus(C500);
+    request.setError(C500);
   }
 }
 
 void ServerManager::sendResponse(Client& client) {
-  HttpResponse& response_obj = client.getResponseObj();
+  HttpResponse& response_obj = client.getRequest().getResponse();
   try {
     client.setTimeout();
     client.setSessionTimeout();
 
     client.send();
-    if (!client.isPartialWritten()) {
-      if (client.getRequestObj().getHeader("CONNECTION") == "close" ||
+    if (!client.isPartialResponse()) {
+      if (client.getRequest().getHeader("CONNECTION") == "close" ||
           !response_obj.isSuccessCode()) {
         throw Client::ConnectionClosedException();
       }
@@ -196,15 +218,16 @@ const ServerBlock& ServerManager::findServerBlock(
   return server_blocks_of_key[0];
 }
 
-void ServerManager::validateRequest(const HttpRequest& request_obj,
-                                    const LocationBlock& location_block) {
-  const std::string& request_method = request_obj.getMethod();
+void ServerManager::validateRequest(const HttpRequest& request) {
+  const LocationBlock& location_block =
+      request.getResponse().getLocationBlock();
+  const std::string& request_method = request.getMethod();
   if (!location_block.isImplementedMethod(request_method)) {
     throw ResponseException(C501);
   } else if (!location_block.isAllowedMethod(request_method)) {
     throw ResponseException(C405);
   } else if (request_method == METHODS[POST] &&
-             location_block.getBodyLimit() < request_obj.getContentLength()) {
+             location_block.getBodyLimit() < request.getContentLength()) {
     throw ResponseException(C413);
   }
 }
@@ -230,4 +253,14 @@ void ServerManager::deleteClients(std::queue<int>& delete_clients) {
     selector_.unregisterFD(delete_clients.front());
     delete_clients.pop();
   }
+}
+
+std::string ServerManager::completeUri(std::string& uri,
+                                       const LocationBlock& location_block) {
+  std::string root = location_block.getRoot();
+  if (*root.rbegin() != '/') {
+    root += "/";
+  }
+  uri.replace(0, location_block.getUri().size(), root);
+  return uri;
 }

@@ -37,8 +37,6 @@ class ResponseGenerator {
   static std::string getDateHeader(void);
   static void replaceNLtoCRLF(std::string &header);
   static std::string generateErrorPage(HttpResponse &response);
-  static std::string completeUri(std::string &uri,
-                                 const LocationBlock &location_block);
   static std::string readFile(HttpResponse &response, const std::string &uri);
   static std::string readIndexFile(HttpResponse &response,
                                    const std::string &url);
