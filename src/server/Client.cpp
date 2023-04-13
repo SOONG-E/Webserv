@@ -13,6 +13,7 @@ Client::Client(int fd, const ServerBlock& default_server,
                const SocketAddress& cli_addr, const SocketAddress& serv_addr)
     : fd_(fd), cli_address_(cli_addr), serv_address_(serv_addr) {
   this->setTimeout();
+  (void)default_server;
   // logConnectionInfo();
 }
 

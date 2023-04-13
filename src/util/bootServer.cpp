@@ -1,8 +1,4 @@
-#include <iostream>
-
-#include "ConfigParser.hpp"
-#include "Error.hpp"
-#include "utility.hpp"
+#include "bootServer.hpp"
 
 void checkArgs(int argc) {
   if (argc > 2) {

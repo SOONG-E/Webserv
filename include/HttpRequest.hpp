@@ -6,7 +6,8 @@
 #include <vector>
 
 #include "HttpParser.hpp"
-#include "HttpResponse.hpp"
+
+class HttpParser;
 
 class HttpRequest {
   static const std::size_t DEFAULT_CONTENT_LENGTH;

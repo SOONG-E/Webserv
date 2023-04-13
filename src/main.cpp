@@ -1,7 +1,5 @@
-#include "Config.hpp"
-#include "ServerManager.hpp"
+#include "bootServer.hpp"
 #include "constant.hpp"
-#include "utility.hpp"
 
 void runServer(ServerManager& manager) {
   while (1) {
@@ -17,8 +15,8 @@ int main(int argc, char* argv[]) {
   checkArgs(argc);
   printLogo();
 
-  const Config& config = createConfig(argc, argv);
-  ServerManager& manager = setServer(config);
+  const Config config = createConfig(argc, argv);
+  ServerManager manager = setServer(config);
 
   runServer(manager);
 

@@ -9,7 +9,6 @@
 #include <map>
 #include <string>
 
-#include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "Selector.hpp"
 #include "SocketAddress.hpp"

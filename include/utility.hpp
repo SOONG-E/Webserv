@@ -6,9 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "Config.hpp"
 #include "ResponseStatus.hpp"
-#include "ServerManager.hpp"
 #include "constant.hpp"
 
 /*====================*/
@@ -25,14 +23,6 @@ std::vector<std::string> split(const std::string& content,
                                const std::string& delim = WHITESPACE);
 std::size_t stoi(const std::string& value);
 std::string trim(const std::string& str);
-
-/*====================*/
-//   bootServer.cpp   //
-/*====================*/
-void checkArgs(int argc);
-void printLogo();
-Config createConfig(int argc, char** argv);
-ServerManager setServer(const Config& config);
 
 /*========================*/
 //   Template functions   //

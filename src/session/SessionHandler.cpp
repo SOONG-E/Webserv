@@ -36,14 +36,14 @@ Session* SessionHandler::findSession(const Client& client) {
   sessions_mapped_type& sessions = sessions_[server_block_key];
   try {
     Session& session = sessions.at(session_key);
-    std::string session_id = client.getRequestObj().getCookie("Session-ID");
+    std::string session_id = client.getRequest().getCookie("Session-ID");
     if (session.getID() == session_id) {
       session.setTimeout();
       return &session;
     }
     Client* client = session.getClient();
     if (client) {
-      client->getResponseObj().setSession(NULL);
+      client->getResponse().setSession(NULL);
     }
     sessions.erase(session_key);
   } catch (const std::out_of_range& e) {
@@ -67,7 +67,7 @@ void SessionHandler::deleteTimeoutSessions() {
         delete_sessions.push(mapped_it->first);
         Client* client = session->getClient();
         if (client) {
-          client->getResponseObj().setSession(NULL);
+          client->getResponse().setSession(NULL);
         }
       }
     }

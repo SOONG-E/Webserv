@@ -38,9 +38,9 @@ std::string ResponseGenerator::generateResponse(HttpResponse &response,
   return header + body;
 }
 
-std::string ResponseGenerator::generateBody(HttpRequest &request,
-                                            HttpResponse &response,
-                                            std::string &body) {
+void ResponseGenerator::generateBody(HttpRequest &request,
+                                     HttpResponse &response,
+                                     std::string &body) {
   if (response.isSuccessCode() == false) {
     body = generateErrorPage(response);
     return;
@@ -48,26 +48,25 @@ std::string ResponseGenerator::generateBody(HttpRequest &request,
   if (isCgi(request, response) == true) {
     return;
   }
-  body = generatePage(request, response, body);
+  generatePage(response, body);
 }
 
-std::string ResponseGenerator::generateHeader(HttpRequest &request,
-                                              HttpResponse &response,
-                                              std::string &header,
-                                              const std::string &body) {
+void ResponseGenerator::generateHeader(HttpRequest &request,
+                                       HttpResponse &response,
+                                       std::string &header,
+                                       const std::string &body) {
   if (header.empty()) {
     header = "HTTP/1.1 " + ResponseStatus::CODES[response.getStatus()] + " " +
              ResponseStatus::REASONS[response.getStatus()] + CRLF;
   }
   generateGeneralHeader(request, response, header);
-  generateEntityHeader(request, response, header, body);
-  header += generateCookie(request) + CRLF;
+  generateEntityHeader(response, header, body);
+  // header += generateCookie(request) + CRLF;
   header += CRLF;
 }
 
-std::string ResponseGenerator::generatePage(HttpRequest &request,
-                                            HttpResponse &response,
-                                            std::string &body) {
+void ResponseGenerator::generatePage(HttpResponse &response,
+                                     std::string &body) {
   std::string uri = response.getFullUri();
   try {
     body = readFile(response, uri);
@@ -141,30 +140,31 @@ void ResponseGenerator::generateHeaderFromCgi(HttpResponse &response,
 //  generate header field   //
 /*==========================*/
 
-std::string ResponseGenerator::generateGeneralHeader(HttpRequest &request,
-                                                     HttpResponse &response,
-                                                     std::string &header) {
+void ResponseGenerator::generateGeneralHeader(HttpRequest &request,
+                                              HttpResponse &response,
+                                              std::string &header) {
   header += getConnectionHeader(request, response) + CRLF;
   header += getDateHeader() + CRLF;
-  header += getTransferEncodingHeader(request) + CRLF;
+  header += getTransferEncodingHeader(request);
   header += "Cache-Control: no-cache, no-store, must-revalidate" + CRLF;
 }
 
-std::string ResponseGenerator::generateEntityHeader(HttpRequest &request,
-                                                    HttpResponse &response,
-                                                    std::string &header,
-                                                    const std::string &body) {
+void ResponseGenerator::generateEntityHeader(HttpResponse &response,
+                                             std::string &header,
+                                             const std::string &body) {
   header += "Server: Webserv" + CRLF;
   header +=
       "Allow: " + join(response.getLocationBlock().getAllowedMethods(), ", ") +
       CRLF;
   if (body.empty() == false) {
-    header += "Content_Length: " + body.length() + CRLF;
+    header += "Content_Length: " + toString(body.length()) + CRLF;
     header += "Content-Type: text/html" + CRLF;
   }
 }
 
 std::string ResponseGenerator::generateCookie(HttpRequest &request) {
+  (void)request;
+  return "";  // temp
   // if (session_ && request.getCookie("Session-ID") != session_->getID()) {
   //   header += "Set-Cookie: Session-ID=" + session_->getID() +
   //             "; Max-Age=" + COOKIE_MAX_AGE + "; HttpOnly;" + CRLF;
@@ -190,8 +190,10 @@ std::string ResponseGenerator::getDateHeader(void) {
 
 std::string ResponseGenerator::getTransferEncodingHeader(HttpRequest &request) {
   if (request.getHeader("Transfer-Encoding").empty() == false) {
-    return ("Transfer-Encoding: " + request.getHeader("Transfer-Encoding"));
+    return ("Transfer-Encoding: " + request.getHeader("Transfer-Encoding") +
+            CRLF);
   }
+  return "";
 }
 
 /*==========================*/
@@ -242,7 +244,7 @@ std::string ResponseGenerator::readFile(HttpResponse &response,
     url = (*uri.rbegin() == '/') ? uri : uri + '/';
     return readIndexFile(response, url);
   }
-  return readFile(response, uri);
+  return ::readFile(uri);
 }
 
 /*==========================*/

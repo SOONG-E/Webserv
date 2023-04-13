@@ -5,7 +5,7 @@
 #include <string>
 
 #include "HttpRequest.hpp"
-#include "LocationBlock.hpp"
+#include "ResponseGenerator.hpp"
 #include "ServerBlock.hpp"
 #include "Session.hpp"
 

@@ -8,13 +8,8 @@
 
 #include "Client.hpp"
 #include "Config.hpp"
-#include "HttpRequest.hpp"
-#include "LocationBlock.hpp"
 #include "ResponseGenerator.hpp"
-#include "Selector.hpp"
-#include "ServerBlock.hpp"
 #include "ServerSocket.hpp"
-#include "Session.hpp"
 #include "SessionHandler.hpp"
 
 class ServerManager {
@@ -48,7 +43,8 @@ class ServerManager {
   void sendResponse(Client& client);
   const ServerBlock& findServerBlock(const std::string& server_socket_key,
                                      const std::string& server_name);
-  void validateRequest(const HttpRequest& request, const LocationBlock &location_block);
+  void validateRequest(const HttpRequest& request,
+                       const LocationBlock& location_block);
   void deleteClients(std::queue<int>& delete_clients);
   void deleteTimeoutClients();
   std::string completeUri(std::string& uri,

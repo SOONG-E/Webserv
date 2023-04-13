@@ -6,19 +6,19 @@
 #include "HttpResponse.hpp"
 #include "utility.hpp"
 
+class HttpResponse;
+
 class ResponseGenerator {
  public:
   static std::string generateResponse(HttpResponse &response,
                                       HttpRequest &request);
 
  private:
-  static std::string generateBody(HttpRequest &request, HttpResponse &response,
-                                  std::string &body);
-  static std::string generateHeader(HttpRequest &request,
-                                    HttpResponse &response, std::string &header,
-                                    const std::string &body);
-  static std::string generatePage(HttpRequest &request, HttpResponse &response,
-                                  std::string &body);
+  static void generateBody(HttpRequest &request, HttpResponse &response,
+                           std::string &body);
+  static void generateHeader(HttpRequest &request, HttpResponse &response,
+                             std::string &header, const std::string &body);
+  static void generatePage(HttpResponse &response, std::string &body);
   static std::string generateErrorPage(HttpResponse &response);
 
   static void processCgiResponse(HttpResponse &response, std::string &header,
@@ -27,13 +27,11 @@ class ResponseGenerator {
   static void generateHeaderFromCgi(HttpResponse &response,
                                     std::string &header);
 
-  static std::string generateGeneralHeader(HttpRequest &request,
-                                           HttpResponse &response,
-                                           std::string &header);
-  static std::string generateEntityHeader(HttpRequest &request,
-                                          HttpResponse &response,
-                                          std::string &header,
-                                          const std::string &body);
+  static void generateGeneralHeader(HttpRequest &request,
+                                    HttpResponse &response,
+                                    std::string &header);
+  static void generateEntityHeader(HttpResponse &response, std::string &header,
+                                   const std::string &body);
   static std::string generateCookie(HttpRequest &request);
   static std::string getConnectionHeader(HttpRequest &request,
                                          HttpResponse &response);

@@ -6,12 +6,6 @@
 #include <string>
 
 #include "Cgi.hpp"
-#include "HttpParser.hpp"
-#include "HttpResponse.hpp"
-#include "Selector.hpp"
-#include "ServerBlock.hpp"
-#include "Session.hpp"
-#include "SocketAddress.hpp"
 
 class Client {
  public:
