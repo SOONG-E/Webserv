@@ -48,7 +48,7 @@ class ServerManager {
   void sendResponse(Client& client);
   const ServerBlock& findServerBlock(const std::string& server_socket_key,
                                      const std::string& server_name);
-  void validateRequest(const HttpRequest& request);
+  void validateRequest(const HttpRequest& request, const LocationBlock &location_block);
   void deleteClients(std::queue<int>& delete_clients);
   void deleteTimeoutClients();
   std::string completeUri(std::string& uri,

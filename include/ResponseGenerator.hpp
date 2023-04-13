@@ -8,7 +8,8 @@
 
 class ResponseGenerator {
  public:
-  static std::string generateResponse(HttpRequest &request);
+  static std::string generateResponse(HttpResponse &response,
+                                      HttpRequest &request);
 
  private:
   static std::string generateBody(HttpRequest &request, HttpResponse &response,

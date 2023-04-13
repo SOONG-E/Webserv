@@ -33,6 +33,7 @@ class HttpResponse {
   void setFullUri(const std::string& fullUri);
   void setCgiResponse(const std::string& cgiResponse);
 
+  void generate(HttpRequest& request);
   void clear(void);
   bool isSuccessCode(void) const;
 

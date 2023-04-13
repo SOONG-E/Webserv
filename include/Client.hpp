@@ -63,6 +63,7 @@ class Client {
   SocketAddress cli_address_;
   SocketAddress serv_address_;
   HttpRequest request_;
+  HttpResponse response_;
   Cgi cgi_;
   std::string buf_;
   std::time_t timeout_;

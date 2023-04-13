@@ -21,8 +21,8 @@
 //  - set error page if any exception is throwed while processing
 /*====================================================================*/
 
-std::string ResponseGenerator::generateResponse(HttpRequest &request) {
-  HttpResponse &response = request.getResponse();
+std::string ResponseGenerator::generateResponse(HttpResponse &response,
+                                                HttpRequest &request) {
   std::string header;
   std::string body;
 

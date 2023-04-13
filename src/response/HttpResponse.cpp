@@ -63,6 +63,10 @@ void HttpResponse::setCgiResponse(const std::string& cgiResponse) {
 
 /*===============================================================================*/
 
+void HttpResponse::generate(HttpRequest& request) {
+  ResponseGenerator::generateResponse(*this, request);
+}
+
 void HttpResponse::clear(void) { status_ = DEFAULT_STATUS; }
 
 bool HttpResponse::isSuccessCode(void) const { return status_ <= C204; }

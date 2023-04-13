@@ -48,11 +48,9 @@ HttpRequest& Client::getRequest() { return request_; }
 
 const HttpRequest& Client::getRequest() const { return request_; }
 
-HttpResponse& Client::getResponse() { return request_.getResponse(); }
+HttpResponse& Client::getResponse() { return response_; }
 
-const HttpResponse& Client::getResponse() const {
-  return request_.getResponse();
-}
+const HttpResponse& Client::getResponse() const { return response_; }
 
 Cgi& Client::getCgi() { return cgi_; }
 
@@ -140,7 +138,7 @@ void Client::executeCgiIO(Selector& selector) {
       cgi_.write(selector);
     }
     if (selector.isReadable(cgi_.getReadFD())) {
-      cgi_.read(selector, getRequest().getResponse());
+      cgi_.read(selector, getResponse());
     } else if (cgi_.getTimeout() < std::time(NULL)) {
       cgi_.cleanUp(selector);
       throw ResponseException(C504);

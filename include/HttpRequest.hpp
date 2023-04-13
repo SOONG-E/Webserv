@@ -32,8 +32,6 @@ class HttpRequest {
   std::string getHeader(const std::string& key) const;
   std::string getCookie(const std::string& name) const;
   const std::string& getBody(void) const;
-  HttpResponse& getResponse();
-  const HttpResponse& getResponse() const;
 
   void setMethod(const std::string& method);
   void setUri(const std::string& uri);
@@ -43,7 +41,6 @@ class HttpRequest {
   void setContentLength(std::size_t content_length);
   void addHeader(const std::string& key, const std::string& value);
   void setBody(const std::string& body);
-  void setStatus(const int status);
 
   bool hasCookie() const;
   bool isCompleted() const;
@@ -59,7 +56,6 @@ class HttpRequest {
   headers_type headers_;
   cookie_list_type cookie_;
   std::string body_;
-  HttpResponse response_;
   bool isHeaderSet_;
   bool isCompletedRequest_;
 

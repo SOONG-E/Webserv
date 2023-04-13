@@ -78,10 +78,6 @@ std::string HttpRequest::getCookie(const std::string& name) const {
 
 const std::string& HttpRequest::getBody(void) const { return body_; }
 
-HttpResponse& HttpRequest::getResponse() { return response_; }
-
-const HttpResponse& HttpRequest::getResponse() const { return response_; }
-
 /*==========================*/
 //         Setter           //
 /*==========================*/
@@ -108,8 +104,6 @@ void HttpRequest::setCookie(const cookie_list_type& cookie) {
 }
 
 void HttpRequest::setBody(const std::string& body) { body_ = body; }
-
-void HttpRequest::setStatus(const int status) { response_.setStatus(status); }
 
 void HttpRequest::setContentLength(std::size_t content_length) {
   content_length_ = content_length;

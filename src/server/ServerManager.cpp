@@ -121,7 +121,7 @@ void ServerManager::handleTimeout() {
 
 void ServerManager::setBlock(Client& client) {
   HttpRequest& request = client.getRequest();
-  HttpResponse& response = request.getResponse();
+  HttpResponse& response = client.getResponse();
 
   const ServerBlock server_block = this->findServerBlock(
       client.getServerSocketKey(), request.getHeader("HOST"));
@@ -144,7 +144,7 @@ void ServerManager::deleteFile(HttpResponse& response) {
 
 void ServerManager::preprocess(Client& client) {
   if (client.getRequest().getMethod() == METHODS[DELETE]) {
-    deleteFile(client.getRequest().getResponse());
+    deleteFile(client.getResponse());
   }
   if (client.isCgi()) {
     client.runCgiProcess(selector_);
@@ -162,7 +162,7 @@ void ServerManager::receiveRequest(Client& client) {
 
     if (request.isCompleted() == true) {
       setBlock(client);
-      validateRequest(request);
+      validateRequest(request, client.getResponse().getLocationBlock());
 
       Session* session = session_handler_.findSession(client);
       if (!session) {
@@ -173,16 +173,16 @@ void ServerManager::receiveRequest(Client& client) {
       preprocess(client);
     }
   } catch (const ResponseException& e) {
-    request.setStatus(e.status);
+    client.getResponse().setStatus(e.status);
   } catch (const Client::ConnectionClosedException& e) {
     throw Client::ConnectionClosedException();
   } catch (const std::exception& e) {
-    request.setStatus(C500);
+    client.getResponse().setStatus(C500);
   }
 }
 
 void ServerManager::sendResponse(Client& client) {
-  HttpResponse& response_obj = client.getRequest().getResponse();
+  HttpResponse& response_obj = client.getResponse();
   try {
     client.setTimeout();
     client.setSessionTimeout();
@@ -218,9 +218,8 @@ const ServerBlock& ServerManager::findServerBlock(
   return server_blocks_of_key[0];
 }
 
-void ServerManager::validateRequest(const HttpRequest& request) {
-  const LocationBlock& location_block =
-      request.getResponse().getLocationBlock();
+void ServerManager::validateRequest(const HttpRequest& request,
+                                    const LocationBlock& location_block) {
   const std::string& request_method = request.getMethod();
   if (!location_block.isImplementedMethod(request_method)) {
     throw ResponseException(C501);
