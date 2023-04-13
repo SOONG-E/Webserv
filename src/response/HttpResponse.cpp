@@ -63,8 +63,8 @@ void HttpResponse::setCgiResponse(const std::string& cgiResponse) {
 
 /*===============================================================================*/
 
-void HttpResponse::generate(HttpRequest& request) {
-  ResponseGenerator::generateResponse(*this, request);
+std::string HttpResponse::generate(HttpRequest& request) {
+  return ResponseGenerator::generateResponse(*this, request);
 }
 
 void HttpResponse::clear(void) { status_ = DEFAULT_STATUS; }

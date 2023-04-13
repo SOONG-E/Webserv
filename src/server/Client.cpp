@@ -100,7 +100,7 @@ std::string Client::receive() const {
 
 void Client::send() {
   if (!isPartialResponse()) {
-    buf_ = ResponseGenerator::generateResponse(getRequest());
+    buf_ = getResponse().generate(getRequest());
   }
   std::size_t write_bytes = ::send(fd_, buf_.c_str(), buf_.size(), 0);
 
