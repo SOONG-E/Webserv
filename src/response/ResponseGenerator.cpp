@@ -115,7 +115,7 @@ bool ResponseGenerator::isCgi(HttpRequest &request, HttpResponse &response) {
   if (!(method == METHODS[POST] || method == METHODS[GET])) {
     return false;
   }
-  const LocationBlock location_block = response.getLocationBlock();
+  const Location location_block = response.getLocation();
   return location_block.isCgi(request.getUri(), method,
                               request.getQueryString());
 }
@@ -154,8 +154,7 @@ void ResponseGenerator::generateEntityHeader(HttpResponse &response,
                                              const std::string &body) {
   header += "Server: Webserv" + CRLF;
   header +=
-      "Allow: " + join(response.getLocationBlock().getAllowedMethods(), ", ") +
-      CRLF;
+      "Allow: " + join(response.getLocation().getAllowedMethods(), ", ") + CRLF;
   if (body.empty() == false) {
     header += "Content_Length: " + toString(body.length()) + CRLF;
     header += "Content-Type: text/html" + CRLF;
@@ -223,7 +222,7 @@ std::string ResponseGenerator::directoryListing(const std::string &url) {
 
 std::string ResponseGenerator::readIndexFile(HttpResponse &response,
                                              const std::string &url) {
-  LocationBlock location_block = response.getLocationBlock();
+  Location location_block = response.getLocation();
   for (std::size_t i = 0; i < location_block.getIndex().size(); ++i) {
     try {
       return readFile(response, url + location_block.getIndex()[i]);

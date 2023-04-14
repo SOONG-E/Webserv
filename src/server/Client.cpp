@@ -183,7 +183,7 @@ bool Client::isCgi() const {
   if (request.getMethod() == METHODS[DELETE]) {
     return false;
   }
-  const LocationBlock location_block = getResponse().getLocationBlock();
+  const Location location_block = getResponse().getLocation();
   return location_block.isCgi(request.getUri(), request.getMethod(),
                               request.getQueryString());
 }

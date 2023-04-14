@@ -42,7 +42,7 @@ void Cgi::execute(const HttpRequest& request, const HttpResponse& response,
                   const SocketAddress& serv_addr) {
   int pipe_fds[2][2];  // read, write
 
-  std::string cgi_path = response.getLocationBlock().getCgiParam("CGI_PATH");
+  std::string cgi_path = response.getLocation().getCgiParam("CGI_PATH");
   std::string uri = getAbsolutePath(request.getUri());
 
   if (pipe(pipe_fds[0]) == ERROR<int>()) {
