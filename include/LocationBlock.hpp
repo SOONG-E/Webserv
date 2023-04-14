@@ -45,8 +45,7 @@ class LocationBlock {
   void addCgiParam(const std::string& key, const std::string& value);
 
   bool isAllowedMethod(const std::string& method) const;
-  bool isCgi(const std::string& request_uri, const std::string& request_method,
-             const std::string& request_query) const;
+  bool isCgi(void);
   void clear(void);
 
  private:
@@ -58,6 +57,7 @@ class LocationBlock {
   bool autoindex_;
   std::vector<std::string> index_;
   std::map<std::string, std::string> cgi_param_;
+  bool is_cgi_;
 };
 
 #endif

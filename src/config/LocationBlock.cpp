@@ -131,28 +131,13 @@ void LocationBlock::addIndex(const std::string& index) {
 void LocationBlock::addCgiParam(const std::string& key,
                                 const std::string& value) {
   cgi_param_[key] = value;
+  is_cgi_ = true;
 }
 
 bool LocationBlock::isAllowedMethod(const std::string& method) const {
   return allowed_methods_.find(method) != allowed_methods_.end();
 }
 
-bool LocationBlock::isCgi(const std::string& request_uri,
-                          const std::string& request_method,
-                          const std::string& request_query) const {
-  if (cgi_param_.find("CGI_EXTENSION") == cgi_param_.end()) {
-    return false;
-  }
-  const std::string& extension = cgi_param_.at("CGI_EXTENSION").substr(1);
-  std::size_t index = request_uri.rfind(extension);
-  if (index == std::string::npos ||
-      index != request_uri.size() - extension.size()) {
-    return false;
-  }
-  if (request_method == METHODS[POST] || !request_query.empty()) {
-    return true;
-  }
-  return false;
-}
+bool LocationBlock::isCgi(void) { return is_cgi_; }
 
 void LocationBlock::clear(void) { *this = LocationBlock(); }
