@@ -42,6 +42,10 @@ class ResponseGenerator {
                                    const std::string &url);
   static std::string readFile(HttpResponse &response, const std::string &uri);
   static void replaceNLtoCRLF(std::string &header);
+
+ public:
+  ResponseGenerator();
+  ~ResponseGenerator();
 };
 
 #endif

@@ -27,6 +27,10 @@ class HttpParser {
   static void parsebBody(HttpRequest& request);
   static void unchunkMessage(HttpRequest& request);
   static std::vector<std::string> splitByCRLF(const std::string& content);
+
+ private:
+  HttpParser();
+  ~HttpParser();
 };
 
 #endif
