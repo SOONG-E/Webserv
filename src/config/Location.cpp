@@ -1,4 +1,4 @@
-#include "LocationBlock.hpp"
+#include "Location.hpp"
 
 #include <cerrno>
 #include <cstdlib>
@@ -8,14 +8,14 @@
 #include "Error.hpp"
 #include "constant.hpp"
 
-const std::string LocationBlock::DEFAULTS[] = {
+const std::string Location::DEFAULTS[] = {
     "100m",        // CLIENT_MAX_BODY_SIZE
     "html",        // ROOT
     "off",         // AUTOINDEX
     "index.html",  // INDEX
 };
 
-LocationBlock::LocationBlock() : root_(DEFAULTS[ROOT]) {
+Location::Location() : root_(DEFAULTS[ROOT]) {
   setBodyLimit(DEFAULTS[CLIENT_MAX_BODY_SIZE]);
   addAllowedMethod(METHODS[GET]);
   addAllowedMethod(METHODS[POST]);
@@ -23,7 +23,7 @@ LocationBlock::LocationBlock() : root_(DEFAULTS[ROOT]) {
   addIndex(DEFAULTS[INDEX]);
 }
 
-LocationBlock::LocationBlock(const LocationBlock& origin)
+Location::Location(const Location& origin)
     : uri_(origin.uri_),
       body_limit_(origin.body_limit_),
       allowed_methods_(origin.allowed_methods_),
@@ -33,7 +33,7 @@ LocationBlock::LocationBlock(const LocationBlock& origin)
       index_(origin.index_),
       cgi_param_(origin.cgi_param_) {}
 
-LocationBlock& LocationBlock::operator=(const LocationBlock& origin) {
+Location& Location::operator=(const Location& origin) {
   if (this != &origin) {
     uri_ = origin.uri_;
     body_limit_ = origin.body_limit_;
@@ -47,9 +47,9 @@ LocationBlock& LocationBlock::operator=(const LocationBlock& origin) {
   return *this;
 }
 
-LocationBlock::~LocationBlock() {}
+Location::~Location() {}
 
-bool LocationBlock::isImplementedMethod(const std::string& method) {
+bool Location::isImplementedMethod(const std::string& method) {
   for (std::size_t i = 0; i < METHODS_COUNT; ++i) {
     if (method == METHODS[i]) {
       return true;
@@ -58,42 +58,40 @@ bool LocationBlock::isImplementedMethod(const std::string& method) {
   return false;
 }
 
-const std::string& LocationBlock::getUri(void) const { return uri_; }
+const std::string& Location::getUri(void) const { return uri_; }
 
-std::size_t LocationBlock::getBodyLimit(void) const { return body_limit_; }
+std::size_t Location::getBodyLimit(void) const { return body_limit_; }
 
-std::set<std::string>& LocationBlock::getAllowedMethods(void) {
+std::set<std::string>& Location::getAllowedMethods(void) {
   return allowed_methods_;
 }
 
-const std::set<std::string>& LocationBlock::getAllowedMethods(void) const {
+const std::set<std::string>& Location::getAllowedMethods(void) const {
   return allowed_methods_;
 }
 
-const std::string& LocationBlock::getReturnUrl(void) const {
-  return return_url_;
-}
+const std::string& Location::getReturnUrl(void) const { return return_url_; }
 
-const std::string& LocationBlock::getRoot(void) const { return root_; }
+const std::string& Location::getRoot(void) const { return root_; }
 
-bool LocationBlock::getAutoindex(void) const { return autoindex_; }
+bool Location::getAutoindex(void) const { return autoindex_; }
 
-std::vector<std::string>& LocationBlock::getIndex(void) { return index_; }
+std::vector<std::string>& Location::getIndex(void) { return index_; }
 
-const std::vector<std::string>& LocationBlock::getIndex(void) const {
+const std::vector<std::string>& Location::getIndex(void) const {
   return index_;
 }
 
-std::string LocationBlock::getCgiParam(const std::string& key) const {
+std::string Location::getCgiParam(const std::string& key) const {
   if (cgi_param_.find(key) == cgi_param_.end()) {
     return "";
   }
   return cgi_param_.at(key);
 }
 
-void LocationBlock::setUri(const std::string& uri) { uri_ = uri; }
+void Location::setUri(const std::string& uri) { uri_ = uri; }
 
-void LocationBlock::setBodyLimit(const std::string& raw) {
+void Location::setBodyLimit(const std::string& raw) {
   static const ByteUnit UNITS;
   char* unit;
   body_limit_ = std::strtoul(raw.c_str(), &unit, 10);
@@ -107,37 +105,34 @@ void LocationBlock::setBodyLimit(const std::string& raw) {
   body_limit_ *= UNITS.size.at(unit);
 }
 
-void LocationBlock::addAllowedMethod(const std::string& method) {
+void Location::addAllowedMethod(const std::string& method) {
   allowed_methods_.insert(method);
 }
 
-void LocationBlock::setReturnUrl(const std::string& return_url) {
+void Location::setReturnUrl(const std::string& return_url) {
   return_url_ = return_url;
 }
 
-void LocationBlock::setRoot(const std::string& root) { root_ = root; }
+void Location::setRoot(const std::string& root) { root_ = root; }
 
-void LocationBlock::setAutoindex(const std::string& raw) {
+void Location::setAutoindex(const std::string& raw) {
   if (raw != "on" && raw != "off") {
     Error::log(Error::INFO[ETOKEN], raw, EXIT_FAILURE);
   }
   autoindex_ = (raw == "on");
 }
 
-void LocationBlock::addIndex(const std::string& index) {
-  index_.push_back(index);
-}
+void Location::addIndex(const std::string& index) { index_.push_back(index); }
 
-void LocationBlock::addCgiParam(const std::string& key,
-                                const std::string& value) {
+void Location::addCgiParam(const std::string& key, const std::string& value) {
   cgi_param_[key] = value;
   is_cgi_ = true;
 }
 
-bool LocationBlock::isAllowedMethod(const std::string& method) const {
+bool Location::isAllowedMethod(const std::string& method) const {
   return allowed_methods_.find(method) != allowed_methods_.end();
 }
 
-bool LocationBlock::isCgi(void) { return is_cgi_; }
+bool Location::isCgi(void) { return is_cgi_; }
 
-void LocationBlock::clear(void) { *this = LocationBlock(); }
+void Location::clear(void) { *this = Location(); }

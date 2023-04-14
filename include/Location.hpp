@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-class LocationBlock {
+class Location {
   enum Index {
     CLIENT_MAX_BODY_SIZE,
     ROOT,
@@ -17,10 +17,10 @@ class LocationBlock {
   static const std::string DEFAULTS[];
 
  public:
-  LocationBlock();
-  LocationBlock(const LocationBlock& origin);
-  LocationBlock& operator=(const LocationBlock& origin);
-  ~LocationBlock();
+  Location();
+  Location(const Location& origin);
+  Location& operator=(const Location& origin);
+  ~Location();
 
   static bool isImplementedMethod(const std::string& method);
 
