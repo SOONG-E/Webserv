@@ -20,7 +20,7 @@ class ConfigParser {
   void parseServerName(void);
   void parseErrorPage(void);
 
-  void parseLocationBlock(void);
+  void parseLocation(void);
   void parseClientMaxBodySize(void);
   void parseAllowedMethods(void);
   void parseReturn(void);
@@ -35,7 +35,7 @@ class ConfigParser {
 
   Config config_;
   ServerBlock server_block_;
-  LocationBlock location_block_;
+  Location location_block_;
   std::string content_;
   std::size_t pos_;
 };

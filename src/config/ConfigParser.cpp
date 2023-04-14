@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 #include "Error.hpp"
@@ -39,13 +40,10 @@ ConfigParser& ConfigParser::operator=(const ConfigParser& origin) {
 ConfigParser::~ConfigParser() {}
 
 const Config& ConfigParser::parse(void) {
-  int index = 0;
   while (peek() == "server") {
-    server_block_.clear();
+    server_block_ = ServerBlock();
     parseServerBlock();
-    server_block_.setKey(index);
     config_.addServerBlock(server_block_);
-    index += 1;
   }
   std::string token = expect();
   if (!token.empty()) {
@@ -68,26 +66,29 @@ void ConfigParser::parseServerBlock(void) {
       parseErrorPage();
     } else if (token == "location") {
       location_block_.clear();
-      parseLocationBlock();
-      server_block_.addLocationBlock(location_block_);
+      parseLocation();
+      server_block_.locations.push_back(location_block_);
+      // server_block_.addLocation(location_block_);
     } else {
       Error::log(Error::INFO[ETOKEN], token, EXIT_FAILURE);
     }
   }
   expect("}");
-  server_block_.setDefault();
+  // server_block_.setDefault();
 }
 
 void ConfigParser::parseListen(void) {
   expect("listen");
-  server_block_.addListen(expect());
+  server_block_.listens.push_back(Listen(expect()));
+  // server_block_.addListen(expect());
   expect(";");
 }
 
 void ConfigParser::parseServerName(void) {
   expect("server_name");
   while (peek() != ";") {
-    server_block_.addServerName(expect());
+    server_block_.server_names.insert(expect());
+    // server_block_.addServerName(expect());
   }
   expect(";");
 }
@@ -101,7 +102,8 @@ void ConfigParser::parseErrorPage(void) {
   const std::string& page = codes.back();
   codes.pop_back();
   for (std::size_t i = 0; i < codes.size(); ++i) {
-    server_block_.addErrorPage(codes[i], page);
+    server_block_.error_pages.insert(std::make_pair(codes[i], page));
+    // server_block_.addErrorPage(codes[i], page);
   }
   expect(";");
 }
@@ -112,7 +114,7 @@ void ConfigParser::parseClientMaxBodySize(void) {
   expect(";");
 }
 
-void ConfigParser::parseLocationBlock(void) {
+void ConfigParser::parseLocation(void) {
   expect("location");
   location_block_.setUri(expect());
   expect("{");
