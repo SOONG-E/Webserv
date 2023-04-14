@@ -27,7 +27,7 @@ const ServerBlock& HttpResponse::getServerBlock(void) const {
   return server_block_;
 }
 
-const LocationBlock& HttpResponse::getLocationBlock(void) const {
+const Location& HttpResponse::getLocation(void) const {
   return location_block_;
 }
 
@@ -49,7 +49,7 @@ void HttpResponse::setServerBlock(const ServerBlock& server_block) {
   server_block_ = server_block;
 }
 
-void HttpResponse::setLocationBlock(const LocationBlock& location_block) {
+void HttpResponse::setLocation(const Location& location_block) {
   location_block_ = location_block;
 }
 
