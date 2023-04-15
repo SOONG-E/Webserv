@@ -4,12 +4,12 @@
 #include <string>
 
 struct Listen {
-  static const std::string DEFAULT_HOST;
+  static const std::string DEFAULT_IP;
 
   Listen();
   explicit Listen(const std::string& token);
 
-  std::string host;
+  std::string ip;
   std::string port;
   std::string server_socket_key;
 };
