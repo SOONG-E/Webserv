@@ -8,6 +8,11 @@ void checkArgs(int argc) {
 
 void printLogo() { std::cout << readFile("Webserv.art"); }
 
+void registerSignalHandlers() {
+  signal(SIGPIPE, SIG_IGN);
+  signal(SIGCHLD, SIG_IGN);
+}
+
 Config createConfig(int argc, char** argv) {
   const std::string& filename = (argc == 2) ? argv[1] : DEFAULT_PATH;
   ConfigParser config_parser(filename);
@@ -16,10 +21,9 @@ Config createConfig(int argc, char** argv) {
   return config;
 }
 
-ServerManager setServer(const Config& config) {
-  ServerManager manager;
-  manager.registerSignalHandlers();
-  manager.configureServer(config);
+ServerManager setServer(const ServerManager& manager) {
+  registerSignalHandlers();
+
   manager.createServers();
   return manager;
 }

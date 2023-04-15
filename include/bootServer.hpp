@@ -12,6 +12,6 @@
 void checkArgs(int argc);
 void printLogo();
 Config createConfig(int argc, char** argv);
-ServerManager setServer(const Config& config);
+ServerManager setServer(const ServerManager& manager);
 
 #endif

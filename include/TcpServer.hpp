@@ -9,15 +9,14 @@
 
 class TcpServer {
  public:
-  TcpServer(const std::string ip, const std::string port,
-            const HttpServer *virtual_server);
+  TcpServer(const std::string ip, const std::string port);
   ~TcpServer();
 
-  void appendServer(const HttpServer *virtual_server);
+  void appendServer(const ServerBlock servers);
 
  private:
-  std::string ip_;
-  std::string port_;  // 타입 변경하기
+  const std::string ip_;
+  const std::string port_;  // 타입 변경하기
 
   std::map<std::string, HttpServer *> virtual_servers_;
 };

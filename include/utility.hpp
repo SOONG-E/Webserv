@@ -23,6 +23,8 @@ std::vector<std::string> split(const std::string& content,
                                const std::string& delim = WHITESPACE);
 std::size_t stoi(const std::string& value);
 std::string trim(const std::string& str);
+std::string getIpFromKey(const std::string key);
+std::string getPortFromKey(const std::string key);
 
 /*========================*/
 //   Template functions   //

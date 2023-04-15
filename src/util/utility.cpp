@@ -104,3 +104,13 @@ std::string trim(const std::string& str) {
   if (start == std::string::npos) return "";
   return (str.substr(start, end - start + 1));
 }
+
+std::string getIpFromKey(const std::string key) {
+  std::size_t boundary = key.find(":");
+  return key.substr(0, boundary);
+}
+
+std::string getPortFromKey(const std::string key) {
+  std::size_t boundary = key.find(":");
+  return key.substr(boundary + 1);
+}

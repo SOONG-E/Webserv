@@ -8,12 +8,15 @@
 
 class HttpServer {
  public:
-  HttpServer(ServerBlock &server_block);
+  typedef std::vector<Location> LocationType;
+  typedef std::map<std::string, std::string> ErrorPageType;
+
+  HttpServer(const ServerBlock &server_block);
   ~HttpServer();
 
  private:
-  std::vector<Location> locations_;
-  std::map<std::string, std::string> error_pages_;
+  const LocationType locations_;
+  const ErrorPageType error_pages_;
 };
 
 #endif

@@ -1,13 +1,8 @@
 #include "bootServer.hpp"
 #include "constant.hpp"
 
-void runServer(ServerManager& manager) {
-  while (1) {
-    if (manager.select() > 0) {
-      manager.respondToClients();
-      manager.acceptConnections();
-    }
-    manager.handleTimeout();
+void runServer(const ServerManager& manager) {
+  while (true) {
   }
 }
 
@@ -16,7 +11,9 @@ int main(int argc, char* argv[]) {
   printLogo();
 
   const Config config = createConfig(argc, argv);
-  ServerManager manager = setServer(config);
+  const ServerManager manager(config);
+  
+  setServer(manager);
 
   runServer(manager);
 
