@@ -15,6 +15,9 @@ class TcpServer {
   TcpServer(const TcpServer &origin);
   ~TcpServer();
 
+  std::string getIp(void) const;
+  std::string getPort(void) const;
+
   void appendServer(const ServerBlock &servers,
                     const HttpServer *virtual_server);
 

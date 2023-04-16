@@ -13,6 +13,9 @@ TcpServer::TcpServer(const TcpServer &origin)
 
 TcpServer::~TcpServer() {}
 
+std::string TcpServer::getIp(void) const { return ip_; }
+std::string TcpServer::getPort(void) const { return port_; }
+
 /* append new virtual server in virtual_servers */
 void TcpServer::appendServer(const ServerBlock &servers,
                              const HttpServer *virtual_server) {
