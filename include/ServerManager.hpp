@@ -6,7 +6,6 @@
 
 #include "Config.hpp"
 #include "TcpServer.hpp"
-#include "utility.hpp"
 
 class ServerManager {
  public:
@@ -15,11 +14,15 @@ class ServerManager {
 
  private:
   typedef std::map<std::string, TcpServer *> TcpServerType;
+  typedef std::vector<HttpServer *> HttpServerType;
 
   void registerServer(const Config &config);
-  TcpServer *seekTcpServer(std::string key);
+  TcpServer *seekTcpServer(const std::string &key);
+  TcpServer *createTcpServer(const std::string &key);
+  HttpServer *createHttpServer(const ServerBlock &server_block);
 
   TcpServerType tcp_servers_;
+  HttpServerType http_servers_;
 };
 
 #endif
