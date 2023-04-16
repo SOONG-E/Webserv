@@ -7,8 +7,6 @@
 
 class SocketAddress {
  public:
-  SocketAddress();
-  SocketAddress(const std::string& host, const std::string& port);
   SocketAddress(const sockaddr& address, const socklen_t address_len);
   SocketAddress(const SocketAddress& src);
   SocketAddress& operator=(const SocketAddress& src);
