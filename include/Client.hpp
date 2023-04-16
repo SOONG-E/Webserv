@@ -6,11 +6,13 @@
 #include <string>
 
 #include "HttpRequest.hpp"
+#include "SocketAddress.hpp"
 #include "TcpServer.hpp"
 
 class Client {
  public:
-  Client(const int fd, const TcpServer* tcp_server);
+  Client(const int fd, const TcpServer* tcp_server,
+         const SocketAddress& address);
   Client(const Client& origin);
   ~Client();
 
@@ -22,6 +24,7 @@ class Client {
  private:
   const int fd_;
   const TcpServer* tcp_server_;
+  const SocketAddress address_;
   HttpServer* http_server_;
   HttpRequest request_;
   std::string response_;

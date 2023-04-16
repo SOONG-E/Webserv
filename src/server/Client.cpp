@@ -4,11 +4,14 @@
 #include <cstring>
 #include <iostream>
 
-Client::Client(const int fd, const TcpServer* tcp_server)
-    : fd_(fd), tcp_server_(tcp_server) {}
+Client::Client(const int fd, const TcpServer* tcp_server,
+               const SocketAddress& address)
+    : fd_(fd), tcp_server_(tcp_server), address_(address) {}
 
 Client::Client(const Client& origin)
-    : fd_(origin.fd_), tcp_server_(origin.tcp_server_) {}
+    : fd_(origin.fd_),
+      tcp_server_(origin.tcp_server_),
+      address_(origin.address_) {}
 
 Client::~Client() {}
 
