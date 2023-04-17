@@ -142,6 +142,7 @@ void ServerManager::runServer(void) {
 /* recognize type of event */
 void ServerManager::processEventOnQueue(const int events) {
   struct kevent event;
+  Client *client;
 
   for (int i = 0; i < events; ++i) {
     event = event_list[i];
@@ -150,21 +151,8 @@ void ServerManager::processEventOnQueue(const int events) {
       continue;
     }
     validClientSocket(event.ident);
-    Client *client = static_cast<Client *>(event.udata);
-    switch (event.filter) {
-      case EVFILT_READ:
-
-        break;
-
-      case EVFILT_WRITE:
-        break;
-
-      case EVFILT_PROC:
-        break;
-
-      default:
-        throw std::runtime_error(strerror(errno));  // 수정!
-    }
+    client = static_cast<Client *>(event.udata);
+    client->processEvent(event.filter);
   }
 }
 
