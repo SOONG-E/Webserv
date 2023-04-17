@@ -1,19 +1,19 @@
 #include "bootServer.hpp"
 
-void checkArgs(int argc) {
+static void checkArgs(int argc) {
   if (argc > 2) {
     Error::log(Error::INFO[EARG], "", EXIT_FAILURE);
   }
 }
 
-void printLogo() { std::cout << readFile("Webserv.art"); }
+static void printLogo() { std::cout << readFile("Webserv.art"); }
 
-void registerSignalHandlers() {
+static void registerSignalHandlers() {
   signal(SIGPIPE, SIG_IGN);
   signal(SIGCHLD, SIG_IGN);
 }
 
-Config createConfig(int argc, char** argv) {
+static Config createConfig(int argc, char** argv) {
   const std::string& filename = (argc == 2) ? argv[1] : DEFAULT_PATH;
   ConfigParser config_parser(filename);
   Config config = config_parser.parse();
@@ -21,9 +21,21 @@ Config createConfig(int argc, char** argv) {
   return config;
 }
 
-ServerManager setServer(const ServerManager& manager) {
+ServerManager setServer(int argc, char** argv) {
+  checkArgs(argc);
+  printLogo();
   registerSignalHandlers();
 
-  manager.createServers();
+  const Config config = createConfig(argc, argv);
+  ServerManager manager(config);
+  manager.setServer();
+
   return manager;
+}
+
+void runServer(ServerManager manager) {
+  try {
+    manager.runServer();
+  } catch (std::runtime_error& e) {
+  }
 }

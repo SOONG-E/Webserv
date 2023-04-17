@@ -9,9 +9,7 @@
 #include "ServerManager.hpp"
 #include "utility.hpp"
 
-void checkArgs(int argc);
-void printLogo();
-Config createConfig(int argc, char** argv);
-ServerManager setServer(const ServerManager& manager);
+ServerManager setServer(int argc, char** argv);
+void runServer(ServerManager manager);
 
 #endif
