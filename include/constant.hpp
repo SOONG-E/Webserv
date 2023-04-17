@@ -15,6 +15,7 @@ enum MethodIndex {
   CONNECT,
 };
 
+const int CAPABLE_EVENT_SIZE = 8;
 const std::size_t BUF_SIZE = 65536;
 const int DEFAULT_FD = -1;
 const std::time_t KEEPALIVE_TIMEOUT = 30;
