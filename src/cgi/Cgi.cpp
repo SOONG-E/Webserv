@@ -119,9 +119,9 @@ void Cgi::write(Selector& selector) {
 }
 
 void Cgi::read(Selector& selector, HttpResponse& response) {
-  char buf[BUF_SIZE];
+  char buf[BUFFER_SIZE];
 
-  std::size_t read_bytes = ::read(pipe_fds_[READ], buf, BUF_SIZE);
+  std::size_t read_bytes = ::read(pipe_fds_[READ], buf, BUFFER_SIZE);
 
   if (read_bytes == ERROR<std::size_t>()) {
     kill(pid_, SIGKILL);

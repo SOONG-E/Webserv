@@ -15,15 +15,42 @@ Client::Client(const Client& origin)
 
 Client::~Client() {}
 
-/*==========================*/
-//         Getter           //
-/*==========================*/
+/*======================//
+ Getter
+/*======================*/
 
 int Client::getFd() const { return fd_; }
 HttpServer* Client::getHttpServer(void) const { return http_server_; }
 HttpRequest Client::getRequest(void) const { return request_; }
 std::string Client::getResponse(void) const { return response_; }
 
-/*==========================*/
-//         Setter           //
-/*==========================*/
+/*======================//
+ Setter
+/*======================*/
+
+/*======================//
+ process
+/*======================*/
+
+void Client::processEvent(const int event_type) {
+  switch (event_type) {
+    case EVFILT_READ:
+      readData();
+      break;
+
+    case EVFILT_WRITE:
+      writeData();
+      break;
+
+    case EVFILT_PROC:
+      //
+      break;
+
+    default:
+      throw std::runtime_error(strerror(errno));  // 수정!
+  }
+}
+
+void Client::readData(void) { char buf[BUFFER_SIZE]; }
+
+void Client::writeData(void) {}

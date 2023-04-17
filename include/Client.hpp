@@ -1,6 +1,8 @@
 #ifndef CLIENT_HPP_
 #define CLIENT_HPP_
 
+#include <sys/event.h>
+
 #include <ctime>
 #include <exception>
 #include <string>
@@ -20,6 +22,10 @@ class Client {
   HttpServer* getHttpServer(void) const;
   HttpRequest getRequest(void) const;
   std::string getResponse(void) const;
+
+  void processEvent(const int event_type);
+  void readData(void);
+  void writeData(void);
 
  private:
   const int fd_;
