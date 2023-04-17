@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 
+#include "Client.hpp"
 #include "ServerBlock.hpp"
 
 class HttpServer {
