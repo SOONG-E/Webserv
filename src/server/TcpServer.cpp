@@ -30,6 +30,12 @@ void TcpServer::setDefaultServer(HttpServer *default_server) {
 std::string TcpServer::getIp(void) const { return ip_; }
 std::string TcpServer::getPort(void) const { return port_; }
 HttpServer *TcpServer::getDefaultServer(void) const { return default_server_; }
+HttpServerType TcpServer::getVirtualServers(void) const {
+  return virtual_servers_;
+}
+/*======================//
+ process
+/*======================*/
 
 /* append new virtual server in virtual_servers */
 void TcpServer::appendServer(const ServerBlock &servers,

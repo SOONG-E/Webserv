@@ -24,7 +24,16 @@ class Client {
   std::string getResponse(void) const;
 
   void processEvent(const int event_type);
-  void readData(void);
+
+  /* request */
+  void processRequest(void);
+  std::string readData(void);
+
+  /* handler */
+  void lookUpHttpServer(void);
+  void passRequestToHandler(void);
+
+  /* response */
   void writeData(void);
 
  private:

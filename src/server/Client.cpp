@@ -32,10 +32,11 @@ std::string Client::getResponse(void) const { return response_; }
  process
 /*======================*/
 
+/* recognize type of event */
 void Client::processEvent(const int event_type) {
   switch (event_type) {
     case EVFILT_READ:
-      readData();
+      processRequest();
       break;
 
     case EVFILT_WRITE:
@@ -51,6 +52,45 @@ void Client::processEvent(const int event_type) {
   }
 }
 
-void Client::readData(void) { char buf[BUFFER_SIZE]; }
+/* parse request and pass it to handler */
+void Client::processRequest(void) {
+  std::string data = readData();
+  request_.tailRequest(data);
+  request_.parse();
+  if (request_.isCompleted() == true) {
+    lookUpHttpServer();
+    passRequestToHandler();
+  }
+  //
+}
+
+/* read data from socket */
+std::string Client::readData(void) {
+  char buffer[BUFFER_SIZE];
+  std::size_t read_bytes = recv(fd_, &buffer, BUFFER_SIZE, 0);
+
+  if (read_bytes == -1) {
+    throw;
+  }
+  if (read_bytes == 0) {
+    throw;
+  }
+  return std::string(buffer);
+}
+
+/* lookup associated virtual server */
+void Client::lookUpHttpServer(void) {
+  const TcpServer::HttpServerType virtual_servers =
+      tcp_server_->getVirtualServers();
+  TcpServer::HttpServerType::const_iterator server =
+      virtual_servers.find(request_.getHost());
+  if (server == virtual_servers.end()) {
+    http_server_ = tcp_server_->getDefaultServer();
+    return;
+  }
+  http_server_ = const_cast<HttpServer*>(server->second);
+}
+
+void Client::passRequestToHandler(void) {}
 
 void Client::writeData(void) {}
