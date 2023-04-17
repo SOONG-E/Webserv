@@ -46,6 +46,7 @@ void HttpParser::parseHeader(HttpRequest& request) {
   }
   request.isHeaderSet_ = true;
   separateHeader(request, request.buffer_.substr(0, bound_pos));
+  reserveBodySpace(request);
   request.buffer_ = request.buffer_.substr(bound_pos + DOUBLE_CRLF.size());
 }
 
@@ -56,6 +57,15 @@ void HttpParser::separateHeader(HttpRequest& request,
   parseRequestLine(request, request_line);
   std::string headers = header_part.substr(boundary + CRLF.length());
   parseHeaderFields(request, headers);
+}
+
+void HttpParser::reserveBodySpace(HttpRequest& request) {
+  std::string content_length = request.getHeader("CONTENT-LENGTH");
+  if (content_length.empty() == true) {
+    return;
+  }
+  std::size_t length = ::stoi(content_length);
+  request.buffer_.reserve(length);
 }
 
 void HttpParser::parseRequestLine(HttpRequest& request,

@@ -18,6 +18,7 @@ class HttpParser {
   static void parseHeader(HttpRequest& request);
   static void separateHeader(HttpRequest& request,
                              const std::string& header_part);
+  static void reserveBodySpace(HttpRequest& request);
   static void parseRequestLine(HttpRequest& request,
                                const std::string& request_line);
   static void parseHeaderFields(HttpRequest& request,
@@ -29,8 +30,8 @@ class HttpParser {
   static std::vector<std::string> splitByCRLF(const std::string& content);
 
  private:
-  HttpParser();
-  ~HttpParser();
+  HttpParser(){};
+  ~HttpParser(){};
 };
 
 #endif
