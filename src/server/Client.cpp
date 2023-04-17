@@ -6,12 +6,16 @@
 
 Client::Client(const int fd, const TcpServer* tcp_server,
                const SocketAddress& address)
-    : fd_(fd), tcp_server_(tcp_server), address_(address) {}
+    : fd_(fd),
+      tcp_server_(tcp_server),
+      address_(address),
+      is_response_ready(false) {}
 
 Client::Client(const Client& origin)
     : fd_(origin.fd_),
       tcp_server_(origin.tcp_server_),
-      address_(origin.address_) {}
+      address_(origin.address_),
+      is_response_ready(origin.is_response_ready) {}
 
 Client::~Client() {}
 
@@ -59,6 +63,7 @@ void Client::processRequest(void) {
   request_.parse();
   if (request_.isCompleted() == true) {
     lookUpHttpServer();
+    lookUpLocation();
     passRequestToHandler();
   }
   //
@@ -78,7 +83,8 @@ std::string Client::readData(void) {
   return std::string(buffer);
 }
 
-/* lookup associated virtual server */
+/* lookup associated virtual server
+if there isn't a matched server then default server is setted */
 void Client::lookUpHttpServer(void) {
   const TcpServer::HttpServerType virtual_servers =
       tcp_server_->getVirtualServers();
@@ -91,6 +97,22 @@ void Client::lookUpHttpServer(void) {
   http_server_ = const_cast<HttpServer*>(server->second);
 }
 
-void Client::passRequestToHandler(void) {}
+/* lookup associated location block */
+void Client::lookUpLocation(void) {
+  location_ = http_server_->findLocation(request_.getUri());
+}
+
+/* pass the request to eligible handler */
+void Client::passRequestToHandler(void) {
+  if (location_.isCgi() == true) {
+    // cgi handler
+    return;
+  }
+  if (location_.getAutoindex() == true) {
+    // autoindex handle
+    return;
+  }
+  // static handler
+}
 
 void Client::writeData(void) {}

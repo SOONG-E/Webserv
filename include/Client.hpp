@@ -31,6 +31,7 @@ class Client {
 
   /* handler */
   void lookUpHttpServer(void);
+  void lookUpLocation(void);
   void passRequestToHandler(void);
 
   /* response */
@@ -41,9 +42,11 @@ class Client {
   const TcpServer* tcp_server_;
   const SocketAddress address_;
   HttpServer* http_server_;
+  Location location_;
   HttpRequest request_;
   std::string response_;
-  std::string buffer_;
+  std::string status_;
+  bool is_response_ready;
 };
 
 #endif
