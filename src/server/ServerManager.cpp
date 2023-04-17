@@ -61,6 +61,10 @@ HttpServer *ServerManager::createHttpServer(const ServerBlock &server_block) {
  set server
 /*======================*/
 
+void ServerManager::setServer(void) { bindServers(); }
+
+/* bind each server to listen socket,
+append the listen socket on chanege list */
 void ServerManager::bindServers(void) {
   int fd;
   struct addrinfo *addr_info;
@@ -80,9 +84,11 @@ void ServerManager::bindServers(void) {
     if (listen(fd, 128) == -1) {
       throw std::runtime_error(strerror(errno));
     }
+    createListenEvent(fd, it->second);
   }
 }
 
+/* create and set a listen socket for each server */
 int ServerManager::createListenSocket(void) const {
   int fd = socket(AF_INET, SOCK_STREAM, 0);
   if (fd == -1) {
@@ -96,6 +102,7 @@ int ServerManager::createListenSocket(void) const {
   return fd;
 }
 
+/* get addrinfo using information of server */
 struct addrinfo *ServerManager::getAddrInfo(const std::string ip,
                                             const std::string port) {
   struct addrinfo hints, *addr_info;
@@ -117,17 +124,103 @@ struct addrinfo *ServerManager::getAddrInfo(const std::string ip,
  server run
 /*======================*/
 
-ServerManager::acceptNewClient(const int fd) {
+/* run Server with main loop */
+void ServerManager::runServer(void) {
+  int events;
+
+  while (true) {
+    events = kevent(kq_, &change_event_list[0], change_event_list.size(),
+                    event_list, CAPABLE_EVENT_SIZE, 0);  // timeout 추가할 지
+    if (events == -1) {
+      throw std::runtime_error(strerror(errno));
+    }
+    change_event_list.clear();
+    processEventOnQueue(events);
+  }
+}
+
+/* recognize type of event */
+void ServerManager::processEventOnQueue(const int events) {
+  struct kevent event;
+
+  for (int i = 0; i < events; ++i) {
+    event = event_list[i];
+    if (listen_sockets_.find(event.ident) != listen_sockets_.end()) {
+      acceptNewClient(event.ident, static_cast<TcpServer *>(event.udata));
+      continue;
+    }
+    validClientSocket(event.ident);
+    Client *client = static_cast<Client *>(event.udata);
+    switch (event.filter) {
+      case EVFILT_READ:
+
+        break;
+
+      case EVFILT_WRITE:
+        break;
+
+      case EVFILT_PROC:
+        break;
+
+      default:
+        throw std::runtime_error(strerror(errno));  // 수정!
+    }
+  }
+}
+
+/* accept client, create Client instance with fd, tcp server */
+void ServerManager::acceptNewClient(const int server_socker,
+                                    const TcpServer *tcp_server) {
   sockaddr client_addr;
   socklen_t client_addrlen;
 
-  int client_fd = ::accept(fd, &client_addr, &client_addrlen);
-  if (client_fd == ERROR<int>()) {
+  int client_fd = ::accept(server_socker, &client_addr, &client_addrlen);
+  if (client_fd == -1) {
     throw std::runtime_error(strerror(errno));
   }
 
   if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == ERROR<int>()) {
     close(client_fd);
     throw std::runtime_error(strerror(errno));
+  }
+  Client *new_client = new Client(client_fd, tcp_server,
+                                  SocketAddress(client_addr, client_addrlen));
+  createClient(client_fd, tcp_server,
+               SocketAddress(client_addr, client_addrlen));
+}
+
+/* create Client instance, register event and append client in client list*/
+void ServerManager::createClient(const int client_fd,
+                                 const TcpServer *tcp_server,
+                                 const SocketAddress socket_address) {
+  Client *new_client = new Client(client_fd, tcp_server, socket_address);
+  createEvent(client_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new_client);
+  clients_[client_fd] = new_client;
+}
+
+/*======================//
+ manage event
+/*======================*/
+
+/* EV_SET interface */
+void ServerManager::createEvent(uintptr_t ident, int16_t filter, uint16_t flags,
+                                uint32_t fflags, intptr_t data, void *udata) {
+  struct kevent event;
+
+  EV_SET(&event, ident, filter, flags, fflags, data, udata);
+  change_event_list.push_back(event);
+}
+
+void ServerManager::createListenEvent(int fd, TcpServer *server) {
+  createEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, server);
+}
+
+/*======================//
+ utils
+/*======================*/
+
+void ServerManager::validClientSocket(const int socket) {
+  if (clients_.find(socket) == clients_.end()) {
+    throw std::runtime_error("error");
   }
 }
