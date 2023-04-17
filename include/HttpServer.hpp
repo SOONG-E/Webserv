@@ -6,6 +6,7 @@
 
 #include "Client.hpp"
 #include "ServerBlock.hpp"
+#include "exception.hpp"
 
 class HttpServer {
  public:
@@ -14,6 +15,10 @@ class HttpServer {
 
   HttpServer(const ServerBlock &server_block);
   ~HttpServer();
+
+  const Location &findLocation(const std::string &request_uri) const;
+  std::size_t find(const std::string &uri) const;
+  const Location &redirect(const Location &location) const;
 
  private:
   const LocationType locations_;
