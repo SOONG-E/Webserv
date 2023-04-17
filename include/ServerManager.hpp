@@ -3,7 +3,10 @@
 
 #include <fcntl.h>
 #include <netdb.h>
+#include <sys/event.h>
 #include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include <exception>
@@ -32,6 +35,7 @@ class ServerManager {
   int createListenSocket(void) const;
   struct addrinfo *getAddrInfo(const std::string ip, const std::string port);
 
+  const int kq_;
   TcpServerType tcp_servers_;
   HttpServerType http_servers_;
   std::set<int> listen_sockets_;

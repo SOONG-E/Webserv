@@ -1,6 +1,11 @@
 #include "ServerManager.hpp"
 
-ServerManager::ServerManager(const Config &config) { registerServer(config); };
+ServerManager::ServerManager(const Config &config) : kq_(kqueue()) {
+  registerServer(config);
+  if (kq_ == -1) {
+    throw std::runtime_error(strerror(errno));
+  }
+};
 
 ServerManager::~ServerManager() {}
 
