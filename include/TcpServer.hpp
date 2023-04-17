@@ -17,14 +17,17 @@ class TcpServer {
 
   std::string getIp(void) const;
   std::string getPort(void) const;
+  HttpServer *getDefaultServer(void) const;
 
   void appendServer(const ServerBlock &servers,
                     const HttpServer *virtual_server);
 
  private:
-  const std::string ip_;
-  const std::string port_;  // 타입 변경하기
+  void setDefaultServer(HttpServer *default_server);
 
+  const std::string ip_;
+  const std::string port_;
+  HttpServer *default_server_;
   std::map<std::string, const HttpServer *> virtual_servers_;
 };
 
