@@ -1,9 +1,7 @@
 #ifndef UTILITY_HPP_
 #define UTILITY_HPP_
 
-#include <ctime>
 #include <sstream>
-#include <string>
 #include <vector>
 
 #include "ResponseStatus.hpp"
@@ -21,6 +19,8 @@ std::string readFile(const std::string& filename);
 int removeDirectory(const std::string& path);
 std::vector<std::string> split(const std::string& content,
                                const std::string& delim = WHITESPACE);
+std::set<std::string> splitToSet(const std::string& content,
+                                 const std::string& delim = WHITESPACE);
 std::size_t stoi(const std::string& value);
 std::string trim(const std::string& str);
 std::string getIpFromKey(const std::string key);

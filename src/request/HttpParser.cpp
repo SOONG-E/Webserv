@@ -27,27 +27,27 @@ const std::size_t HttpParser::HEADER_MAX_SIZE = 8192;
 /*===============================================================*/
 
 void HttpParser::parseRequest(HttpRequest& request) {
-  if (request.isHeaderSet_ == false) {
+  if (request.isHeaderSet() == false) {
     parseHeader(request);
   }
-  if (request.isHeaderSet_ == true && request.isCompletedRequest_ == false) {
+  if (request.isHeaderSet() == true && request.isCompleted() == false) {
     parsebBody(request);
   }
 }
 
 void HttpParser::parseHeader(HttpRequest& request) {
-  std::size_t bound_pos = request.buffer_.find(DOUBLE_CRLF);
-  if (request.buffer_.size() <= HEADER_MAX_SIZE &&
-      bound_pos == std::string::npos) {
+  std::string buffer = request.getBuffer();
+  std::size_t bound_pos = buffer.find(DOUBLE_CRLF);
+  if (buffer.size() <= HEADER_MAX_SIZE && bound_pos == std::string::npos) {
     return;
   }
   if (HEADER_MAX_SIZE < bound_pos) {
     throw ResponseException(C413);
   }
-  request.isHeaderSet_ = true;
-  separateHeader(request, request.buffer_.substr(0, bound_pos));
+  request.setIsHeaderSet(true);
+  separateHeader(request, buffer.substr(0, bound_pos));
   reserveBodySpace(request);
-  request.buffer_ = request.buffer_.substr(bound_pos + DOUBLE_CRLF.size());
+  request.setBuffer(buffer.substr(bound_pos + DOUBLE_CRLF.size()));
 }
 
 void HttpParser::separateHeader(HttpRequest& request,
@@ -65,7 +65,7 @@ void HttpParser::reserveBodySpace(HttpRequest& request) {
     return;
   }
   std::size_t length = ::stoi(content_length);
-  request.buffer_.reserve(length);
+  request.reserveBodySpace(length);
 }
 
 void HttpParser::parseRequestLine(HttpRequest& request,
@@ -133,8 +133,7 @@ void HttpParser::parseQueryString(HttpRequest& request) {
   }
   std::string query_string = uri.substr(query_boundary + 1);
   request.setUri(uri.substr(0, query_boundary));
-  if (request.getMethod() == METHODS[GET] ||
-      request.getMethod() == METHODS[HEAD]) {
+  if (request.getMethod() == "GET" || request.getMethod() == "HEAD") {
     request.setQueryString(query_string);
   }
 }
@@ -144,10 +143,11 @@ void HttpParser::parseQueryString(HttpRequest& request) {
 /*==========================*/
 
 void HttpParser::parsebBody(HttpRequest& request) {
-  if (request.isHeaderSet_ == true && request.getMethod() != METHODS[POST]) {
-    request.isCompletedRequest_ = true;
+  if (request.isHeaderSet() == true && request.getMethod() != "POST") {
+    request.setIsCompleted(true);
     return;
   }
+  std::string buffer = request.getBuffer();
   if (!request.getHeader("CONTENT-LENGTH").empty()) {
     if (request.getContentLength() == static_cast<std::size_t>(-1)) {
       try {
@@ -157,19 +157,19 @@ void HttpParser::parsebBody(HttpRequest& request) {
       }
     }
     std::size_t content_length = request.getContentLength();
-    if (content_length < request.buffer_.size()) {
+    if (content_length < buffer.size()) {
       throw ResponseException(C413);
     }
-    if (content_length == request.buffer_.size()) {
-      request.setBody(request.buffer_);
-      request.isCompletedRequest_ = true;
+    if (content_length == buffer.size()) {
+      request.setBody(buffer);
+      request.setIsCompleted(true);
     }
     return;
   }
   if (request.getHeader("TRANSFER-ENCODING") != "chunked") {
     throw ResponseException(C411);
   }
-  if (request.buffer_.find(DOUBLE_CRLF) == std::string::npos) return;
+  if (buffer.find(DOUBLE_CRLF) == std::string::npos) return;
   unchunkMessage(request);
 }
 
@@ -177,7 +177,7 @@ void HttpParser::unchunkMessage(HttpRequest& request) {
   std::string content;
   std::size_t content_length = 0;
   std::size_t chunk_size = 0;
-  std::vector<std::string> chunks = splitByCRLF(request.buffer_);
+  std::vector<std::string> chunks = splitByCRLF(request.getBuffer());
   if (chunks.size() < 1) throw ResponseException(C400);
   chunk_size = hexToInt(chunks[0]);
   std::size_t idx = 1;
@@ -189,7 +189,7 @@ void HttpParser::unchunkMessage(HttpRequest& request) {
   }
   request.setContentLength(content_length);
   request.setBody(content);
-  request.isCompletedRequest_ = true;
+  request.setIsCompleted(true);
 }
 
 /*==========================*/

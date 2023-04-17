@@ -2,6 +2,8 @@
 #define CONSTANT_HPP_
 
 #include <ctime>
+#include <map>
+#include <set>
 #include <string>
 
 enum MethodIndex {

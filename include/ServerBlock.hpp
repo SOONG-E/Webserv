@@ -1,11 +1,6 @@
 #ifndef SERVER_BLOCK_HPP_
 #define SERVER_BLOCK_HPP_
 
-#include <map>
-#include <set>
-#include <string>
-#include <vector>
-
 #include "Listen.hpp"
 #include "Location.hpp"
 

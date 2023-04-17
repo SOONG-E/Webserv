@@ -5,10 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "HttpParser.hpp"
-
-class HttpParser;
-
 class HttpRequest {
   static const std::size_t DEFAULT_CONTENT_LENGTH;
 
@@ -33,6 +29,7 @@ class HttpRequest {
   std::string getHeader(const std::string& key) const;
   std::string getCookie(const std::string& name) const;
   const std::string& getBody(void) const;
+  std::string& getBuffer(void);
 
   void setMethod(const std::string& method);
   void setUri(const std::string& uri);
@@ -42,12 +39,16 @@ class HttpRequest {
   void setContentLength(std::size_t content_length);
   void addHeader(const std::string& key, const std::string& value);
   void setBody(const std::string& body);
+  void setBuffer(const std::string& buffer);
+  void setIsHeaderSet(bool is_header_set);
+  void setIsCompleted(bool is_completed_request);
+  void reserveBodySpace(std::size_t size);
 
-  bool hasCookie() const;
-  bool isCompleted() const;
+  bool hasCookie(void) const;
+  bool isHeaderSet(void) const;
+  bool isCompleted(void) const;
 
  private:
-  friend class HttpParser;
   std::string method_;
   std::string uri_;
   std::string host_;
@@ -57,8 +58,8 @@ class HttpRequest {
   headers_type headers_;
   cookie_list_type cookie_;
   std::string body_;
-  bool isHeaderSet_;
-  bool isCompletedRequest_;
+  bool is_header_set_;
+  bool is_completed_request_;
 
   std::string buffer_;
 };

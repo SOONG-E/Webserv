@@ -11,6 +11,9 @@
 #include "SocketAddress.hpp"
 #include "TcpServer.hpp"
 
+class TcpServer;
+class HttpServer;
+
 class Client {
  public:
   Client(const int fd, const TcpServer* tcp_server,
@@ -46,7 +49,7 @@ class Client {
   HttpRequest request_;
   std::string response_;
   std::string status_;
-  bool is_response_ready;
+  bool is_response_ready_;
 };
 
 #endif

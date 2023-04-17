@@ -6,8 +6,6 @@
 
 #include "HttpRequest.hpp"
 
-class HttpRequest;
-
 class HttpParser {
   static const std::size_t HEADER_MAX_SIZE;
 

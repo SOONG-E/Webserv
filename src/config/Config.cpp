@@ -27,12 +27,13 @@ void Config::addServerBlock(const ServerBlock& server_block) {
 }
 
 void Config::validate(const ServerBlock& server_block) const {
-  static std::size_t total_count;
-  static std::set<std::string> total_keys;
-  std::set<std::string> each_keys = server_block.keys();
-  total_count += each_keys.size();
-  total_keys.insert(each_keys.begin(), each_keys.end());
-  if (total_count != total_keys.size()) {
-    Error::log("Server configuration duplicated", "", EXIT_FAILURE);
-  }
+  (void)server_block;
+  // static std::size_t total_count;
+  // static std::set<std::string> total_keys;
+  // std::set<std::string> each_keys = server_block.keys();
+  // total_count += each_keys.size();
+  // total_keys.insert(each_keys.begin(), each_keys.end());
+  // if (total_count != total_keys.size()) {
+  //   Error::log("Server configuration duplicated", "", EXIT_FAILURE);
+  // }
 }

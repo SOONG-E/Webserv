@@ -9,19 +9,25 @@ Client::Client(const int fd, const TcpServer* tcp_server,
     : fd_(fd),
       tcp_server_(tcp_server),
       address_(address),
-      is_response_ready(false) {}
+      http_server_(NULL),
+      is_response_ready_(false) {}
 
 Client::Client(const Client& origin)
     : fd_(origin.fd_),
       tcp_server_(origin.tcp_server_),
       address_(origin.address_),
-      is_response_ready(origin.is_response_ready) {}
+      http_server_(origin.http_server_),
+      location_(origin.location_),
+      request_(origin.request_),
+      response_(origin.response_),
+      status_(origin.status_),
+      is_response_ready_(origin.is_response_ready_) {}
 
 Client::~Client() {}
 
 /*======================//
  Getter
-/*======================*/
+========================*/
 
 int Client::getFd() const { return fd_; }
 HttpServer* Client::getHttpServer(void) const { return http_server_; }
@@ -30,11 +36,11 @@ std::string Client::getResponse(void) const { return response_; }
 
 /*======================//
  Setter
-/*======================*/
+========================*/
 
 /*======================//
  process
-/*======================*/
+========================*/
 
 /* recognize type of event */
 void Client::processEvent(const int event_type) {
@@ -74,7 +80,7 @@ std::string Client::readData(void) {
   char buffer[BUFFER_SIZE];
   std::size_t read_bytes = recv(fd_, &buffer, BUFFER_SIZE, 0);
 
-  if (read_bytes == -1) {
+  if (read_bytes == static_cast<std::size_t>(-1)) {
     throw;
   }
   if (read_bytes == 0) {
@@ -86,9 +92,9 @@ std::string Client::readData(void) {
 /* lookup associated virtual server
 if there isn't a matched server then default server is setted */
 void Client::lookUpHttpServer(void) {
-  const TcpServer::HttpServerType virtual_servers =
+  const std::map<std::string, const HttpServer*> virtual_servers =
       tcp_server_->getVirtualServers();
-  TcpServer::HttpServerType::const_iterator server =
+  std::map<std::string, const HttpServer*>::const_iterator server =
       virtual_servers.find(request_.getHost());
   if (server == virtual_servers.end()) {
     http_server_ = tcp_server_->getDefaultServer();

@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "ResponseStatus.hpp"
+#include "HttpParser.hpp"
 #include "constant.hpp"
 
 const std::size_t HttpRequest::DEFAULT_CONTENT_LENGTH = -1;
@@ -14,22 +14,26 @@ HttpRequest::HttpRequest(const HttpRequest& origin)
     : method_(origin.method_),
       uri_(origin.uri_),
       host_(origin.host_),
+      query_string_(origin.query_string_),
+      port_(origin.port_),
       content_length_(origin.content_length_),
       headers_(origin.headers_),
       body_(origin.body_),
-      isHeaderSet_(false),
-      isCompletedRequest_(false) {}
+      is_header_set_(false),
+      is_completed_request_(false) {}
 
 HttpRequest HttpRequest::operator=(const HttpRequest& origin) {
   if (this != &origin) {
     method_ = origin.method_;
     uri_ = origin.uri_;
     host_ = origin.host_;
+    query_string_ = origin.query_string_;
+    port_ = origin.port_;
     content_length_ = origin.content_length_;
     headers_ = origin.headers_;
     body_ = origin.body_;
-    isHeaderSet_ = origin.isHeaderSet_;
-    isCompletedRequest_ = origin.isCompletedRequest_;
+    is_header_set_ = origin.is_header_set_;
+    is_completed_request_ = origin.is_completed_request_;
   }
   return *this;
 }
@@ -78,6 +82,8 @@ std::string HttpRequest::getCookie(const std::string& name) const {
 
 const std::string& HttpRequest::getBody(void) const { return body_; }
 
+std::string& HttpRequest::getBuffer(void) { return buffer_; }
+
 /*==========================*/
 //         Setter           //
 /*==========================*/
@@ -103,8 +109,6 @@ void HttpRequest::setCookie(const cookie_list_type& cookie) {
   cookie_ = cookie;
 }
 
-void HttpRequest::setBody(const std::string& body) { body_ = body; }
-
 void HttpRequest::setContentLength(std::size_t content_length) {
   content_length_ = content_length;
 }
@@ -113,15 +117,29 @@ void HttpRequest::addHeader(const std::string& key, const std::string& value) {
   headers_[key].push_back(value);
 }
 
+void HttpRequest::setBody(const std::string& body) { body_ = body; }
+
+void HttpRequest::setBuffer(const std::string& buffer) { buffer_ = buffer; }
+void HttpRequest::setIsHeaderSet(bool is_header_set) {
+  is_header_set_ = is_header_set;
+}
+void HttpRequest::setIsCompleted(bool is_completed_request) {
+  is_completed_request_ = is_completed_request;
+}
+
+void HttpRequest::reserveBodySpace(std::size_t size) { buffer_.reserve(size); }
+
 /*==========================*/
 //  Check member variable   //
 /*==========================*/
 
-bool HttpRequest::hasCookie() const {
+bool HttpRequest::hasCookie(void) const {
   if (getHeader("COOKIE").empty() || getCookie("Session-ID").empty()) {
     return false;
   }
   return true;
 }
 
-bool HttpRequest::isCompleted() const { return isCompletedRequest_; }
+bool HttpRequest::isHeaderSet(void) const { return is_header_set_; }
+
+bool HttpRequest::isCompleted(void) const { return is_completed_request_; }

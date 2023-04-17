@@ -11,7 +11,7 @@ ServerManager::~ServerManager() {}
 
 /*======================//
  initialize server
-/*======================*/
+========================*/
 
 /* register TcpServer, HttpServer */
 void ServerManager::registerServer(const Config &config) {
@@ -59,7 +59,7 @@ HttpServer *ServerManager::createHttpServer(const ServerBlock &server_block) {
 
 /*======================//
  set server
-/*======================*/
+========================*/
 
 void ServerManager::setServer(void) { bindServers(); }
 
@@ -103,8 +103,8 @@ int ServerManager::createListenSocket(void) const {
 }
 
 /* get addrinfo using information of server */
-struct addrinfo *ServerManager::getAddrInfo(const std::string ip,
-                                            const std::string port) {
+struct addrinfo *ServerManager::getAddrInfo(const std::string &ip,
+                                            const std::string &port) {
   struct addrinfo hints, *addr_info;
 
   std::memset(&hints, 0, sizeof(hints));
@@ -122,7 +122,7 @@ struct addrinfo *ServerManager::getAddrInfo(const std::string ip,
 
 /*======================//
  server run
-/*======================*/
+========================*/
 
 /* run Server with main loop */
 void ServerManager::runServer(void) {
@@ -139,7 +139,7 @@ void ServerManager::runServer(void) {
   }
 }
 
-/* recognize type of event */
+/* recognize where is event occurred */
 void ServerManager::processEventOnQueue(const int events) {
   struct kevent event;
   Client *client;
@@ -171,8 +171,6 @@ void ServerManager::acceptNewClient(const int server_socker,
     close(client_fd);
     throw std::runtime_error(strerror(errno));
   }
-  Client *new_client = new Client(client_fd, tcp_server,
-                                  SocketAddress(client_addr, client_addrlen));
   createClient(client_fd, tcp_server,
                SocketAddress(client_addr, client_addrlen));
 }
@@ -188,7 +186,7 @@ void ServerManager::createClient(const int client_fd,
 
 /*======================//
  manage event
-/*======================*/
+========================*/
 
 /* EV_SET interface */
 void ServerManager::createEvent(uintptr_t ident, int16_t filter, uint16_t flags,
@@ -205,7 +203,7 @@ void ServerManager::createListenEvent(int fd, TcpServer *server) {
 
 /*======================//
  utils
-/*======================*/
+========================*/
 
 void ServerManager::validClientSocket(const int socket) {
   if (clients_.find(socket) == clients_.end()) {

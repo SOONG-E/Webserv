@@ -17,7 +17,7 @@ TcpServer::~TcpServer() {}
 
 /*======================//
  Setter
-/*======================*/
+========================*/
 
 void TcpServer::setDefaultServer(HttpServer *default_server) {
   default_server_ = default_server;
@@ -25,17 +25,18 @@ void TcpServer::setDefaultServer(HttpServer *default_server) {
 
 /*======================//
  Getter
-/*======================*/
+========================*/
 
 std::string TcpServer::getIp(void) const { return ip_; }
 std::string TcpServer::getPort(void) const { return port_; }
 HttpServer *TcpServer::getDefaultServer(void) const { return default_server_; }
-HttpServerType TcpServer::getVirtualServers(void) const {
+std::map<std::string, const HttpServer *> TcpServer::getVirtualServers(
+    void) const {
   return virtual_servers_;
 }
 /*======================//
  process
-/*======================*/
+========================*/
 
 /* append new virtual server in virtual_servers */
 void TcpServer::appendServer(const ServerBlock &servers,

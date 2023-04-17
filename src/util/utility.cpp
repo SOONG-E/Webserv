@@ -88,6 +88,23 @@ std::vector<std::string> split(const std::string& content,
   return substrings;
 }
 
+std::set<std::string> splitToSet(const std::string& content,
+                                 const std::string& delim) {
+  std::set<std::string> substrings;
+  std::size_t start = 0;
+  std::size_t end;
+  while (start != content.size()) {
+    end = content.find_first_of(delim, start);
+    if (end == std::string::npos) {
+      substrings.insert(content.substr(start));
+      break;
+    }
+    substrings.insert(content.substr(start, end - start));
+    start = end + 1;
+  }
+  return substrings;
+}
+
 std::size_t stoi(const std::string& value) {
   std::istringstream iss(value);
   std::size_t num;
