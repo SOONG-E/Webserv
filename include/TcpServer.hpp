@@ -16,8 +16,7 @@ class TcpServer {
   HttpServer *getDefaultServer(void) const;
   std::map<std::string, const HttpServer *> getVirtualServers(void) const;
 
-  void appendServer(const ServerBlock &servers,
-                    const HttpServer *virtual_server);
+  void appendServer(const ServerBlock &servers, HttpServer *virtual_server);
 
  private:
   void setDefaultServer(HttpServer *default_server);

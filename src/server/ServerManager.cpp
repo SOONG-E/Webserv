@@ -46,7 +46,9 @@ TcpServer *ServerManager::seekTcpServer(const std::string &key) {
 
 /* create new TcpServer */
 TcpServer *ServerManager::createTcpServer(const std::string &key) {
-  return new TcpServer(key);
+  TcpServer *new_server = new TcpServer(key);
+  tcp_servers_[key] = new_server;
+  return new_server;
 }
 
 /* create new HttpServer and append it to http_servers list */

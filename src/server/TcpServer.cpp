@@ -40,9 +40,9 @@ std::map<std::string, const HttpServer *> TcpServer::getVirtualServers(
 
 /* append new virtual server in virtual_servers */
 void TcpServer::appendServer(const ServerBlock &servers,
-                             const HttpServer *virtual_server) {
+                             HttpServer *virtual_server) {
   if (default_server_ == NULL) {
-    setDefaultServer(default_server_);
+    setDefaultServer(virtual_server);
   }
   for (std::set<std::string>::iterator it = servers.server_names.begin();
        it != servers.server_names.end(); ++it) {
