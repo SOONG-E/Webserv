@@ -62,6 +62,7 @@ void HttpParser::separateHeader(HttpRequest& request,
 void HttpParser::reserveBodySpace(HttpRequest& request) {
   std::string content_length = request.getHeader("CONTENT-LENGTH");
   if (content_length.empty() == true) {
+    request.setContentLength(0);
     return;
   }
   std::size_t length = ::stoi(content_length);
