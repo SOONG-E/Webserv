@@ -17,6 +17,8 @@ enum MethodIndex {
   CONNECT,
 };
 
+const std::string DEFAULT_ERROR_PAGE = "html/error.html";
+
 const int CAPABLE_EVENT_SIZE = 8;
 const std::size_t BUFFER_SIZE = 65536;
 const int DEFAULT_FD = -1;
