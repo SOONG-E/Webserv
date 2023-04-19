@@ -13,15 +13,19 @@ struct Response StaticContentHandler::handle(Client *client) {
 
 std::string StaticContentHandler::generateBody(Client *client) {
   std::string body;
-  if (client->isErrorCode() == true) {
-    body = loadErrorPage(client->getHttpServer(), client->getStatusInt());
-    return body;
-  }
   std::string uri = client->getFullUri();
-  if (*uri.rbegin() == '/') {
-    uri.pop_back();  // 수정!!!!
-  }
+
   try {
+    if (client->getRequest().getMethod() == METHODS[DELETE]) {
+      deleteFile(client, uri);
+    }
+    if (client->isErrorCode() == true) {
+      body = loadErrorPage(client->getHttpServer(), client->getStatusInt());
+      return body;
+    }
+    if (*uri.rbegin() == '/') {
+      uri.pop_back();  // 수정!!!!
+    }
     body = ::readFile(uri);
   } catch (FileOpenException &e) {
     client->setStatus(C404);
@@ -38,4 +42,11 @@ std::string StaticContentHandler::loadErrorPage(HttpServer *http_server,
   std::string uri = http_server->getErrorPage(ResponseStatus::CODES[status]);
 
   return ::readFile(uri);
+}
+
+void StaticContentHandler::deleteFile(Client *client, const std::string &uri) {
+  if (unlink(uri.c_str()) == -1) {
+    throw FileOpenException();
+  }
+  client->setStatus(C204);
 }
