@@ -8,6 +8,7 @@
 #include <string>
 
 #include "HttpRequest.hpp"
+#include "Response.hpp"
 #include "SocketAddress.hpp"
 #include "TcpServer.hpp"
 
@@ -25,6 +26,12 @@ class Client {
   HttpServer* getHttpServer(void) const;
   HttpRequest getRequest(void) const;
   std::string getResponse(void) const;
+  std::string getStatus(void) const;
+  int getStatusInt(void) const;
+  std::string getFullUri(void) const;
+
+  void setStatus(int status);
+  void setStatus(std::string &status);
 
   void processEvent(const int event_type);
 
@@ -35,10 +42,14 @@ class Client {
   /* handler */
   void lookUpHttpServer(void);
   void lookUpLocation(void);
+  void setFullUri(void);
   void passRequestToHandler(void);
+  void setToSend(bool set);
 
   /* response */
   void writeData(void);
+
+  bool isErrorCode(void);
 
  private:
   const int fd_;
@@ -47,6 +58,7 @@ class Client {
   HttpServer* http_server_;
   Location location_;
   HttpRequest request_;
+  std::string fullUri_;
   std::string response_;
   std::string status_;
   bool is_response_ready_;

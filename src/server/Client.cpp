@@ -33,10 +33,16 @@ int Client::getFd() const { return fd_; }
 HttpServer* Client::getHttpServer(void) const { return http_server_; }
 HttpRequest Client::getRequest(void) const { return request_; }
 std::string Client::getResponse(void) const { return response_; }
+std::string Client::getStatus(void) const { return status_; }
+int Client::getStatusInt(void) const { return ::stoi(status_); }
+std::string Client::getFullUri(void) const { return fullUri_; }
 
 /*======================//
  Setter
 ========================*/
+
+void Client::setStatus(int status) { status_ = toString(status); }
+void Client::setStatus(std::string& status) { status_ = status; }
 
 /*======================//
  process
@@ -66,10 +72,15 @@ void Client::processEvent(const int event_type) {
 void Client::processRequest(void) {
   std::string data = readData();
   request_.tailRequest(data);
-  request_.parse();
+  try {
+    request_.parse();
+  } catch (std::exception& e) {
+    // error handling
+  }
   if (request_.isCompleted() == true) {
     lookUpHttpServer();
     lookUpLocation();
+    setFullUri();
     passRequestToHandler();
   }
   //
@@ -108,17 +119,61 @@ void Client::lookUpLocation(void) {
   location_ = http_server_->findLocation(request_.getUri());
 }
 
-/* pass the request to eligible handler */
-void Client::passRequestToHandler(void) {
-  if (location_.isCgi() == true) {
-    // cgi handler
-    return;
+void Client::setFullUri(void) {
+  std::string root = location_.getRoot();
+  if (*root.rbegin() != '/') {
+    root += "/";
   }
-  if (location_.getAutoindex() == true) {
-    // autoindex handle
-    return;
-  }
-  // static handler
+  std::string uri = request_.getUri();
+  fullUri_ = uri.replace(0, location_.getUri().size(), root);
 }
 
-void Client::writeData(void) {}
+/* pass the request to eligible handler */
+void Client::passRequestToHandler(void) {
+  struct Response response_from_upsteam;
+  try {
+    if (location_.isCgi() == true) {
+      // cgi handler
+    }
+    if (location_.getAutoindex() == true) {
+      // autoindex handle
+    }
+    // static handler
+    // response_ = ResponseGenerator(response_from_upsteam);
+    // setToSend(true);
+  } catch (std::exception& e) {
+    // static handler
+  }
+}
+
+/* turn on/off event, is_response_ready */
+void Client::setToSend(bool set) {
+  is_response_ready_ = set;
+  if (set == true) {
+    // 이벤트 처리로 writable기다릴 수 있게 하기
+    return;
+  }
+  // writable 이벤트 끄기
+}
+
+/* send response to client */
+void Client::writeData(void) {
+  std::size_t write_bytes;
+  if (is_response_ready_ == true) {
+    write_bytes = ::send(fd_, response_.c_str(), response_.size(), 0);
+    if (write_bytes == -1) {
+      // error handling
+    }
+  }
+  response_.erase(0, write_bytes);
+  if (response_.empty() == true) {
+    setToSend(false);
+  }
+}
+
+bool Client::isErrorCode(void) {
+  if (status_[0] == '2') {
+    return true;
+  }
+  return false;
+}
