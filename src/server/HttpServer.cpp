@@ -40,3 +40,10 @@ const Location& HttpServer::redirect(const Location& location) const {
   }
   return findLocation(location.getReturnUrl());
 }
+
+const std::string& HttpServer::getErrorPage(const std::string& code) const {
+  if (error_pages_.find(code) == error_pages_.end()) {
+    return DEFAULT_ERROR_PAGE;
+  }
+  return error_pages_.at(code);
+}
