@@ -24,6 +24,9 @@ class ServerManager {
   void setServer(void);
   void runServer(void);
 
+  void createEvent(uintptr_t ident, int16_t filter, uint16_t flags,
+                   uint32_t fflags, intptr_t data, void *udata);
+
  private:
   typedef std::map<std::string, TcpServer *> TcpServerType;
   typedef std::vector<HttpServer *> HttpServerType;
@@ -40,8 +43,6 @@ class ServerManager {
   int createListenSocket(void) const;
   struct addrinfo *getAddrInfo(const std::string &ip, const std::string &port);
 
-  void createEvent(uintptr_t ident, int16_t filter, uint16_t flags,
-                   uint32_t fflags, intptr_t data, void *udata);
   void createListenEvent(int fd, TcpServer *server);
 
   void processEventOnQueue(const int events);

@@ -169,7 +169,7 @@ void ServerManager::acceptNewClient(const int server_socker,
     throw std::runtime_error(strerror(errno));
   }
 
-  if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == ERROR<int>()) {
+  if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
     close(client_fd);
     throw std::runtime_error(strerror(errno));
   }
@@ -181,7 +181,7 @@ void ServerManager::acceptNewClient(const int server_socker,
 void ServerManager::createClient(const int client_fd,
                                  const TcpServer *tcp_server,
                                  const SocketAddress socket_address) {
-  Client *new_client = new Client(client_fd, tcp_server, socket_address);
+  Client *new_client = new Client(client_fd, tcp_server, socket_address, *this);
   createEvent(client_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new_client);
   clients_[client_fd] = new_client;
 }

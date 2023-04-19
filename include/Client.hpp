@@ -9,6 +9,7 @@
 
 #include "HttpRequest.hpp"
 #include "Response.hpp"
+#include "ServerManager.hpp"
 #include "SocketAddress.hpp"
 #include "TcpServer.hpp"
 
@@ -18,7 +19,7 @@ class HttpServer;
 class Client {
  public:
   Client(const int fd, const TcpServer* tcp_server,
-         const SocketAddress& address);
+         const SocketAddress& address, ServerManager manager);
   Client(const Client& origin);
   ~Client();
 
@@ -31,7 +32,7 @@ class Client {
   std::string getFullUri(void) const;
 
   void setStatus(int status);
-  void setStatus(std::string &status);
+  void setStatus(std::string& status);
 
   void processEvent(const int event_type);
 
@@ -52,6 +53,7 @@ class Client {
   bool isErrorCode(void);
 
  private:
+  ServerManager manager_;
   const int fd_;
   const TcpServer* tcp_server_;
   const SocketAddress address_;

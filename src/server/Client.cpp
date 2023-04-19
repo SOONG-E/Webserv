@@ -5,12 +5,13 @@
 #include <iostream>
 
 Client::Client(const int fd, const TcpServer* tcp_server,
-               const SocketAddress& address)
+               const SocketAddress& address, ServerManager manager)
     : fd_(fd),
       tcp_server_(tcp_server),
       address_(address),
       http_server_(NULL),
-      is_response_ready_(false) {}
+      is_response_ready_(false),
+      manager_(manager) {}
 
 Client::Client(const Client& origin)
     : fd_(origin.fd_),
@@ -21,7 +22,8 @@ Client::Client(const Client& origin)
       request_(origin.request_),
       response_(origin.response_),
       status_(origin.status_),
-      is_response_ready_(origin.is_response_ready_) {}
+      is_response_ready_(origin.is_response_ready_),
+      manager_(origin.manager_) {}
 
 Client::~Client() {}
 
