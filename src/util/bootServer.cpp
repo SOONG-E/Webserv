@@ -6,7 +6,9 @@ static void checkArgs(int argc) {
   }
 }
 
-static void printLogo() { std::cout << readFile("./static/Webserv.art"); }
+static void printLogo() {
+  std::cout << readFile("./static/Webserv.art") << std::endl;
+}
 
 static void registerSignalHandlers() {
   signal(SIGPIPE, SIG_IGN);
@@ -29,7 +31,6 @@ ServerManager setServer(int argc, char** argv) {
   } catch (std::exception& e) {
     // error handling
   }
-
   const Config config = createConfig(argc, argv);
   ServerManager manager(config);
   manager.setServer();
