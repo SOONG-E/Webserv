@@ -5,16 +5,18 @@
 #include <iostream>
 
 Client::Client(const int fd, const TcpServer* tcp_server,
-               const SocketAddress& address, ServerManager manager)
-    : fd_(fd),
+               const SocketAddress& address, ServerManager* manager)
+    : manager_(manager),
+      fd_(fd),
       tcp_server_(tcp_server),
       address_(address),
       http_server_(NULL),
-      is_response_ready_(false),
-      manager_(manager) {}
+      status_("200"),
+      is_response_ready_(false) {}
 
 Client::Client(const Client& origin)
-    : fd_(origin.fd_),
+    : manager_(origin.manager_),
+      fd_(origin.fd_),
       tcp_server_(origin.tcp_server_),
       address_(origin.address_),
       http_server_(origin.http_server_),
@@ -22,8 +24,7 @@ Client::Client(const Client& origin)
       request_(origin.request_),
       response_(origin.response_),
       status_(origin.status_),
-      is_response_ready_(origin.is_response_ready_),
-      manager_(origin.manager_) {}
+      is_response_ready_(origin.is_response_ready_) {}
 
 Client::~Client() {}
 
@@ -33,6 +34,7 @@ Client::~Client() {}
 
 int Client::getFd() const { return fd_; }
 HttpServer* Client::getHttpServer(void) const { return http_server_; }
+Location Client::getLocation(void) const { return location_; }
 HttpRequest Client::getRequest(void) const { return request_; }
 std::string Client::getResponse(void) const { return response_; }
 std::string Client::getStatus(void) const { return status_; }
@@ -43,8 +45,7 @@ std::string Client::getFullUri(void) const { return fullUri_; }
  Setter
 ========================*/
 
-void Client::setStatus(int status) { status_ = toString(status); }
-void Client::setStatus(std::string& status) { status_ = status; }
+void Client::setStatus(int status) { status_ = ResponseStatus::CODES[status]; }
 
 /*======================//
  process
@@ -140,33 +141,37 @@ void Client::passRequestToHandler(void) {
     if (location_.getAutoindex() == true) {
       // autoindex handle
     }
-    // static handler
-    // response_ = ResponseGenerator(response_from_upsteam);
-    // setToSend(true);
+    response_from_upsteam = StaticContentHandler::handle(this);
   } catch (std::exception& e) {
     // static handler
+    std::cout << "error" << std::endl;
   }
+  response_ = ResponseGenerator::generateResponse(*this, response_from_upsteam);
+  setToSend(true);
 }
 
 /* turn on/off event, is_response_ready */
 void Client::setToSend(bool set) {
   is_response_ready_ = set;
   if (set == true) {
-    // 이벤트 처리로 writable기다릴 수 있게 하기
+    manager_->createEvent(fd_, EVFILT_READ | EVFILT_WRITE, EV_ADD | EV_ENABLE,
+                          0, 0, this);
     return;
   }
-  // writable 이벤트 끄기
+  manager_->createEvent(fd_, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, this);
 }
 
 /* send response to client */
 void Client::writeData(void) {
   std::size_t write_bytes;
-  if (is_response_ready_ == true) {
-    write_bytes = ::send(fd_, response_.c_str(), response_.size(), 0);
-    if (write_bytes == -1) {
-      // error handling
-    }
+  if (is_response_ready_ == false) {
+    return;
   }
+  write_bytes = ::send(fd_, response_.c_str(), response_.size(), 0);
+  if (write_bytes == ERROR<std::size_t>()) {
+    // error handling
+  }
+
   response_.erase(0, write_bytes);
   if (response_.empty() == true) {
     setToSend(false);
@@ -174,7 +179,7 @@ void Client::writeData(void) {
 }
 
 bool Client::isErrorCode(void) {
-  if (status_[0] == '2') {
+  if (status_.size() == 3 && status_[0] == '2') {
     return true;
   }
   return false;

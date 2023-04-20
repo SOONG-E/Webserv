@@ -16,6 +16,9 @@
 #include "Config.hpp"
 #include "TcpServer.hpp"
 
+class SocketAddress;
+class Client;
+
 class ServerManager {
  public:
   ServerManager(const Config &config);

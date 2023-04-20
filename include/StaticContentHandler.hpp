@@ -5,6 +5,9 @@
 
 #include "Client.hpp"
 
+class HttpServer;
+class Client;
+
 class StaticContentHandler {
  public:
   static struct Response handle(Client *client);

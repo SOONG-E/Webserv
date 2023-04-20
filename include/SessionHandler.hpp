@@ -7,6 +7,8 @@
 #include "Client.hpp"
 #include "Session.hpp"
 
+class HttpServer;
+
 class SessionHandler {
  public:
   typedef std::string session_key_type;
