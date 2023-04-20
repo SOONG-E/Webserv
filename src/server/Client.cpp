@@ -154,8 +154,7 @@ void Client::passRequestToHandler(void) {
 void Client::setToSend(bool set) {
   is_response_ready_ = set;
   if (set == true) {
-    manager_->createEvent(fd_, EVFILT_READ | EVFILT_WRITE, EV_ADD | EV_ENABLE,
-                          0, 0, this);
+    manager_->createEvent(fd_, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, this);
     return;
   }
   manager_->createEvent(fd_, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, this);
