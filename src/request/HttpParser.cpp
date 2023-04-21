@@ -36,7 +36,7 @@ void HttpParser::parseRequest(HttpRequest& request) {
 }
 
 void HttpParser::parseHeader(HttpRequest& request) {
-  std::string buffer = request.getBuffer();
+  std::string& buffer = request.getBuffer();
   std::size_t bound_pos = buffer.find(DOUBLE_CRLF);
   if (buffer.size() <= HEADER_MAX_SIZE && bound_pos == std::string::npos) {
     return;
@@ -144,8 +144,9 @@ void HttpParser::parseQueryString(HttpRequest& request) {
 /*==========================*/
 
 void HttpParser::parsebBody(HttpRequest& request) {
-  if (request.isHeaderSet() == true && request.getMethod() != "POST") {
+  if (request.getMethod() != METHODS[POST]) {
     request.setIsCompleted(true);
+    request.setBuffer("");
     return;
   }
   std::string buffer = request.getBuffer();
