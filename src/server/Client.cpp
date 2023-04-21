@@ -91,7 +91,6 @@ void Client::processRequest(void) {
   } catch (const ResponseException& e) {
     passErrorToHandler(e.status);
   } catch (const ConnectionClosedException& e) {
-    unconnectClient();
     throw e;
   } catch (const std::exception& e) {
     passErrorToHandler(C500);
@@ -208,4 +207,3 @@ bool Client::isErrorCode(void) {
 }
 
 void Client::clearClient() { request_ = HttpRequest(); }
-void Client::unconnectClient() { close(fd_); }

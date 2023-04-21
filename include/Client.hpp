@@ -61,7 +61,6 @@ class Client {
 
   bool isErrorCode(void);
   void clearClient(void);
-  void unconnectClient(void);
 
  private:
   ServerManager* manager_;
