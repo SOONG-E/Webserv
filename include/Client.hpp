@@ -14,6 +14,7 @@
 #include "SocketAddress.hpp"
 #include "StaticContentHandler.hpp"
 #include "TcpServer.hpp"
+#include "exception.hpp"
 
 class HttpServer;
 class ServerManager;
@@ -28,12 +29,17 @@ class Client {
 
   int getFd(void) const;
   HttpServer* getHttpServer(void) const;
-  Location getLocation(void) const;
-  HttpRequest getRequest(void) const;
-  std::string getResponse(void) const;
-  std::string getStatus(void) const;
+  Location& getLocation(void);
+  const Location& getLocation(void) const;
+  HttpRequest& getRequest(void);
+  const HttpRequest& getRequest(void) const;
+  std::string& getResponse(void);
+  const std::string& getResponse(void) const;
+  std::string& getStatus(void);
+  const std::string& getStatus(void) const;
   int getStatusInt(void) const;
-  std::string getFullUri(void) const;
+  std::string& getFullUri(void);
+  const std::string& getFullUri(void) const;
 
   void setStatus(int status);
 
@@ -47,6 +53,7 @@ class Client {
   void lookUpHttpServer(void);
   void lookUpLocation(void);
   void setFullUri(void);
+  void passErrorToHandler(int status);
   void passRequestToHandler(void);
   void setToSend(bool set);
 
@@ -54,6 +61,7 @@ class Client {
   void writeData(void);
 
   bool isErrorCode(void);
+  void clearClient(void);
 
  private:
   ServerManager* manager_;

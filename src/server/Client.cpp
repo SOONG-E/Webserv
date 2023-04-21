@@ -34,12 +34,17 @@ Client::~Client() {}
 
 int Client::getFd() const { return fd_; }
 HttpServer* Client::getHttpServer(void) const { return http_server_; }
-Location Client::getLocation(void) const { return location_; }
-HttpRequest Client::getRequest(void) const { return request_; }
-std::string Client::getResponse(void) const { return response_; }
-std::string Client::getStatus(void) const { return status_; }
+Location& Client::getLocation(void) { return location_; }
+const Location& Client::getLocation(void) const { return location_; }
+HttpRequest& Client::getRequest(void) { return request_; }
+const HttpRequest& Client::getRequest(void) const { return request_; }
+std::string& Client::getResponse(void) { return response_; }
+const std::string& Client::getResponse(void) const { return response_; }
+std::string& Client::getStatus(void) { return status_; }
+const std::string& Client::getStatus(void) const { return status_; }
 int Client::getStatusInt(void) const { return ::stoi(status_); }
-std::string Client::getFullUri(void) const { return fullUri_; }
+std::string& Client::getFullUri(void) { return fullUri_; }
+const std::string& Client::getFullUri(void) const { return fullUri_; }
 
 /*======================//
  Setter
@@ -73,20 +78,25 @@ void Client::processEvent(const int event_type) {
 
 /* parse request and pass it to handler */
 void Client::processRequest(void) {
-  std::string data = readData();
-  request_.tailRequest(data);
   try {
+    std::string data = readData();
+    request_.tailRequest(data);
     request_.parse();
-  } catch (std::exception& e) {
-    // error handling
+
+    if (request_.isCompleted() == true) {
+      lookUpHttpServer();
+      lookUpLocation();
+      setFullUri();
+      passRequestToHandler();
+    }
+  } catch (const ResponseException& e) {
+    passErrorToHandler(e.status);
+  } catch (const ConnectionClosedException& e) {
+    clearClient();
+    throw e;
+  } catch (const std::exception& e) {
+    passErrorToHandler(C500);
   }
-  if (request_.isCompleted() == true) {
-    lookUpHttpServer();
-    lookUpLocation();
-    setFullUri();
-    passRequestToHandler();
-  }
-  //
 }
 
 /* read data from socket */
@@ -95,10 +105,10 @@ std::string Client::readData(void) {
   std::size_t read_bytes = recv(fd_, &buffer, BUFFER_SIZE, 0);
 
   if (read_bytes == static_cast<std::size_t>(-1)) {
-    throw;
+    throw ConnectionClosedException(fd_);
   }
   if (read_bytes == 0) {
-    throw;
+    throw ConnectionClosedException(fd_);
   }
   return std::string(buffer);
 }
@@ -122,6 +132,7 @@ void Client::lookUpLocation(void) {
   location_ = http_server_->findLocation(request_.getUri());
 }
 
+/* turn uri into full uri */
 void Client::setFullUri(void) {
   std::string root = location_.getRoot();
   if (*root.rbegin() != '/') {
@@ -131,20 +142,26 @@ void Client::setFullUri(void) {
   fullUri_ = uri.replace(0, location_.getUri().size(), root);
 }
 
+/* set status code and pass it to handler */
+void Client::passErrorToHandler(int status) {
+  status_ = ResponseStatus::CODES[status];
+  passRequestToHandler();
+}
+
 /* pass the request to eligible handler */
 void Client::passRequestToHandler(void) {
   struct Response response_from_upsteam;
   try {
-    if (location_.isCgi() == true) {
+    if (location_.isCgi() == true && isErrorCode() == false) {
       // cgi handler
     }
-    if (location_.getAutoindex() == true) {
+    if (location_.getAutoindex() == true && isErrorCode() == false) {
       // autoindex handle
     }
     response_from_upsteam = StaticContentHandler::handle(this);
-  } catch (std::exception& e) {
-    // static handler
-    std::cout << "error" << std::endl;
+  } catch (const ResponseException& e) {
+    status_ = ResponseStatus::CODES[e.status];
+    response_from_upsteam = StaticContentHandler::handle(this);
   }
   response_ = ResponseGenerator::generateResponse(*this, response_from_upsteam);
   setToSend(true);
@@ -168,7 +185,7 @@ void Client::writeData(void) {
   }
   write_bytes = ::send(fd_, response_.c_str(), response_.size(), 0);
   if (write_bytes == ERROR<std::size_t>()) {
-    // error handling
+    throw ConnectionClosedException(fd_);
   }
 
   response_.erase(0, write_bytes);
@@ -177,9 +194,15 @@ void Client::writeData(void) {
   }
 }
 
+/*======================//
+ utils
+========================*/
+
 bool Client::isErrorCode(void) {
   if (status_.size() == 3 && status_[0] == '2') {
-    return true;
+    return false;
   }
-  return false;
+  return true;
 }
+
+void Client::clearClient() { close(fd_); }
