@@ -60,7 +60,7 @@ class Client {
   void writeData(void);
 
   bool isErrorCode(void);
-  void clearClient(void);
+  void clear(void);
 
  private:
   ServerManager* manager_;
