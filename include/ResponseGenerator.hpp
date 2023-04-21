@@ -11,16 +11,16 @@ class Client;
 
 class ResponseGenerator {
  public:
-  static std::string generateResponse(Client &client,
-                                      struct Response &response);
+  static std::string &generateResponse(Client &client,
+                                       struct Response &response_dummy);
 
  private:
-  static std::string generateStatusLine(Client &client);
-  static std::string generateHeader(
-      Client &client, const std::map<std::string, std::string> &headers);
+  static void generateStatusLine(std::string &response, Client &client);
+  static void generateHeader(std::string &response, Client &client,
+                             const std::map<std::string, std::string> &headers);
 
-  static std::string generateGeneralHeader(Client &client);
-  static std::string generateEntityHeader(Client &client);
+  static void generateGeneralHeader(std::string &response, Client &client);
+  static void generateEntityHeader(std::string &response, Client &client);
   static std::string generateCookie(HttpRequest &request);
   static std::string getConnectionHeader(Client &client);
   static std::string getDateHeader(void);

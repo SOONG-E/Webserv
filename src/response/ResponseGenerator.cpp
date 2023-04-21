@@ -1,60 +1,59 @@
 #include "ResponseGenerator.hpp"
 
-std::string ResponseGenerator::generateResponse(
+std::string &ResponseGenerator::generateResponse(
     Client &client, struct Response &response_dummy) {
-  std::string response;
-  response = generateStatusLine(client);
-  response += generateHeader(client, response_dummy.headers);
+  std::string &response = client.getResponse();
+  generateStatusLine(response, client);
+  generateHeader(response, client, response_dummy.headers);
   response += response_dummy.body;
 
   return response;
 }
 
-std::string ResponseGenerator::generateStatusLine(Client &client) {
+void ResponseGenerator::generateStatusLine(std::string &response,
+                                           Client &client) {
   int status = client.getStatus();
 
-  std::string status_line = "HTTP/1.1 " + ResponseStatus::CODES[status] + " " +
-                            ResponseStatus::REASONS[status] + CRLF;
-  return status_line;
+  response += "HTTP/1.1 " + ResponseStatus::CODES[status] + " " +
+              ResponseStatus::REASONS[status] + CRLF;
 }
 
-/*==========================*/
-//  generate header field   //
-/*==========================*/
+/*===============================
+ generate, combine header field
+===============================*/
 
-std::string ResponseGenerator::generateHeader(
-    Client &client, const std::map<std::string, std::string> &headers) {
-  std::string header;
-  header += generateGeneralHeader(client);
-  header += generateEntityHeader(client);
-  // header += generateCookie(request) + CRLF;
+void ResponseGenerator::generateHeader(
+    std::string &response, Client &client,
+    const std::map<std::string, std::string> &headers) {
+  generateGeneralHeader(response, client);
+  generateEntityHeader(response, client);
+  // response += generateCookie(request) + CRLF;
   for (std::map<std::string, std::string>::const_iterator it = headers.begin();
        it != headers.end(); it++) {
-    header += it->first + " : ";
-    header += it->second + CRLF;
+    response += it->first + " : ";
+    response += it->second + CRLF;
   }
-  header += CRLF;
-
-  return header;
+  response += CRLF;
 }
 
-std::string ResponseGenerator::generateGeneralHeader(Client &client) {
-  std::string header;
-  header += getConnectionHeader(client) + CRLF;
-  header += getDateHeader() + CRLF;
-  header += "Cache-Control: no-cache, no-store, must-revalidate" + CRLF;
-
-  return header;
+void ResponseGenerator::generateGeneralHeader(std::string &response,
+                                              Client &client) {
+  response += getConnectionHeader(client) + CRLF;
+  response += getDateHeader() + CRLF;
+  response += "Cache-Control: no-cache, no-store, must-revalidate" + CRLF;
 }
 
-std::string ResponseGenerator::generateEntityHeader(Client &client) {
-  std::string header;
-  header += "Server: Webserv" + CRLF;
-  header +=
+void ResponseGenerator::generateEntityHeader(std::string &response,
+                                             Client &client) {
+  response += "Server: Webserv" + CRLF;
+  response +=
       "Allow: " + join(client.getLocation().getAllowedMethods(), ", ") + CRLF;
-  header += "Content-Type: text/html" + CRLF;
-  return header;
+  response += "Content-Type: text/html" + CRLF;
 }
+
+/*============================
+  create header field
+============================*/
 
 std::string ResponseGenerator::generateCookie(HttpRequest &request) {
   (void)request;
