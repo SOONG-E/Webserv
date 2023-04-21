@@ -7,6 +7,7 @@
 
 class HttpServer;
 class Client;
+class Location;
 
 class StaticContentHandler {
  public:
@@ -17,6 +18,8 @@ class StaticContentHandler {
   ~StaticContentHandler(){};
 
   static std::string generateBody(Client *client);
+  static std::string readIndexFile(Location &location, const std::string &url);
+  static std::string readPage(Location &location, const std::string &uri);
   static std::string loadErrorPage(HttpServer *http_server, const int status);
   static void deleteFile(Client *client, const std::string &uri);
 };
