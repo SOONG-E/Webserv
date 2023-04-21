@@ -3,14 +3,7 @@
 
 #include <string>
 
-enum ErrorIndex {
-  EARG,
-  ECGI,
-  EOPEN,
-  ERECV,
-  ESEND,
-  ETOKEN,
-};
+enum ErrorIndex { EARG, ECGI, EOPEN, ERECV, ESEND, ETOKEN, ESYSTEM };
 
 struct Error {
   static const std::string DELIM;

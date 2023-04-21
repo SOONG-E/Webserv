@@ -209,6 +209,6 @@ void ServerManager::createListenEvent(int fd, TcpServer *server) {
 
 void ServerManager::validClientSocket(const int socket) {
   if (clients_.find(socket) == clients_.end()) {
-    throw std::runtime_error("error");
+    throw std::runtime_error("unvalid client socket");
   }
 }
