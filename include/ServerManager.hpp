@@ -50,6 +50,7 @@ class ServerManager {
 
   void processEventOnQueue(const int events);
   void acceptNewClient(const int server_socker, const TcpServer *tcp_server);
+  void unconnectClient(const int client_fd);
 
   /*member variables*/
   const int kq_;

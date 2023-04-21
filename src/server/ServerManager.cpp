@@ -156,7 +156,7 @@ void ServerManager::processEventOnQueue(const int events) {
     try {
       client->processEvent(event.filter);
     } catch (const ConnectionClosedException &e) {
-      clients_.erase(e.client_fd);
+      unconnectClient(e.client_fd);
     }
   }
 }
@@ -189,6 +189,11 @@ void ServerManager::createClient(const int client_fd,
   clients_[client_fd] = new_client;
 }
 
+void ServerManager::unconnectClient(const int client_fd) {
+  close(client_fd);
+  clients_.erase(client_fd);
+}
+
 /*======================//
  manage event
 ========================*/
@@ -205,7 +210,3 @@ void ServerManager::createEvent(uintptr_t ident, int16_t filter, uint16_t flags,
 void ServerManager::createListenEvent(int fd, TcpServer *server) {
   createEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, server);
 }
-
-/*======================//
- utils
-========================*/
