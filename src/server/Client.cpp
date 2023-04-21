@@ -91,7 +91,7 @@ void Client::processRequest(void) {
   } catch (const ResponseException& e) {
     passErrorToHandler(e.status);
   } catch (const ConnectionClosedException& e) {
-    clearClient();
+    unconnectClient();
     throw e;
   } catch (const std::exception& e) {
     passErrorToHandler(C500);
@@ -171,8 +171,10 @@ void Client::setToSend(bool set) {
   is_response_ready_ = set;
   if (set == true) {
     manager_->createEvent(fd_, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, this);
+    manager_->createEvent(fd_, EVFILT_READ, EV_ADD | EV_DISABLE, 0, 0, this);
     return;
   }
+  manager_->createEvent(fd_, EVFILT_WRITE, EV_ADD | EV_DISABLE, 0, 0, this);
   manager_->createEvent(fd_, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, this);
 }
 
@@ -190,6 +192,7 @@ void Client::writeData(void) {
   response_.erase(0, write_bytes);
   if (response_.empty() == true) {
     setToSend(false);
+    clearClient();
   }
 }
 
@@ -204,4 +207,5 @@ bool Client::isErrorCode(void) {
   return true;
 }
 
-void Client::clearClient() { close(fd_); }
+void Client::clearClient() { request_ = HttpRequest(); }
+void Client::unconnectClient() { close(fd_); }
