@@ -15,8 +15,7 @@ class ResponseGenerator {
                                       struct Response &response);
 
  private:
-  static std::string generateStatusLine(Client &client,
-                                        struct Response &response);
+  static std::string generateStatusLine(Client &client);
   static std::string generateHeader(
       Client &client, const std::map<std::string, std::string> &headers);
 

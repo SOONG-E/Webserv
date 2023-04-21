@@ -35,9 +35,8 @@ class Client {
   const HttpRequest& getRequest(void) const;
   std::string& getResponse(void);
   const std::string& getResponse(void) const;
-  std::string& getStatus(void);
-  const std::string& getStatus(void) const;
-  int getStatusInt(void) const;
+  int& getStatus(void);
+  const int& getStatus(void) const;
   std::string& getFullUri(void);
   const std::string& getFullUri(void) const;
 
@@ -73,7 +72,7 @@ class Client {
   HttpRequest request_;
   std::string fullUri_;
   std::string response_;
-  std::string status_;
+  int status_;
   bool is_response_ready_;
 };
 

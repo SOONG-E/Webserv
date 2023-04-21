@@ -3,24 +3,19 @@
 std::string ResponseGenerator::generateResponse(
     Client &client, struct Response &response_dummy) {
   std::string response;
-  response = generateStatusLine(client, response_dummy);
+  response = generateStatusLine(client);
   response += generateHeader(client, response_dummy.headers);
   response += response_dummy.body;
 
   return response;
 }
 
-std::string ResponseGenerator::generateStatusLine(Client &client,
-                                                  struct Response &response) {
-  std::string status = client.getStatus();
-  std::map<std::string, std::string>::iterator status_iterator =
-      response.headers.find("Status");
-  if (status_iterator != response.headers.end()) {
-    status = status_iterator->second;
-    response.headers.erase(status_iterator);
-  }
-  return "HTTP/1.1 " + status + ResponseStatus::REASONS[client.getStatusInt()] +
-         CRLF;
+std::string ResponseGenerator::generateStatusLine(Client &client) {
+  int status = client.getStatus();
+
+  std::string status_line = "HTTP/1.1 " + ResponseStatus::CODES[status] + " " +
+                            ResponseStatus::REASONS[status] + CRLF;
+  return status_line;
 }
 
 /*==========================*/

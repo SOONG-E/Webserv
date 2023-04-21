@@ -20,7 +20,7 @@ std::string StaticContentHandler::generateBody(Client *client) {
       deleteFile(client, uri);
     }
     if (client->isErrorCode() == true) {
-      body = loadErrorPage(client->getHttpServer(), client->getStatusInt());
+      body = loadErrorPage(client->getHttpServer(), client->getStatus());
       return body;
     }
     body = readPage(client->getLocation(), uri);

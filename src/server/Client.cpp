@@ -11,7 +11,7 @@ Client::Client(const int fd, const TcpServer* tcp_server,
       tcp_server_(tcp_server),
       address_(address),
       http_server_(NULL),
-      status_("200"),
+      status_(C200),
       is_response_ready_(false) {}
 
 Client::Client(const Client& origin)
@@ -40,9 +40,8 @@ HttpRequest& Client::getRequest(void) { return request_; }
 const HttpRequest& Client::getRequest(void) const { return request_; }
 std::string& Client::getResponse(void) { return response_; }
 const std::string& Client::getResponse(void) const { return response_; }
-std::string& Client::getStatus(void) { return status_; }
-const std::string& Client::getStatus(void) const { return status_; }
-int Client::getStatusInt(void) const { return ::stoi(status_); }
+int& Client::getStatus(void) { return status_; }
+const int& Client::getStatus(void) const { return status_; }
 std::string& Client::getFullUri(void) { return fullUri_; }
 const std::string& Client::getFullUri(void) const { return fullUri_; }
 
@@ -50,7 +49,7 @@ const std::string& Client::getFullUri(void) const { return fullUri_; }
  Setter
 ========================*/
 
-void Client::setStatus(int status) { status_ = ResponseStatus::CODES[status]; }
+void Client::setStatus(int status) { status_ = status; }
 
 /*======================//
  process
@@ -144,7 +143,7 @@ void Client::setFullUri(void) {
 
 /* set status code and pass it to handler */
 void Client::passErrorToHandler(int status) {
-  status_ = ResponseStatus::CODES[status];
+  status_ = status;
   passRequestToHandler();
 }
 
@@ -160,7 +159,7 @@ void Client::passRequestToHandler(void) {
     }
     response_from_upsteam = StaticContentHandler::handle(this);
   } catch (const ResponseException& e) {
-    status_ = ResponseStatus::CODES[e.status];
+    status_ = e.status;
     response_from_upsteam = StaticContentHandler::handle(this);
   }
   response_ = ResponseGenerator::generateResponse(*this, response_from_upsteam);
@@ -199,7 +198,7 @@ void Client::writeData(void) {
 ========================*/
 
 bool Client::isErrorCode(void) {
-  if (status_.size() == 3 && status_[0] == '2') {
+  if (status_ <= C204) {
     return false;
   }
   return true;
