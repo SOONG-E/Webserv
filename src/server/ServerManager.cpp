@@ -152,9 +152,12 @@ void ServerManager::processEventOnQueue(const int events) {
       acceptNewClient(event.ident, static_cast<TcpServer *>(event.udata));
       continue;
     }
-    validClientSocket(event.ident);
     client = static_cast<Client *>(event.udata);
-    client->processEvent(event.filter);
+    try {
+      client->processEvent(event.filter);
+    } catch (const ConnectionClosedException &e) {
+      clients_.erase(e.client_fd);
+    }
   }
 }
 
@@ -206,9 +209,3 @@ void ServerManager::createListenEvent(int fd, TcpServer *server) {
 /*======================//
  utils
 ========================*/
-
-void ServerManager::validClientSocket(const int socket) {
-  if (clients_.find(socket) == clients_.end()) {
-    throw std::runtime_error("unvalid client socket");
-  }
-}

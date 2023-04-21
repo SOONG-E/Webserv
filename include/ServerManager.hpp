@@ -51,7 +51,6 @@ class ServerManager {
   void processEventOnQueue(const int events);
   void acceptNewClient(const int server_socker, const TcpServer *tcp_server);
 
-  void validClientSocket(const int socket);
   /*member variables*/
   const int kq_;
   TcpServerType tcp_servers_;
