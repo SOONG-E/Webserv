@@ -30,15 +30,16 @@ void TcpServer::setDefaultServer(HttpServer *default_server) {
 std::string TcpServer::getIp(void) const { return ip_; }
 std::string TcpServer::getPort(void) const { return port_; }
 HttpServer *TcpServer::getDefaultServer(void) const { return default_server_; }
-std::map<std::string, const HttpServer *> TcpServer::getVirtualServers(
-    void) const {
+TcpServer::VirtualServerType TcpServer::getVirtualServers(void) const {
   return virtual_servers_;
 }
 /*======================//
- process
+ set TcpServer
 ========================*/
 
-/* append new virtual server in virtual_servers */
+/* append new virtual server in virtual_servers
+if there is a duplicated server configuration
+then occur error, quit the server*/
 void TcpServer::appendServer(const ServerBlock &servers,
                              HttpServer *virtual_server) {
   if (default_server_ == NULL) {
@@ -46,6 +47,9 @@ void TcpServer::appendServer(const ServerBlock &servers,
   }
   for (std::set<std::string>::iterator it = servers.server_names.begin();
        it != servers.server_names.end(); ++it) {
+    if (virtual_servers_.find(*it) != virtual_servers_.end()) {
+      Error::log("Server configuration duplicated", "", EXIT_FAILURE);
+    }
     virtual_servers_[*it] = virtual_server;
   }
-}  // what if there is the same host ?
+}

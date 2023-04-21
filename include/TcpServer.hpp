@@ -6,6 +6,8 @@
 
 class TcpServer {
  public:
+  typedef std::map<std::string, const HttpServer *> VirtualServerType;
+
   TcpServer(const std::string &key);
   TcpServer(const std::string &ip, const std::string &port);
   TcpServer(const TcpServer &origin);
@@ -14,7 +16,7 @@ class TcpServer {
   std::string getIp(void) const;
   std::string getPort(void) const;
   HttpServer *getDefaultServer(void) const;
-  std::map<std::string, const HttpServer *> getVirtualServers(void) const;
+  VirtualServerType getVirtualServers(void) const;
 
   void appendServer(const ServerBlock &servers, HttpServer *virtual_server);
 
@@ -24,7 +26,7 @@ class TcpServer {
   const std::string ip_;
   const std::string port_;
   HttpServer *default_server_;
-  std::map<std::string, const HttpServer *> virtual_servers_;
+  VirtualServerType virtual_servers_;
 };
 
 #endif
