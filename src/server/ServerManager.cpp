@@ -193,7 +193,7 @@ void ServerManager::createClient(const int client_fd,
 
 void ServerManager::unconnectClient(const int client_fd) {
   close(client_fd);
-  clients_.find(client_fd)->second->clear();
+  delete clients_.find(client_fd)->second;
   clients_.erase(client_fd);
 }
 
