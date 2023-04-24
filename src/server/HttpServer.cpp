@@ -43,7 +43,7 @@ const Location& HttpServer::redirect(const Location& location) const {
 
 const std::string& HttpServer::getErrorPage(const std::string& code) const {
   if (error_pages_.find(code) == error_pages_.end()) {
-    return DEFAULT_ERROR_PAGE;
+    return EMPTY_STRING;
   }
   return error_pages_.at(code);
 }

@@ -53,14 +53,23 @@ std::string StaticContentHandler::readPage(Location &location,
   }
   return ::readFile(uri);
 }
-
+#include <iostream>
 std::string StaticContentHandler::loadErrorPage(HttpServer *http_server,
                                                 const int status) {
   if (http_server == NULL) {
     return ::readFile(DEFAULT_ERROR_PAGE);
   }
   std::string uri = http_server->getErrorPage(ResponseStatus::CODES[status]);
-
+  if (uri.empty() == true) {
+    try {
+      std::string page =
+          DEFAULT_ERROR_DIRECTORY + ResponseStatus::CODES[status] + ".html";
+      return ::readFile(DEFAULT_ERROR_DIRECTORY +
+                        ResponseStatus::CODES[status] + ".html");
+    } catch (FileOpenException &e) {
+      return ::readFile(DEFAULT_ERROR_PAGE);
+    }
+  }
   return ::readFile(uri);
 }
 
