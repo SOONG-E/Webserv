@@ -154,11 +154,11 @@ void Client::passRequestToHandler(void) {
   try {
     if (location_.isCgi() == true && isErrorCode() == false) {
       // cgi handler
+    } else if (location_.getAutoindex() == true && isErrorCode() == false) {
+      response_from_upsteam = AutoIndexHandler::handle(this);
+    } else {
+      response_from_upsteam = StaticContentHandler::handle(this);
     }
-    if (location_.getAutoindex() == true && isErrorCode() == false) {
-      // autoindex handle
-    }
-    response_from_upsteam = StaticContentHandler::handle(this);
   } catch (const ResponseException& e) {
     status_ = e.status;
     response_from_upsteam = StaticContentHandler::handle(this);

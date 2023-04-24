@@ -12,9 +12,9 @@
 #include "ResponseGenerator.hpp"
 #include "ServerManager.hpp"
 #include "SocketAddress.hpp"
-#include "StaticContentHandler.hpp"
 #include "TcpServer.hpp"
 #include "exception.hpp"
+#include "handler.hpp"
 
 class HttpServer;
 class ServerManager;
