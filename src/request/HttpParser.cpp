@@ -153,7 +153,7 @@ void HttpParser::parsebBody(HttpRequest& request) {
     request.setBuffer("");
     return;
   }
-  std::string buffer = request.getBuffer();
+  std::string& buffer = request.getBuffer();
   if (!request.getHeader("CONTENT-LENGTH").empty()) {
     if (request.getContentLength() == static_cast<std::size_t>(-1)) {
       try {
