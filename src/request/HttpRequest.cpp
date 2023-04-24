@@ -21,9 +21,11 @@ HttpRequest::HttpRequest(const HttpRequest& origin)
       port_(origin.port_),
       content_length_(origin.content_length_),
       headers_(origin.headers_),
+      cookie_(origin.cookie_),
       body_(origin.body_),
-      is_header_set_(false),
-      is_completed_request_(false) {}
+      is_header_set_(origin.is_header_set_),
+      is_completed_request_(origin.is_completed_request_),
+      buffer_(origin.buffer_) {}
 
 HttpRequest HttpRequest::operator=(const HttpRequest& origin) {
   if (this != &origin) {
@@ -34,9 +36,11 @@ HttpRequest HttpRequest::operator=(const HttpRequest& origin) {
     port_ = origin.port_;
     content_length_ = origin.content_length_;
     headers_ = origin.headers_;
+    cookie_ = origin.cookie_;
     body_ = origin.body_;
     is_header_set_ = origin.is_header_set_;
     is_completed_request_ = origin.is_completed_request_;
+    buffer_ = origin.buffer_;
   }
   return *this;
 }

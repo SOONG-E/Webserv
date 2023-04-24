@@ -31,7 +31,8 @@ Location::Location(const Location& origin)
       root_(origin.root_),
       autoindex_(origin.autoindex_),
       index_(origin.index_),
-      cgi_param_(origin.cgi_param_) {}
+      cgi_param_(origin.cgi_param_),
+      is_cgi_(origin.is_cgi_) {}
 
 Location& Location::operator=(const Location& origin) {
   if (this != &origin) {
@@ -43,6 +44,7 @@ Location& Location::operator=(const Location& origin) {
     autoindex_ = origin.autoindex_;
     index_ = origin.index_;
     cgi_param_ = origin.cgi_param_;
+    is_cgi_ = origin.is_cgi_;
   }
   return *this;
 }
