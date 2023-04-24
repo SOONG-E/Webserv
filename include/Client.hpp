@@ -27,12 +27,16 @@ class Client {
   Client(const Client& origin);
   ~Client();
 
+  ServerManager* getServerManager(void);
   int getFd(void) const;
+  const TcpServer* getTcpServer(void) const;
   HttpServer* getHttpServer(void) const;
+  const SocketAddress getAddr(void) const;
   Location& getLocation(void);
   const Location& getLocation(void) const;
   HttpRequest& getRequest(void);
   const HttpRequest& getRequest(void) const;
+  Process& getProcess(void);
   std::string& getResponse(void);
   const std::string& getResponse(void) const;
   int& getStatus(void);
@@ -41,6 +45,8 @@ class Client {
   const std::string& getFullUri(void) const;
 
   void setStatus(int status);
+  void setProcess(Process& cgi_process);
+  void setIsCgiDone(bool set);
 
   void processEvent(const int event_type);
 
@@ -60,6 +66,7 @@ class Client {
   void writeData(void);
 
   bool isErrorCode(void);
+  bool isCgiDone(void);
   void clear(void);
 
  private:
@@ -70,10 +77,13 @@ class Client {
   HttpServer* http_server_;
   Location location_;
   HttpRequest request_;
+  Process cgi_process_;
   std::string fullUri_;
   std::string response_;
   int status_;
+
   bool is_response_ready_;
+  bool is_cgi_working_;
 };
 
 #endif

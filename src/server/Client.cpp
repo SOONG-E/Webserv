@@ -12,7 +12,8 @@ Client::Client(const int fd, const TcpServer* tcp_server,
       address_(address),
       http_server_(NULL),
       status_(C200),
-      is_response_ready_(false) {}
+      is_response_ready_(false),
+      is_cgi_working_(false) {}
 
 Client::Client(const Client& origin)
     : manager_(origin.manager_),
@@ -24,7 +25,8 @@ Client::Client(const Client& origin)
       request_(origin.request_),
       response_(origin.response_),
       status_(origin.status_),
-      is_response_ready_(origin.is_response_ready_) {}
+      is_response_ready_(origin.is_response_ready_),
+      is_cgi_working_(origin.is_cgi_working_) {}
 
 Client::~Client() {}
 
@@ -32,12 +34,16 @@ Client::~Client() {}
  Getter
 ========================*/
 
+ServerManager* Client::getServerManager(void) { return manager_; }
 int Client::getFd() const { return fd_; }
+const TcpServer* Client::getTcpServer(void) const { return tcp_server_; }
 HttpServer* Client::getHttpServer(void) const { return http_server_; }
+const SocketAddress Client::getAddr(void) const { return address_; }
 Location& Client::getLocation(void) { return location_; }
 const Location& Client::getLocation(void) const { return location_; }
 HttpRequest& Client::getRequest(void) { return request_; }
 const HttpRequest& Client::getRequest(void) const { return request_; }
+Process& Client::getProcess(void) { return cgi_process_; }
 std::string& Client::getResponse(void) { return response_; }
 const std::string& Client::getResponse(void) const { return response_; }
 int& Client::getStatus(void) { return status_; }
@@ -50,6 +56,8 @@ const std::string& Client::getFullUri(void) const { return fullUri_; }
 ========================*/
 
 void Client::setStatus(int status) { status_ = status; }
+void Client::setProcess(Process& cgi_process) { cgi_process_ = cgi_process; }
+void Client::setIsCgiDone(bool set) { cgi_process_.isFinished = set; }
 
 /*======================//
  process
@@ -57,6 +65,18 @@ void Client::setStatus(int status) { status_ = status; }
 
 /* recognize a type of event */
 void Client::processEvent(const int event_type) {
+  if (is_cgi_working_ == true) {
+    try {
+      CgiHandler::handle(this, event_type);
+      if (isCgiDone() == true) {
+        passRequestToHandler();
+      }
+    } catch (const ResponseException& e) {
+      CgiHandler::setPhase(this, P_RESET);
+      passErrorToHandler(e.status);
+    }
+    return;
+  }
   switch (event_type) {
     case EVFILT_READ:
       processRequest();
@@ -64,10 +84,6 @@ void Client::processEvent(const int event_type) {
 
     case EVFILT_WRITE:
       writeData();
-      break;
-
-    case EVFILT_PROC:
-      //
       break;
 
     default:
@@ -110,7 +126,7 @@ std::string Client::readData(void) {
   if (read_bytes == 0) {
     throw std::runtime_error("no data in buffer");
   }
-  return std::string(buffer);
+  return std::string(buffer, read_bytes);
 }
 
 /* lookup associated virtual server
@@ -153,7 +169,13 @@ void Client::passRequestToHandler(void) {
   struct Response response_from_upsteam;
   try {
     if (location_.isCgi() == true && isErrorCode() == false) {
-      // cgi handler
+      if (cgi_process_.isStarted == false && is_cgi_working_ == false) {
+        CgiHandler::execute(this);
+        is_cgi_working_ = true;
+        return;
+      }
+      response_from_upsteam = CgiHandler::getResponse(this);
+      is_cgi_working_ = false;
     } else if (location_.getAutoindex() == true && isErrorCode() == false) {
       response_from_upsteam = AutoIndexHandler::handle(this);
     } else {
@@ -207,9 +229,12 @@ bool Client::isErrorCode(void) {
   return true;
 }
 
+bool Client::isCgiDone(void) { return (cgi_process_.isFinished == true); }
+
 void Client::clear() {
   request_.clear();
   fullUri_.clear();
   status_ = C200;
   is_response_ready_ = false;
+  is_cgi_working_ = false;
 }
