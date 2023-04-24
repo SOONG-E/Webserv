@@ -27,7 +27,7 @@ void ServerManager::registerServer(const Config &config) {
 
     for (std::vector<Listen>::iterator lit = listens.begin();
          lit != listens.end(); ++lit) {
-      tcp_server = seekTcpServer(lit->server_socket_key);
+      tcp_server = getTcpServer(lit->server_socket_key);
       tcp_server->appendServer(*it, http_server);
     }
   }
@@ -35,7 +35,7 @@ void ServerManager::registerServer(const Config &config) {
 
 /* seek the TcpServer using key and return
 unless there is TcpServer look forward, then create new on and return */
-TcpServer *ServerManager::seekTcpServer(const std::string &key) {
+TcpServer *ServerManager::getTcpServer(const std::string &key) {
   TcpServerType::iterator tcp_server = tcp_servers_.find(key);
 
   if (tcp_server == tcp_servers_.end()) {

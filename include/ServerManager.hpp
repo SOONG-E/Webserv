@@ -36,7 +36,7 @@ class ServerManager {
   typedef std::map<int, Client *> ClientType;
 
   void registerServer(const Config &config);
-  TcpServer *seekTcpServer(const std::string &key);
+  TcpServer *getTcpServer(const std::string &key);
   TcpServer *createTcpServer(const std::string &key);
   HttpServer *createHttpServer(const ServerBlock &server_block);
   void createClient(const int client_fd, const TcpServer *tcp_server,
