@@ -55,7 +55,7 @@ void Client::setStatus(int status) { status_ = status; }
  process
 ========================*/
 
-/* recognize type of event */
+/* recognize a type of event */
 void Client::processEvent(const int event_type) {
   switch (event_type) {
     case EVFILT_READ:
@@ -92,12 +92,14 @@ void Client::processRequest(void) {
     passErrorToHandler(e.status);
   } catch (const ConnectionClosedException& e) {
     throw e;
+  } catch (std::runtime_error& e) {
+    throw e;
   } catch (const std::exception& e) {
     passErrorToHandler(C500);
   }
 }
 
-/* read data from socket */
+/* read data from a connection socket */
 std::string Client::readData(void) {
   char buffer[BUFFER_SIZE];
   std::size_t read_bytes = recv(fd_, &buffer, BUFFER_SIZE, 0);
@@ -106,7 +108,7 @@ std::string Client::readData(void) {
     throw ConnectionClosedException(fd_);
   }
   if (read_bytes == 0) {
-    throw ConnectionClosedException(fd_);
+    throw std::runtime_error("no data in buffer");
   }
   return std::string(buffer);
 }
@@ -130,7 +132,7 @@ void Client::lookUpLocation(void) {
   location_ = http_server_->findLocation(request_.getUri());
 }
 
-/* turn uri into full uri */
+/* turn the uri into full uri */
 void Client::setFullUri(void) {
   std::string root = location_.getRoot();
   if (*root.rbegin() != '/') {
@@ -140,7 +142,7 @@ void Client::setFullUri(void) {
   fullUri_ = uri.replace(0, location_.getUri().size(), root);
 }
 
-/* set status code and pass it to handler */
+/* set status code and pass it to the handler */
 void Client::passErrorToHandler(int status) {
   status_ = status;
   passRequestToHandler();
@@ -170,14 +172,13 @@ void Client::setToSend(bool set) {
   is_response_ready_ = set;
   if (set == true) {
     manager_->createEvent(fd_, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, this);
-    manager_->createEvent(fd_, EVFILT_READ, EV_ADD | EV_DISABLE, 0, 0, this);
     return;
   }
-  manager_->createEvent(fd_, EVFILT_WRITE, EV_ADD | EV_DISABLE, 0, 0, this);
   manager_->createEvent(fd_, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, this);
+  manager_->createEvent(fd_, EVFILT_WRITE, EV_ADD | EV_DISABLE, 0, 0, this);
 }
 
-/* send response to client */
+/* send the response to client */
 void Client::writeData(void) {
   std::size_t write_bytes;
   if (is_response_ready_ == false) {
@@ -191,7 +192,7 @@ void Client::writeData(void) {
   response_.erase(0, write_bytes);
   if (response_.empty() == true) {
     setToSend(false);
-    clearClient();
+    clear();
   }
 }
 
@@ -206,4 +207,9 @@ bool Client::isErrorCode(void) {
   return true;
 }
 
-void Client::clearClient() { request_ = HttpRequest(); }
+void Client::clear() {
+  request_ = HttpRequest();
+  fullUri_.clear();
+  status_ = C200;
+  is_response_ready_ = false;
+}

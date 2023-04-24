@@ -157,6 +157,8 @@ void ServerManager::processEventOnQueue(const int events) {
       client->processEvent(event.filter);
     } catch (const ConnectionClosedException &e) {
       unconnectClient(e.client_fd);
+    } catch (const std::runtime_error &e) {
+      continue;
     }
   }
 }
