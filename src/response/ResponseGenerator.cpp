@@ -67,10 +67,10 @@ std::string ResponseGenerator::generateCookie(HttpRequest &request) {
 std::string ResponseGenerator::getConnectionHeader(Client &client) {
   const std::string header_name = "Connection";
   if (client.isErrorCode() == true) {
-    return (header_name + "close");
+    return (header_name + ": close");
   }
   if (client.getRequest().getHeader("CONNECTION").empty() == false) {
-    return (header_name + client.getRequest().getHeader("CONNECTION"));
+    return (header_name + " : " + client.getRequest().getHeader("CONNECTION"));
   }
   return (header_name + " : " + "keep-alive");
 }
