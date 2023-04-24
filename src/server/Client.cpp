@@ -57,6 +57,7 @@ const std::string& Client::getFullUri(void) const { return fullUri_; }
 
 void Client::setStatus(int status) { status_ = status; }
 void Client::setProcess(Process& cgi_process) { cgi_process_ = cgi_process; }
+void Client::setIsCgiWorking(bool set) { is_cgi_working_ = set; }
 void Client::setIsCgiDone(bool set) { cgi_process_.isFinished = set; }
 
 /*======================//
@@ -193,11 +194,12 @@ void Client::passRequestToHandler(void) {
 void Client::setToSend(bool set) {
   is_response_ready_ = set;
   if (set == true) {
-    manager_->createEvent(fd_, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, this);
+    manager_->createEvent(fd_, EVFILT_READ, EV_DISABLE, 0, 0, this);
+    manager_->createEvent(fd_, EVFILT_WRITE, EV_ENABLE, 0, 0, this);
     return;
   }
-  manager_->createEvent(fd_, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, this);
-  manager_->createEvent(fd_, EVFILT_WRITE, EV_ADD | EV_DISABLE, 0, 0, this);
+  manager_->createEvent(fd_, EVFILT_READ, EV_ENABLE, 0, 0, this);
+  manager_->createEvent(fd_, EVFILT_WRITE, EV_DISABLE, 0, 0, this);
 }
 
 /* send the response to client */

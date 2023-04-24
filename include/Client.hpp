@@ -46,6 +46,7 @@ class Client {
 
   void setStatus(int status);
   void setProcess(Process& cgi_process);
+  void setIsCgiWorking(bool set);
   void setIsCgiDone(bool set);
 
   void processEvent(const int event_type);
