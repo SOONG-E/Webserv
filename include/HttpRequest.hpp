@@ -10,13 +10,12 @@ class HttpRequest {
 
  public:
   typedef std::map<std::string, std::vector<std::string> > headers_type;
+  typedef std::map<std::string, std::string> cookie_list_type;
 
   HttpRequest();
   HttpRequest(const HttpRequest& origin);
   HttpRequest operator=(const HttpRequest& origin);
   ~HttpRequest();
-
-  typedef std::map<std::string, std::string> cookie_list_type;
 
   void tailRequest(std::string& message);
   void parse(void);
