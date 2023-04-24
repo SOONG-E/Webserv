@@ -121,7 +121,7 @@ void CgiHandler::readFromCgi(Client* client) {
   Process& process = client->getProcess();
   char buffer[BUFFER_SIZE];
 
-  std::size_t read_bytes = read(process.input_fd, buffer, BUFFER_SIZE);
+  std::size_t read_bytes = ::read(process.input_fd, buffer, BUFFER_SIZE);
 
   if (read_bytes == ERROR<std::size_t>()) {
     throw ResponseException(C500);
@@ -135,7 +135,7 @@ void CgiHandler::readFromCgi(Client* client) {
 }
 
 /*=========================//
- get data after cgi's done
+ get data after cgi is done
 ===========================*/
 
 struct Response CgiHandler::getResponse(Client* client) {
@@ -249,7 +249,7 @@ void CgiHandler::setPhase(Client* client, int phase) {
       break;
 
     case P_WAIT:
-      manager->createEvent(process.output_fd, EVFILT_WRITE, EV_DISABLE, 0, 0,
+      manager->createEvent(process.output_fd, EVFILT_WRITE, EV_DELETE, 0, 0,
                            client);
       manager->createEvent(process.pid, EVFILT_PROC, EV_ADD | EV_ENABLE,
                            NOTE_EXIT, 0, client);
@@ -258,17 +258,17 @@ void CgiHandler::setPhase(Client* client, int phase) {
       break;
 
     case P_READ:
-      manager->createEvent(process.pid, EVFILT_PROC, EV_DISABLE, 0, 0, client);
+      manager->createEvent(process.pid, 0, EV_DELETE, 0, 0, client);
       manager->createEvent(process.input_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0,
                            0, client);
       process.phase = P_READ;
       break;
 
     case P_DONE:
-      manager->createEvent(process.input_fd, EVFILT_READ, EV_DISABLE, 0, 0,
+      manager->createEvent(process.input_fd, EVFILT_READ, EV_DELETE, 0, 0,
                            client);
-      manager->createEvent(client->getFd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0,
-                           0, client);
+      manager->createEvent(client->getFd(), EVFILT_READ, EV_ENABLE, 0, 0,
+                           client);
       process.phase = P_DONE;
       break;
 
