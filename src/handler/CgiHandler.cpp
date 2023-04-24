@@ -45,20 +45,17 @@ void CgiHandler::execute(Client* client) {
     exit(EXIT_FAILURE);
   }
 
-  process.pid = pid;
-  process.input_fd = pipe_fds[1][READ];
-  process.output_fd = pipe_fds[0][WRITE];
-
   deleteEnvp(envp);
   close(pipe_fds[0][READ]);
   close(pipe_fds[1][WRITE]);
 
+  process.pid = pid;
+  process.input_fd = pipe_fds[1][READ];
+  process.output_fd = pipe_fds[0][WRITE];
+
   if (fcntl(process.input_fd, F_SETFL, O_NONBLOCK) == ERROR<int>() ||
       fcntl(process.output_fd, F_SETFL, O_NONBLOCK) == ERROR<int>()) {
-    kill(pid, SIGKILL);
-    close(process.input_fd);
-    close(process.output_fd);
-
+    cleanUp(client);
     throw ResponseException(C500);
   }
 
@@ -79,10 +76,10 @@ void CgiHandler::execute(Client* client) {
 void CgiHandler::handle(Client* client, int event_type) {
   switch (event_type) {
     case EVFILT_READ:
-      sendToCgi(client);
+      readFromCgi(client);
       break;
     case EVFILT_WRITE:
-      readFromCgi(client);
+      sendToCgi(client);
       break;
     case EVFILT_PROC:
       setPhase(client, P_READ);
@@ -94,11 +91,14 @@ void CgiHandler::handle(Client* client, int event_type) {
 ===========================*/
 
 void CgiHandler::sendToCgi(Client* client) {
+  if (client->getProcess().phase != P_WRITE) {
+    return;
+  }
   Process& process = client->getProcess();
   std::size_t write_bytes;
 
-  write_bytes = ::send(process.output_fd, process.message_to_send.c_str(),
-                       process.message_to_send.size(), 0);
+  write_bytes = ::write(process.output_fd, process.message_to_send.c_str(),
+                        process.message_to_send.size());
   if (write_bytes == ERROR<std::size_t>()) {
     throw ResponseException(C500);
   }
@@ -115,10 +115,13 @@ void CgiHandler::sendToCgi(Client* client) {
 ===========================*/
 
 void CgiHandler::readFromCgi(Client* client) {
+  if (client->getProcess().phase != P_READ) {
+    return;
+  }
   Process& process = client->getProcess();
   char buffer[BUFFER_SIZE];
 
-  std::size_t read_bytes = recv(process.input_fd, &buffer, BUFFER_SIZE, 0);
+  std::size_t read_bytes = read(process.input_fd, buffer, BUFFER_SIZE);
 
   if (read_bytes == ERROR<std::size_t>()) {
     throw ResponseException(C500);
@@ -238,43 +241,46 @@ void CgiHandler::setPhase(Client* client, int phase) {
 
   switch (phase) {
     case P_WRITE:
-      manager->createEvent(client->getFd(), EVFILT_READ, EV_ADD | EV_DISABLE, 0,
-                           0, client);
+      manager->createEvent(client->getFd(), EVFILT_READ, EV_DISABLE, 0, 0,
+                           client);
       manager->createEvent(process.output_fd, EVFILT_WRITE, EV_ADD | EV_ENABLE,
                            0, 0, client);
+      process.phase = P_WRITE;
       break;
 
     case P_WAIT:
-      manager->createEvent(process.output_fd, EVFILT_WRITE, EV_ADD | EV_DISABLE,
-                           0, 0, client);
+      manager->createEvent(process.output_fd, EVFILT_WRITE, EV_DISABLE, 0, 0,
+                           client);
       manager->createEvent(process.pid, EVFILT_PROC, EV_ADD | EV_ENABLE,
                            NOTE_EXIT, 0, client);
+      process.phase = P_WAIT;
 
       break;
 
     case P_READ:
-      manager->createEvent(process.pid, EVFILT_PROC, EV_ADD | EV_DISABLE,
-                           NOTE_EXIT, 0, client);
+      manager->createEvent(process.pid, EVFILT_PROC, EV_DISABLE, 0, 0, client);
       manager->createEvent(process.input_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0,
                            0, client);
+      process.phase = P_READ;
       break;
 
     case P_DONE:
-      manager->createEvent(process.input_fd, EVFILT_READ, EV_ADD | EV_DISABLE,
-                           0, 0, client);
+      manager->createEvent(process.input_fd, EVFILT_READ, EV_DISABLE, 0, 0,
+                           client);
       manager->createEvent(client->getFd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0,
                            0, client);
+      process.phase = P_DONE;
       break;
 
     case P_RESET:
-      manager->createEvent(client->getFd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0,
-                           0, client);
-      manager->createEvent(process.output_fd, EVFILT_WRITE, EV_ADD | EV_DISABLE,
-                           0, 0, client);
-      manager->createEvent(process.pid, EVFILT_PROC, EV_ADD | EV_DISABLE,
-                           NOTE_EXIT, 0, client);
-      manager->createEvent(process.input_fd, EVFILT_READ, EV_ADD | EV_DISABLE,
-                           0, 0, client);
+      manager->createEvent(client->getFd(), EVFILT_READ, EV_ENABLE, 0, 0,
+                           client);
+      manager->createEvent(process.output_fd, EVFILT_WRITE, EV_DELETE, 0, 0,
+                           client);
+      manager->createEvent(process.pid, EVFILT_PROC, EV_DELETE, 0, 0, client);
+      manager->createEvent(process.input_fd, EVFILT_READ, EV_DELETE, 0, 0,
+                           client);
+      client->setIsCgiWorking(false);
       cleanUp(client);
   }
 }

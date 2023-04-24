@@ -9,6 +9,8 @@ struct Process {
   bool isStarted;
   bool isFinished;
 
+  int phase;
+
   int pid;
   int input_fd;
   int output_fd;
