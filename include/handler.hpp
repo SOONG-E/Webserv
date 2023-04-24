@@ -3,6 +3,7 @@
 
 #include "AutoIndexHandler.hpp"
 #include "CgiHandler.hpp"
+#include "Process.hpp"
 #include "StaticContentHandler.hpp"
 
 #endif
