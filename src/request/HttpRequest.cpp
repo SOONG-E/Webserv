@@ -8,7 +8,10 @@
 const std::size_t HttpRequest::DEFAULT_CONTENT_LENGTH = -1;
 
 HttpRequest::HttpRequest()
-    : port_(DEFAULT_PORT), content_length_(DEFAULT_CONTENT_LENGTH) {}
+    : port_(DEFAULT_PORT),
+      content_length_(DEFAULT_CONTENT_LENGTH),
+      is_header_set_(false),
+      is_completed_request_(false) {}
 
 HttpRequest::HttpRequest(const HttpRequest& origin)
     : method_(origin.method_),
@@ -143,3 +146,10 @@ bool HttpRequest::hasCookie(void) const {
 bool HttpRequest::isHeaderSet(void) const { return is_header_set_; }
 
 bool HttpRequest::isCompleted(void) const { return is_completed_request_; }
+
+void HttpRequest::clear(void) {
+  *this = HttpRequest();
+  buffer_.clear();
+  cookie_.clear();
+  body_.clear();
+}

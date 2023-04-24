@@ -93,13 +93,17 @@ void HttpParser::parseHeaderFields(HttpRequest& request,
        header != headers.end(); ++header) {
     if (header->length() == 0) break;
     line = split(*header, ":");
-    if (line.size() < 2) throw ResponseException(C400);
+    if (line.size() < 2) {
+      throw ResponseException(C400);
+    }
     std::transform(line[0].begin(), line[0].end(), line[0].begin(), ::toupper);
     request.addHeader(trim(line[0]), trim(line[1]));
   }
 
   request.setHost(request.getHeader("HOST"));
-  if (request.getHost().empty()) throw ResponseException(C400);
+  if (request.getHost().empty()) {
+    throw ResponseException(C400);
+  }
   if (request.getHeader("CONTENT-TYPE").empty()) {
     request.addHeader("CONTENT-TYPE", "application/octet-stream");
   }
@@ -180,7 +184,9 @@ void HttpParser::unchunkMessage(HttpRequest& request) {
   std::size_t content_length = 0;
   std::size_t chunk_size = 0;
   std::vector<std::string> chunks = splitByCRLF(request.getBuffer());
-  if (chunks.size() < 1) throw ResponseException(C400);
+  if (chunks.size() < 1) {
+    throw ResponseException(C400);
+  }
   chunk_size = hexToInt(chunks[0]);
   std::size_t idx = 1;
   while (chunk_size && idx + 1 < chunks.size()) {

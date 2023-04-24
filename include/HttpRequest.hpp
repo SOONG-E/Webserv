@@ -48,6 +48,8 @@ class HttpRequest {
   bool isHeaderSet(void) const;
   bool isCompleted(void) const;
 
+  void clear(void);
+
  private:
   std::string method_;
   std::string uri_;

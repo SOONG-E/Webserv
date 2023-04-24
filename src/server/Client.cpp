@@ -208,7 +208,7 @@ bool Client::isErrorCode(void) {
 }
 
 void Client::clear() {
-  request_ = HttpRequest();
+  request_.clear();
   fullUri_.clear();
   status_ = C200;
   is_response_ready_ = false;
