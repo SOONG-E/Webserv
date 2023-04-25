@@ -5,6 +5,9 @@ std::string &ResponseGenerator::generateResponse(
   std::string &response = client.getResponse();
   generateStatusLine(response, client, response_dummy);
   generateHeader(response, client, response_dummy.headers);
+  if (client.getRequest().getMethod() == METHODS[HEAD]) {
+    return response;
+  }
   response += response_dummy.body;
 
   return response;
