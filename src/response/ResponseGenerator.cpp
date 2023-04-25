@@ -4,7 +4,7 @@ std::string &ResponseGenerator::generateResponse(
     Client &client, struct Response &response_dummy) {
   std::string &response = client.getResponse();
   generateStatusLine(response, client, response_dummy);
-  generateHeader(response, client, response_dummy.headers);
+  generateHeader(response, client, response_dummy);
   if (client.getRequest().getMethod() == METHODS[HEAD]) {
     return response;
   }
@@ -36,12 +36,12 @@ void ResponseGenerator::generateStatusLine(std::string &response,
  generate, combine header field
 ===============================*/
 
-void ResponseGenerator::generateHeader(
-    std::string &response, Client &client,
-    const std::map<std::string, std::string> &headers) {
+void ResponseGenerator::generateHeader(std::string &response, Client &client,
+                                       struct Response &response_dummy) {
   generateGeneralHeader(response, client);
-  generateEntityHeader(response, client);
+  generateEntityHeader(response, client, response_dummy);
   // response += generateCookie(request) + CRLF;
+  const std::map<std::string, std::string> &headers = response_dummy.headers;
   for (std::map<std::string, std::string>::const_iterator it = headers.begin();
        it != headers.end(); it++) {
     response += it->first + " : ";
@@ -58,11 +58,13 @@ void ResponseGenerator::generateGeneralHeader(std::string &response,
 }
 
 void ResponseGenerator::generateEntityHeader(std::string &response,
-                                             Client &client) {
+                                             Client &client,
+                                             struct Response &response_dummy) {
   response += "Server: Webserv" + CRLF;
   response +=
       "Allow: " + join(client.getLocation().getAllowedMethods(), ", ") + CRLF;
   response += "Content-Type: text/html" + CRLF;
+  response += "Content-Length: " + toString(response_dummy.body.size()) + CRLF;
 }
 
 /*============================

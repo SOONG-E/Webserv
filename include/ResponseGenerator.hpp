@@ -15,12 +15,14 @@ class ResponseGenerator {
                                        struct Response &response_dummy);
 
  private:
-  static void generateStatusLine(std::string &response, Client &client, struct Response &response_dummy);
+  static void generateStatusLine(std::string &response, Client &client,
+                                 struct Response &response_dummy);
   static void generateHeader(std::string &response, Client &client,
-                             const std::map<std::string, std::string> &headers);
+                             struct Response &response_dummy);
 
   static void generateGeneralHeader(std::string &response, Client &client);
-  static void generateEntityHeader(std::string &response, Client &client);
+  static void generateEntityHeader(std::string &response, Client &client,
+                                   struct Response &response_dummy);
   static std::string generateCookie(HttpRequest &request);
   static std::string getConnectionHeader(Client &client);
   static std::string getDateHeader(void);
