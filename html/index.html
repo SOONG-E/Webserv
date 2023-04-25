@@ -1,57 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
 	<meta charset="utf-8">
 	<style>
-		body {
-			font-family: Arial, sans-serif;
-			margin: 0;
-			padding: 0;
-		}
-		
-		#main {
-			background-color: #f4f4f4;
-			padding: 20px;
-		}
-		
-		h2, h3 {
-			margin: 0;
-		}
-		
-		input[type="submit"] {
+		button {
+			padding: 10px;
+			margin: 5px;
 			background-color: #4CAF50;
 			color: white;
-			padding: 12px 20px;
 			border: none;
-			border-radius: 4px;
+			border-radius: 5px;
 			cursor: pointer;
 		}
-		
-		input[type="submit"]:hover {
-			background-color: #45a049;
-		}
-		
-		form {
-			display: inline-block;
-			margin-top: 20px;
-		}
-		
 	</style>
 </head>
-
 <body>
+	<h1>홈페이지</h1>
 
-	<div id="main">
-		<div class="main">
-			<h2>파일 업로드</h2>
-			<form action="/cgi-bin/uploadFile.py" method="post" enctype="multipart/form-data">
-				<input type="file" name="upload_file">
-				<input type="submit">
-			</form>
-		</div>
-	</div>
-
+	<a href="/login.html"><button>로그인</button></a>
+	
 </body>
-
 </html>
