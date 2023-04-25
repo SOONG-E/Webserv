@@ -23,10 +23,14 @@ Client::Client(const Client& origin)
       http_server_(origin.http_server_),
       location_(origin.location_),
       request_(origin.request_),
+      cgi_process_(origin.cgi_process_),
+      fullUri_(origin.fullUri_),
       response_(origin.response_),
       status_(origin.status_),
       is_response_ready_(origin.is_response_ready_),
       is_cgi_working_(origin.is_cgi_working_) {}
+
+Client Client::operator=(const Client& origin) { return Client(origin); }
 
 Client::~Client() {}
 

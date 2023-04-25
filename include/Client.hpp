@@ -25,6 +25,7 @@ class Client {
   Client(const int fd, const TcpServer* tcp_server,
          const SocketAddress& address, ServerManager* manager);
   Client(const Client& origin);
+  Client operator=(const Client& origin);
   ~Client();
 
   ServerManager* getServerManager(void);
