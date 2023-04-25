@@ -8,6 +8,7 @@ Client::Client(const int fd, const TcpServer* tcp_server,
                const SocketAddress& address, ServerManager* manager)
     : manager_(manager),
       fd_(fd),
+      session_(NULL),
       tcp_server_(tcp_server),
       address_(address),
       http_server_(NULL),

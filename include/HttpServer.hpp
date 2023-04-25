@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "ServerBlock.hpp"
+#include "Session.hpp"
 #include "constant.hpp"
 #include "exception.hpp"
 
@@ -12,8 +13,7 @@ class HttpServer {
  public:
   typedef std::vector<Location> LocationType;
   typedef std::map<std::string, std::string> ErrorPageType;
-  typedef std::map<std::string, std::map<std::string, std::string> >
-      SessionType;
+  typedef std::map<std::string, Session *> SessionType;
 
   HttpServer(const int id, const ServerBlock &server_block);
   HttpServer(HttpServer &origin);

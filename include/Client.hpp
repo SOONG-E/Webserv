@@ -74,6 +74,7 @@ class Client {
  private:
   ServerManager* manager_;
   const int fd_;
+  Session* session_;
   const TcpServer* tcp_server_;
   const SocketAddress address_;
   HttpServer* http_server_;
