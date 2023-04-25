@@ -53,7 +53,7 @@ std::string StaticContentHandler::readPage(Location &location,
   }
   return ::readFile(uri);
 }
-#include <iostream>
+
 std::string StaticContentHandler::loadErrorPage(HttpServer *http_server,
                                                 const int status) {
   if (http_server == NULL) {

@@ -23,7 +23,6 @@ class CgiHandler {
   ~CgiHandler(){};
 
   static void sendToCgi(Client *client);
-  static void setProcessDone(Client *client);
   static void readFromCgi(Client *client);
 
   static std::map<std::string, std::string> generateHeader(
