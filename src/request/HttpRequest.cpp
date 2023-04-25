@@ -141,7 +141,7 @@ void HttpRequest::reserveBodySpace(std::size_t size) { buffer_.reserve(size); }
 /*==========================*/
 
 bool HttpRequest::hasCookie(void) const {
-  if (getHeader("COOKIE").empty() || getCookie("Session-ID").empty()) {
+  if (getHeader("COOKIE").empty() || getCookie(SESSION_ID_FIELD).empty()) {
     return false;
   }
   return true;

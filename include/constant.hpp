@@ -21,6 +21,7 @@ const std::string EMPTY_STRING = "";
 const std::string DEFAULT_ERROR_DIRECTORY = "html/default_error/";
 const std::string DEFAULT_ERROR_PAGE = "html/default_error/error.html";
 const std::string DIRECTORY_LISTING_PAGE = "static/autoindex_template.html";
+const std::string SESSION_ID_FIELD = "Session-ID";
 const int CAPABLE_EVENT_SIZE = 8;
 const std::size_t BUFFER_SIZE = 65536;
 const int DEFAULT_FD = -1;
