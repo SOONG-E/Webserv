@@ -13,7 +13,11 @@ def validateRequest(form):
 	if ctype != "multipart/form-data":
 		raise Exception("CONTENT-TYPE must be 'multipart/form-data.")
 	if "upload_file" not in form:
-		raise Exception("Request must be sent with a form including name field.")
+		raise Exception("Request must be sent with a form including 'upload_file' field.")
+	# if "HTTP_X_SERVER_KEY" not in environ:
+	# 	raise Exception("Server key is needed for upoloading file.")
+	# if "HTTP_X_SESSION_ID" not in environ:
+	# 	raise Exception("Session ID is needed for upoloading file.")
 
 def split_filename(filename):
 	if filename.count(".") == 0:
@@ -47,7 +51,12 @@ try:
 	validateRequest(form)
 	uploaded_file = form['upload_file']
 
-	path = "./upload_file/" + environ["HTTP_X_SERVER_KEY"] + "/" + environ["HTTP_X_SESSION_ID"] + "/"
+except Exception as e:
+	print("Status:", "400", "Bad Request")
+
+try:
+	# path = "./upload_file/" + environ["HTTP_X_SERVER_KEY"] + "/" + environ["HTTP_X_SESSION_ID"] + "/"
+	path = "./upload_file/" 
 	makedirs(path, exist_ok=True)
 
 	assert isdir(path)
@@ -61,7 +70,9 @@ try:
 
 	save_file.write(uploaded_file.value)
 
-	print("Status:", "201", "Created")
+	print("Status:", "303", "See Other")
+	print("Location : /mypage.html")
 
 except Exception as e:
-	print("Status:", "400", "Bad Request")
+	print("Status:", "500", "Internal Server Error")
+
