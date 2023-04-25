@@ -16,7 +16,7 @@ Session::~Session() {}
  Setter
 ========================*/
 
-void Session::setTimeout(std::time_t time = std::time(NULL)) {
+void Session::setTimeout(std::time_t time) {
   timeout_ = time + SESSION_TIMEOUT;
 }
 
