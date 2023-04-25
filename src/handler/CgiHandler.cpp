@@ -63,7 +63,6 @@ void CgiHandler::execute(Client* client) {
     close(process.output_fd);
   }
   process.message_to_send = client->getRequest().getBody();
-  process.isStarted = true;
   client->setProcess(process);
 
   setPhase(client, P_WRITE);
@@ -127,8 +126,6 @@ void CgiHandler::readFromCgi(Client* client) {
     throw ResponseException(C500);
   }
   if (read_bytes == 0) {
-    close(process.input_fd);
-    client->setIsCgiDone(true);
     setPhase(client, P_DONE);
   }
   process.message_received += std::string(buffer, read_bytes);
@@ -141,6 +138,8 @@ void CgiHandler::readFromCgi(Client* client) {
 struct Response CgiHandler::getResponse(Client* client) {
   Response response;
   Process& process = client->getProcess();
+  process.phase = P_UNSTARTED;
+
   const std::string& message = process.message_received;
   std::size_t boundary = message.find(DOUBLE_LF);
 
@@ -267,6 +266,7 @@ void CgiHandler::setPhase(Client* client, int phase) {
       break;
 
     case P_DONE:
+      close(process.input_fd);
       manager->createEvent(client->getFd(), EVFILT_READ, EV_ENABLE, 0, 0,
                            client);
       process.phase = P_DONE;
@@ -280,7 +280,7 @@ void CgiHandler::setPhase(Client* client, int phase) {
       manager->createEvent(process.pid, EVFILT_PROC, EV_DELETE, 0, 0, client);
       manager->createEvent(process.input_fd, EVFILT_READ, EV_DELETE, 0, 0,
                            client);
-      client->setIsCgiWorking(false);
+      process.phase = P_UNSTARTED;
       cleanUp(client);
   }
 }

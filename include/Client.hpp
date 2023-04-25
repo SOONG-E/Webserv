@@ -47,27 +47,27 @@ class Client {
 
   void setStatus(int status);
   void setProcess(Process& cgi_process);
-  void setIsCgiWorking(bool set);
-  void setIsCgiDone(bool set);
 
   void processEvent(const int event_type);
 
   /* request */
   void processRequest(void);
   std::string readData(void);
-
-  /* handler */
   void lookUpHttpServer(void);
   void lookUpLocation(void);
   void setFullUri(void);
+
+  /* handler */
   void passErrorToHandler(int status);
   void passRequestToHandler(void);
-  void setToSend(bool set);
+  void passToCgi(const int event_type);
 
   /* response */
   void writeData(void);
 
+  void setToSend(bool set);
   bool isErrorCode(void);
+  bool isCgiStarted(void);
   bool isCgiDone(void);
   void clear(void);
 
@@ -85,7 +85,6 @@ class Client {
   int status_;
 
   bool is_response_ready_;
-  bool is_cgi_working_;
 };
 
 #endif

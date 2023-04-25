@@ -8,7 +8,7 @@
 #include "Client.hpp"
 
 enum PipeFD { READ = 0, WRITE = 1 };
-enum Phase { P_WRITE, P_WAIT, P_READ, P_DONE, P_RESET };
+enum Phase { P_UNSTARTED = 0, P_WRITE, P_WAIT, P_READ, P_DONE, P_RESET };
 
 class CgiHandler {
  public:

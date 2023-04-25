@@ -4,10 +4,7 @@
 #include <string>
 
 struct Process {
-  Process() : isStarted(false), isFinished(false){};
-
-  bool isStarted;
-  bool isFinished;
+  Process() : phase(0){};
 
   int phase;
 

@@ -12,8 +12,7 @@ Client::Client(const int fd, const TcpServer* tcp_server,
       address_(address),
       http_server_(NULL),
       status_(C200),
-      is_response_ready_(false),
-      is_cgi_working_(false) {}
+      is_response_ready_(false) {}
 
 Client::Client(const Client& origin)
     : manager_(origin.manager_),
@@ -27,8 +26,7 @@ Client::Client(const Client& origin)
       fullUri_(origin.fullUri_),
       response_(origin.response_),
       status_(origin.status_),
-      is_response_ready_(origin.is_response_ready_),
-      is_cgi_working_(origin.is_cgi_working_) {}
+      is_response_ready_(origin.is_response_ready_) {}
 
 Client Client::operator=(const Client& origin) { return Client(origin); }
 
@@ -61,8 +59,6 @@ const std::string& Client::getFullUri(void) const { return fullUri_; }
 
 void Client::setStatus(int status) { status_ = status; }
 void Client::setProcess(Process& cgi_process) { cgi_process_ = cgi_process; }
-void Client::setIsCgiWorking(bool set) { is_cgi_working_ = set; }
-void Client::setIsCgiDone(bool set) { cgi_process_.isFinished = set; }
 
 /*======================//
  process
@@ -70,16 +66,8 @@ void Client::setIsCgiDone(bool set) { cgi_process_.isFinished = set; }
 
 /* recognize a type of event */
 void Client::processEvent(const int event_type) {
-  if (is_cgi_working_ == true) {
-    try {
-      CgiHandler::handle(this, event_type);
-      if (isCgiDone() == true) {
-        passRequestToHandler();
-      }
-    } catch (const ResponseException& e) {
-      CgiHandler::setPhase(this, P_RESET);
-      passErrorToHandler(e.status);
-    }
+  if (isCgiStarted() == true) {
+    passToCgi(event_type);
     return;
   }
   switch (event_type) {
@@ -174,13 +162,11 @@ void Client::passRequestToHandler(void) {
   struct Response response_from_upsteam;
   try {
     if (location_.isCgi() == true && isErrorCode() == false) {
-      if (cgi_process_.isStarted == false && is_cgi_working_ == false) {
+      if (isCgiStarted() == false) {
         CgiHandler::execute(this);
-        is_cgi_working_ = true;
         return;
       }
       response_from_upsteam = CgiHandler::getResponse(this);
-      is_cgi_working_ = false;
     } else if (location_.getAutoindex() == true && isErrorCode() == false) {
       response_from_upsteam = AutoIndexHandler::handle(this);
     } else {
@@ -194,16 +180,16 @@ void Client::passRequestToHandler(void) {
   setToSend(true);
 }
 
-/* turn on/off event, is_response_ready */
-void Client::setToSend(bool set) {
-  is_response_ready_ = set;
-  if (set == true) {
-    manager_->createEvent(fd_, EVFILT_READ, EV_DISABLE, 0, 0, this);
-    manager_->createEvent(fd_, EVFILT_WRITE, EV_ENABLE, 0, 0, this);
-    return;
+void Client::passToCgi(const int event_type) {
+  try {
+    CgiHandler::handle(this, event_type);
+    if (isCgiDone() == true) {
+      passRequestToHandler();
+    }
+  } catch (const ResponseException& e) {
+    CgiHandler::setPhase(this, P_RESET);
+    passErrorToHandler(e.status);
   }
-  manager_->createEvent(fd_, EVFILT_READ, EV_ENABLE, 0, 0, this);
-  manager_->createEvent(fd_, EVFILT_WRITE, EV_DISABLE, 0, 0, this);
 }
 
 /* send the response to client */
@@ -228,6 +214,18 @@ void Client::writeData(void) {
  utils
 ========================*/
 
+/* turn on/off event, is_response_ready */
+void Client::setToSend(bool set) {
+  is_response_ready_ = set;
+  if (set == true) {
+    manager_->createEvent(fd_, EVFILT_READ, EV_DISABLE, 0, 0, this);
+    manager_->createEvent(fd_, EVFILT_WRITE, EV_ENABLE, 0, 0, this);
+    return;
+  }
+  manager_->createEvent(fd_, EVFILT_READ, EV_ENABLE, 0, 0, this);
+  manager_->createEvent(fd_, EVFILT_WRITE, EV_DISABLE, 0, 0, this);
+}
+
 bool Client::isErrorCode(void) {
   if (status_ <= C204) {
     return false;
@@ -235,12 +233,14 @@ bool Client::isErrorCode(void) {
   return true;
 }
 
-bool Client::isCgiDone(void) { return (cgi_process_.isFinished == true); }
+bool Client::isCgiStarted(void) { return (cgi_process_.phase != P_UNSTARTED); }
+
+bool Client::isCgiDone(void) { return (cgi_process_.phase == P_DONE); }
 
 void Client::clear() {
   request_.clear();
   fullUri_.clear();
   status_ = C200;
   is_response_ready_ = false;
-  is_cgi_working_ = false;
+  cgi_process_.phase = P_UNSTARTED;
 }
