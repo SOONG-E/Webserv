@@ -1,9 +1,19 @@
 #include "HttpServer.hpp"
 
-HttpServer::HttpServer(const ServerBlock& server_block)
-    : locations_(server_block.locations),
+HttpServer::HttpServer(const int id, const ServerBlock& server_block)
+    : server_id_(id),
+      locations_(server_block.locations),
       error_pages_(server_block.error_pages) {}
 
+HttpServer::HttpServer(HttpServer& origin)
+    : server_id_(origin.server_id_),
+      locations_(origin.locations_),
+      error_pages_(origin.error_pages_),
+      session_(origin.session_) {}
+
+HttpServer HttpServer::operator=(HttpServer& origin) {
+  return HttpServer(origin);
+}
 HttpServer::~HttpServer() {}
 
 const Location& HttpServer::findLocation(const std::string& request_uri) const {
