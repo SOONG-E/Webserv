@@ -1,6 +1,7 @@
 #include "ServerManager.hpp"
 
-ServerManager::ServerManager(const Config &config) : kq_(kqueue()) {
+ServerManager::ServerManager(const Config &config)
+    : kq_(kqueue()), number_of_servers_(0) {
   registerServer(config);
   if (kq_ == -1) {
     throw std::runtime_error(strerror(errno));
@@ -53,7 +54,7 @@ TcpServer *ServerManager::createTcpServer(const std::string &key) {
 
 /* create new HttpServer and append it to http_servers list */
 HttpServer *ServerManager::createHttpServer(const ServerBlock &server_block) {
-  HttpServer *http_server = new HttpServer(server_block);
+  HttpServer *http_server = new HttpServer(number_of_servers_++, server_block);
   http_servers_.push_back(http_server);
 
   return http_server;

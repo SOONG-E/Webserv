@@ -56,6 +56,7 @@ class ServerManager {
   const int kq_;
   TcpServerType tcp_servers_;
   HttpServerType http_servers_;
+  std::size_t number_of_servers_;
   ClientType clients_;
   std::set<int> listen_sockets_;
 
