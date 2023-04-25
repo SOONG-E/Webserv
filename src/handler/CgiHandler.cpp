@@ -144,6 +144,10 @@ struct Response CgiHandler::getResponse(Client* client) {
   const std::string& message = process.message_received;
   std::size_t boundary = message.find(DOUBLE_LF);
 
+  if (boundary == NPOS) {
+    response.headers = generateHeader(message);
+    return response;
+  }
   response.headers = generateHeader(message.substr(0, boundary));
   response.body = message.substr(boundary + DOUBLE_LF.size());
 
@@ -249,8 +253,6 @@ void CgiHandler::setPhase(Client* client, int phase) {
       break;
 
     case P_WAIT:
-      manager->createEvent(process.output_fd, EVFILT_WRITE, EV_DELETE, 0, 0,
-                           client);
       manager->createEvent(process.pid, EVFILT_PROC, EV_ADD | EV_ENABLE,
                            NOTE_EXIT, 0, client);
       process.phase = P_WAIT;
@@ -265,8 +267,6 @@ void CgiHandler::setPhase(Client* client, int phase) {
       break;
 
     case P_DONE:
-      manager->createEvent(process.input_fd, EVFILT_READ, EV_DELETE, 0, 0,
-                           client);
       manager->createEvent(client->getFd(), EVFILT_READ, EV_ENABLE, 0, 0,
                            client);
       process.phase = P_DONE;
