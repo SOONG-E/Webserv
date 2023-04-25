@@ -10,20 +10,24 @@ class Client;
 
 class Session {
  public:
-  Session(const std::string& id, Client* client);
-  Session(const Session& src);
+  typedef std::map<std::string, std::string> ValueType;
+
+  Session(const std::string& id);
+  Session(const std::string& id, ValueType values);
+  Session(const Session& origin);
+  Session operator=(const Session& origin);
   ~Session();
+
+  void setTimeout(std::time_t time = std::time(NULL));
 
   const std::string& getID() const;
   std::time_t getTimeout() const;
-  void setTimeout(std::time_t time = std::time(NULL));
-  Client* getClient();
-  void setClient(Client* client);
+  const std::string& getValue(std::string key) const;
 
  private:
   const std::string id_;
+  ValueType values_;
   std::time_t timeout_;
-  Client* client_;
 };
 
 #endif
