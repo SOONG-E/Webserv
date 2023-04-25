@@ -227,7 +227,7 @@ void Client::setToSend(bool set) {
 }
 
 bool Client::isErrorCode(void) {
-  if (status_ <= C204) {
+  if (status_ < C400) {
     return false;
   }
   return true;
