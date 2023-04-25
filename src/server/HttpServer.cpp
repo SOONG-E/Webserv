@@ -5,13 +5,13 @@ HttpServer::HttpServer(const int id, const ServerBlock& server_block)
       locations_(server_block.locations),
       error_pages_(server_block.error_pages) {}
 
-HttpServer::HttpServer(HttpServer& origin)
+HttpServer::HttpServer(const HttpServer& origin)
     : server_id_(origin.server_id_),
       locations_(origin.locations_),
       error_pages_(origin.error_pages_),
-      session_(origin.session_) {}
+      sessions_(origin.sessions_) {}
 
-HttpServer HttpServer::operator=(HttpServer& origin) {
+HttpServer HttpServer::operator=(const HttpServer& origin) {
   return HttpServer(origin);
 }
 HttpServer::~HttpServer() {}
@@ -56,4 +56,13 @@ const std::string& HttpServer::getErrorPage(const std::string& code) const {
     return EMPTY_STRING;
   }
   return error_pages_.at(code);
+}
+
+Session* HttpServer::getSession(const std::string& id) const {
+  SessionType::const_iterator session = sessions_.find(id);
+
+  if (session == sessions_.end()) {
+    return NULL;
+  }
+  return session->second;
 }
