@@ -97,6 +97,8 @@ void Client::processRequest(void) {
       lookUpLocation();
       setFullUri();
       passRequestToHandler();
+      setSession();
+      validAuth();
     }
   } catch (const ResponseException& e) {
     passErrorToHandler(e.status);
@@ -150,6 +152,23 @@ void Client::setFullUri(void) {
   }
   std::string uri = request_.getUri();
   fullUri_ = uri.replace(0, location_.getUri().size(), root);
+}
+
+void Client::setSession(void) {
+  if (request_.hasCookie() == false) {
+    return;
+  }
+  const std::string session_id = request_.getCookie(SESSION_ID_FIELD);
+  session_ = http_server_->getSession(session_id);
+}
+
+void Client::validAuth(void) {
+  if (location_.getAuth() == false) {
+    return;
+  }
+  if (session_ == NULL) {
+    throw ResponseException(C403);
+  }
 }
 
 /* set status code and pass it to the handler */

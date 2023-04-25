@@ -56,6 +56,8 @@ class Client {
   void lookUpHttpServer(void);
   void lookUpLocation(void);
   void setFullUri(void);
+  void setSession(void);
+  void validAuth(void);
 
   /* handler */
   void passErrorToHandler(int status);
