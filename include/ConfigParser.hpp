@@ -26,6 +26,7 @@ class ConfigParser {
   void parseReturn(void);
   void parseRoot(void);
   void parseAutoindex(void);
+  void parseAuth(void);
   void parseIndex(void);
   void parseCgiParams(void);
 

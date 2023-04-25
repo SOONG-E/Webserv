@@ -12,6 +12,7 @@ const std::string Location::DEFAULTS[] = {
     "100m",        // CLIENT_MAX_BODY_SIZE
     "html",        // ROOT
     "off",         // AUTOINDEX
+    "off",         // AUTH
     "index.html",  // INDEX
 };
 
@@ -20,6 +21,7 @@ Location::Location() : root_(DEFAULTS[ROOT]) {
   addAllowedMethod(METHODS[GET]);
   addAllowedMethod(METHODS[POST]);
   setAutoindex(DEFAULTS[AUTOINDEX]);
+  setAuth(DEFAULTS[AUTH]);
   addIndex(DEFAULTS[INDEX]);
 }
 
@@ -30,6 +32,7 @@ Location::Location(const Location& origin)
       return_url_(origin.return_url_),
       root_(origin.root_),
       autoindex_(origin.autoindex_),
+      auth_(origin.auth_),
       index_(origin.index_),
       cgi_param_(origin.cgi_param_),
       is_cgi_(origin.is_cgi_) {}
@@ -42,6 +45,7 @@ Location& Location::operator=(const Location& origin) {
     return_url_ = origin.return_url_;
     root_ = origin.root_;
     autoindex_ = origin.autoindex_;
+    auth_ = origin.auth_;
     index_ = origin.index_;
     cgi_param_ = origin.cgi_param_;
     is_cgi_ = origin.is_cgi_;
@@ -77,6 +81,8 @@ const std::string& Location::getReturnUrl(void) const { return return_url_; }
 const std::string& Location::getRoot(void) const { return root_; }
 
 bool Location::getAutoindex(void) const { return autoindex_; }
+
+bool Location::getAuth(void) const { return auth_; }
 
 std::vector<std::string>& Location::getIndex(void) { return index_; }
 
@@ -122,6 +128,13 @@ void Location::setAutoindex(const std::string& raw) {
     Error::log(Error::INFO[ETOKEN], raw, EXIT_FAILURE);
   }
   autoindex_ = (raw == "on");
+}
+
+void Location::setAuth(const std::string& raw) {
+  if (raw != "on" && raw != "off") {
+    Error::log(Error::INFO[ETOKEN], raw, EXIT_FAILURE);
+  }
+  auth_ = (raw == "on");
 }
 
 void Location::addIndex(const std::string& index) { index_.push_back(index); }

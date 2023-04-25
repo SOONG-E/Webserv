@@ -131,6 +131,8 @@ void ConfigParser::parseLocation(void) {
       parseRoot();
     } else if (token == "autoindex") {
       parseAutoindex();
+    } else if (token == "auth") {
+      parseAuth();
     } else if (token == "index") {
       parseIndex();
     } else if (token.compare(0, 4, "CGI_") == 0) {
@@ -165,6 +167,12 @@ void ConfigParser::parseRoot(void) {
 
 void ConfigParser::parseAutoindex(void) {
   expect("autoindex");
+  location_block_.setAutoindex(expect());
+  expect(";");
+}
+
+void ConfigParser::parseAuth(void) {
+  expect("auth");
   location_block_.setAutoindex(expect());
   expect(";");
 }

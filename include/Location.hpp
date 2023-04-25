@@ -11,6 +11,7 @@ class Location {
     CLIENT_MAX_BODY_SIZE,
     ROOT,
     AUTOINDEX,
+    AUTH,
     INDEX,
   };
 
@@ -31,6 +32,7 @@ class Location {
   const std::string& getReturnUrl(void) const;
   const std::string& getRoot(void) const;
   bool getAutoindex(void) const;
+  bool getAuth(void) const;
   std::vector<std::string>& getIndex(void);
   const std::vector<std::string>& getIndex(void) const;
   std::string getCgiParam(const std::string& key) const;
@@ -41,6 +43,7 @@ class Location {
   void setReturnUrl(const std::string& return_url);
   void setRoot(const std::string& root);
   void setAutoindex(const std::string& raw);
+  void setAuth(const std::string& raw);
   void addIndex(const std::string& index);
   void addCgiParam(const std::string& key, const std::string& value);
 
@@ -55,6 +58,7 @@ class Location {
   std::string return_url_;
   std::string root_;
   bool autoindex_;
+  bool auth_;
   std::vector<std::string> index_;
   std::map<std::string, std::string> cgi_param_;
   bool is_cgi_;
