@@ -173,7 +173,7 @@ void ConfigParser::parseAutoindex(void) {
 
 void ConfigParser::parseAuth(void) {
   expect("auth");
-  location_block_.setAutoindex(expect());
+  location_block_.setAuth(expect());
   expect(";");
 }
 
