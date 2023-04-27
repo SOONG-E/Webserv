@@ -151,6 +151,10 @@ void Client::setFullUri(void) {
   if (*root.rbegin() != '/') {
     root += "/";
   }
+  if (*location_.getUri().rbegin() != '/') {
+    fullUri_ = root + request_.getUri();
+    return;
+  }
   std::string uri = request_.getUri();
   fullUri_ = uri.replace(0, location_.getUri().size(), root);
 }
