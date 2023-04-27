@@ -23,6 +23,7 @@ class HttpServer {
   const Location &findLocation(const std::string &request_uri) const;
   std::size_t find(const std::string &uri) const;
   const Location &redirect(const Location &location) const;
+  const int getServerKey(void) const;
   const std::string &getErrorPage(const std::string &code) const;
   Session *getSession(const std::string &id) const;
 
