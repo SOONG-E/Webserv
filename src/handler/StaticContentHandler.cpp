@@ -4,7 +4,6 @@ struct Response StaticContentHandler::handle(Client *client) {
   struct Response response;
 
   response.body = generateBody(client);
-  response.has_body = true;
 
   response.headers["content-length"] = toString(response.body.size());
 
