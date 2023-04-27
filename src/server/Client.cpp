@@ -18,6 +18,7 @@ Client::Client(const int fd, const TcpServer* tcp_server,
 Client::Client(const Client& origin)
     : manager_(origin.manager_),
       fd_(origin.fd_),
+      session_(origin.session_),
       tcp_server_(origin.tcp_server_),
       address_(origin.address_),
       http_server_(origin.http_server_),
