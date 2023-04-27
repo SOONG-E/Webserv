@@ -30,6 +30,8 @@ class Client {
 
   ServerManager* getServerManager(void);
   int getFd(void) const;
+  Session* getSession(void);
+  const Session* getSession(void) const;
   const TcpServer* getTcpServer(void) const;
   HttpServer* getHttpServer(void) const;
   const SocketAddress getAddr(void) const;

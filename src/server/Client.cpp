@@ -39,6 +39,8 @@ Client::~Client() {}
 
 ServerManager* Client::getServerManager(void) { return manager_; }
 int Client::getFd() const { return fd_; }
+Session* Client::getSession(void) { return session_; }
+const Session* Client::getSession(void) const { return session_; }
 const TcpServer* Client::getTcpServer(void) const { return tcp_server_; }
 HttpServer* Client::getHttpServer(void) const { return http_server_; }
 const SocketAddress Client::getAddr(void) const { return address_; }
