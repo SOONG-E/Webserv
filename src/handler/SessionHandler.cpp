@@ -15,7 +15,7 @@ struct Response SessionHandler::handle(Client *client) {
   std::string id = getNewSessionId(client->getHttpServer());
   createSession(client, id);
 
-  response.headers["Set-Cookie"] = id;
+  response.headers["Set-Cookie"] = SESSION_ID_FIELD + "=" + id;
   return response;
 }
 

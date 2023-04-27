@@ -97,9 +97,9 @@ void Client::processRequest(void) {
       lookUpHttpServer();
       lookUpLocation();
       setFullUri();
-      passRequestToHandler();
       setSession();
       validAuth();
+      passRequestToHandler();
     }
   } catch (const ResponseException& e) {
     passErrorToHandler(e.status);
