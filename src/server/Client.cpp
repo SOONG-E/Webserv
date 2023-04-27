@@ -59,6 +59,7 @@ const std::string& Client::getFullUri(void) const { return fullUri_; }
 ========================*/
 
 void Client::setStatus(int status) { status_ = status; }
+void Client::setSession(Session* session) { session_ = session; }
 void Client::setProcess(Process& cgi_process) { cgi_process_ = cgi_process; }
 
 /*======================//
@@ -187,6 +188,8 @@ void Client::passRequestToHandler(void) {
         return;
       }
       response_from_upsteam = CgiHandler::getResponse(this);
+    } else if (SessionHandler::recognizeRequest(request_) == true) {
+      response_from_upsteam = SessionHandler::handle(this);
     } else if (location_.getAutoindex() == true && isErrorCode() == false) {
       response_from_upsteam = AutoIndexHandler::handle(this);
     } else {

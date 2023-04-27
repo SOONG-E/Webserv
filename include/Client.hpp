@@ -46,6 +46,7 @@ class Client {
   const std::string& getFullUri(void) const;
 
   void setStatus(int status);
+  void setSession(Session* session);
   void setProcess(Process& cgi_process);
 
   void processEvent(const int event_type);

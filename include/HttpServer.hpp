@@ -26,7 +26,8 @@ class HttpServer {
   const std::string &getErrorPage(const std::string &code) const;
   Session *getSession(const std::string &id) const;
 
-  std::string generateSession(std::map<std::string, std::string> values);
+  bool isExistSessionId(std::string &id);
+  void addSession(std::string &id, Session *session);
 
  private:
   const int server_id_;

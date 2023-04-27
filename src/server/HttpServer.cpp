@@ -66,3 +66,14 @@ Session* HttpServer::getSession(const std::string& id) const {
   }
   return session->second;
 }
+
+bool HttpServer::isExistSessionId(std::string& id) {
+  if (sessions_.find(id) == sessions_.end()) {
+    return false;
+  }
+  return true;
+}
+
+void HttpServer::addSession(std::string& id, Session* session) {
+  sessions_[id] = session;
+}
