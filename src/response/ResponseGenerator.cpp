@@ -40,7 +40,6 @@ void ResponseGenerator::generateHeader(std::string &response, Client &client,
                                        struct Response &response_dummy) {
   generateGeneralHeader(response, client);
   generateEntityHeader(response, client, response_dummy);
-  // response += generateCookie(request) + CRLF;
   const std::map<std::string, std::string> &headers = response_dummy.headers;
   for (std::map<std::string, std::string>::const_iterator it = headers.begin();
        it != headers.end(); it++) {
@@ -70,15 +69,6 @@ void ResponseGenerator::generateEntityHeader(std::string &response,
 /*============================
   create header field
 ============================*/
-
-std::string ResponseGenerator::generateCookie(HttpRequest &request) {
-  (void)request;
-  return "";  // temp
-  // if (session_ && request.getCookie("Session-ID") != session_->getID()) {
-  //   header += "Set-Cookie: Session-ID=" + session_->getID() +
-  //             "; Max-Age=" + COOKIE_MAX_AGE + "; HttpOnly;" + CRLF;
-  // }
-}
 
 std::string ResponseGenerator::getConnectionHeader(Client &client) {
   const std::string header_name = "Connection";

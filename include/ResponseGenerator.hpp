@@ -23,7 +23,6 @@ class ResponseGenerator {
   static void generateGeneralHeader(std::string &response, Client &client);
   static void generateEntityHeader(std::string &response, Client &client,
                                    struct Response &response_dummy);
-  static std::string generateCookie(HttpRequest &request);
   static std::string getConnectionHeader(Client &client);
   static std::string getDateHeader(void);
 };
