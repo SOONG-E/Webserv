@@ -200,10 +200,11 @@ char** CgiHandler::generateEnvp(const Client* client) {
   env_map["SERVER_PORT"] = server->getPort();
   env_map["SERVER_SOFTWARE"] = "webserv/1.1";
 
-  env_map["HTTP_X_SERVER_KEY"] = client->getHttpServer()->getServerKey();
+  env_map["HTTP_X_SERVER_KEY"] =
+      toString(client->getHttpServer()->getServerKey());
   const Session* session = client->getSession();
   if (session) {
-    env_map["HTTP_X_SESSION_ID"] = toString(session->getID());
+    env_map["HTTP_X_SESSION_ID"] = session->getID();
   }
 
   char** envp = new char*[env_map.size() + 1];
