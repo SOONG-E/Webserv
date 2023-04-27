@@ -51,10 +51,6 @@ try:
 	validateRequest(form)
 	uploaded_file = form['upload_file']
 
-except Exception as e:
-	print("Status:", "400", "Bad Request")
-
-try:
 	path = "./upload_file/" + environ["HTTP_X_SERVER_KEY"] + "/" + environ["HTTP_X_SESSION_ID"] + "/"
 	makedirs(path, exist_ok=True)
 
