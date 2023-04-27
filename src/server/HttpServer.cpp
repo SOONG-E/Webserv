@@ -51,7 +51,7 @@ const Location& HttpServer::redirect(const Location& location) const {
   return findLocation(location.getReturnUrl());
 }
 
-const int HttpServer::getServerKey(void) const { return server_id_; }
+int HttpServer::getServerKey(void) const { return server_id_; }
 
 const std::string& HttpServer::getErrorPage(const std::string& code) const {
   if (error_pages_.find(code) == error_pages_.end()) {
