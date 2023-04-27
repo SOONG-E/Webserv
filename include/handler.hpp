@@ -4,6 +4,7 @@
 #include "AutoIndexHandler.hpp"
 #include "CgiHandler.hpp"
 #include "Process.hpp"
+#include "SessionHandler.hpp"
 #include "StaticContentHandler.hpp"
 
 #endif
