@@ -24,7 +24,7 @@ void ResponseGenerator::generateStatusLine(std::string &response,
       response_dummy.headers.find("Status");
   if (status_header != response_dummy.headers.end()) {
     response_dummy.headers.erase("Status");
-    response += status_header->second;
+    response += status_header->second + CRLF;
     return;
   }
 
