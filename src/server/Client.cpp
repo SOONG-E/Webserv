@@ -129,15 +129,8 @@ std::string Client::readData(void) {
 /* lookup associated virtual server
 if there isn't a matched server then default server is setted */
 void Client::lookUpHttpServer(void) {
-  const TcpServer::VirtualServerType virtual_servers =
-      tcp_server_->getVirtualServers();
-  std::map<std::string, const HttpServer*>::const_iterator server =
-      virtual_servers.find(request_.getHost());
-  if (server == virtual_servers.end()) {
-    http_server_ = tcp_server_->getDefaultServer();
-    return;
-  }
-  http_server_ = const_cast<HttpServer*>(server->second);
+  const std::string& host = request_.getHost();
+  http_server_ = tcp_server_->getVirtualServer(host);
 }
 
 /* lookup associated location block */
