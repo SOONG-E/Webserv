@@ -13,7 +13,9 @@ Client::Client(const int fd, const TcpServer* tcp_server,
       address_(address),
       http_server_(NULL),
       status_(C200),
-      is_response_ready_(false) {}
+      is_response_ready_(false) {
+  setClientTimeout();
+}
 
 Client::Client(const Client& origin)
     : manager_(origin.manager_),
@@ -62,6 +64,43 @@ void Client::setStatus(int status) { status_ = status; }
 void Client::setSession(Session* session) { session_ = session; }
 void Client::setProcess(Process& cgi_process) { cgi_process_ = cgi_process; }
 
+void Client::setClientTimeout(std::time_t time) {
+  timeout_ = time + KEEPALIVE_TIMEOUT;
+  setTimer();
+}
+
+void Client::setSessionTimeout() {
+  if (session_) {
+    session_->setTimeout();
+  }
+  setTimer();
+}
+
+void Client::setAllTimeout(std::time_t time) {
+  timeout_ = time + KEEPALIVE_TIMEOUT;
+  if (session_) {
+    session_->setTimeout();
+  }
+  setTimer();
+}
+
+void Client::setTimer(std::time_t time) {
+  time_t timeout = timeout_ - time;
+  if (session_) {
+    timeout = std::min(timeout_, session_->getTimeout()) - time;
+  }
+  manager_->createEvent(fd_, EVFILT_TIMER, EV_DELETE, 0, 0, this);
+  manager_->createEvent(fd_, EVFILT_TIMER, EV_ADD | EV_ONESHOT, NOTE_SECONDS,
+                        timeout, this);
+}
+
+void Client::handleTimeout() {
+  if (session_ && session_->getTimeout() < std::time(NULL)) {
+    http_server_->destroySession(session_->getID());
+  }
+  throw ConnectionClosedException(fd_);
+}
+
 /*======================//
  process
 ========================*/
@@ -81,6 +120,9 @@ void Client::processEvent(const int event_type) {
       writeData();
       break;
 
+    case EVFILT_TIMER:
+      handleTimeout();
+
     default:
       throw std::runtime_error(strerror(errno));  // 수정!
   }
@@ -89,6 +131,7 @@ void Client::processEvent(const int event_type) {
 /* parse request and pass it to handler */
 void Client::processRequest(void) {
   try {
+    setClientTimeout();
     std::string data = readData();
     request_.tailRequest(data);
     request_.parse();
@@ -214,6 +257,8 @@ void Client::passToCgi(const int event_type) {
 
 /* send the response to client */
 void Client::writeData(void) {
+  setAllTimeout();
+
   std::size_t write_bytes;
   if (is_response_ready_ == false) {
     return;
