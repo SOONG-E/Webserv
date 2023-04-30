@@ -66,6 +66,8 @@ void CgiHandler::execute(Client* client) {
   client->setProcess(process);
 
   setPhase(client, P_WRITE);
+  client->setAllTimeout();
+  setTimer(client);
 }
 
 /*======================================//
@@ -83,6 +85,8 @@ void CgiHandler::handle(Client* client, int event_type) {
     case EVFILT_PROC:
       setPhase(client, P_READ);
       break;
+    case EVFILT_TIMER:
+      throw ResponseException(C500);
   }
 }
 /*=========================//
@@ -168,6 +172,19 @@ std::map<std::string, std::string> CgiHandler::generateHeader(
 }
 
 /*=========================//
+ set Timer
+===========================*/
+
+void CgiHandler::setTimer(Client* client) {
+  if (KEEPALIVE_TIMEOUT < CGI_TIMEOUT || SESSION_TIMEOUT < CGI_TIMEOUT) {
+    return;
+  }
+  client->getServerManager()->createEvent(client->getFd(), EVFILT_TIMER,
+                                          EV_ADD | EV_ONESHOT, NOTE_SECONDS,
+                                          CGI_TIMEOUT, client);
+}
+
+/*=========================//
  utils
 ===========================*/
 
@@ -200,10 +217,11 @@ char** CgiHandler::generateEnvp(const Client* client) {
   env_map["SERVER_PORT"] = server->getPort();
   env_map["SERVER_SOFTWARE"] = "webserv/1.1";
 
-  //   Session* session = response_obj.getSession();
-  //   if (session) {
-  //     env_map["HTTP_X_SESSION_ID"] = session->getID();
-  //   }
+
+  const Session* session = client->getSession();
+  if (session) {
+    env_map["HTTP_X_SESSION_ID"] = session->getID();
+  }
 
   char** envp = new char*[env_map.size() + 1];
 
@@ -267,6 +285,10 @@ void CgiHandler::setPhase(Client* client, int phase) {
 
     case P_DONE:
       close(process.input_fd);
+      if (CGI_TIMEOUT < KEEPALIVE_TIMEOUT && CGI_TIMEOUT < SESSION_TIMEOUT) {
+        manager->createEvent(client->getFd(), EVFILT_TIMER, EV_DELETE, 0, 0,
+                             client);
+      }
       manager->createEvent(client->getFd(), EVFILT_READ, EV_ENABLE, 0, 0,
                            client);
       process.phase = P_DONE;
@@ -279,6 +301,8 @@ void CgiHandler::setPhase(Client* client, int phase) {
                            client);
       manager->createEvent(process.pid, EVFILT_PROC, EV_DELETE, 0, 0, client);
       manager->createEvent(process.input_fd, EVFILT_READ, EV_DELETE, 0, 0,
+                           client);
+      manager->createEvent(client->getFd(), EVFILT_TIMER, EV_DELETE, 0, 0,
                            client);
       process.phase = P_UNSTARTED;
       cleanUp(client);

@@ -15,9 +15,9 @@ const int CAPABLE_EVENT_SIZE = 8;
 const std::size_t BUFFER_SIZE = 65536;
 
 /* setting for max time */
-const std::time_t KEEPALIVE_TIMEOUT = 30;
-const std::time_t SESSION_TIMEOUT = 1800;
-const std::time_t CGI_TIMEOUT = 30;
+const std::time_t KEEPALIVE_TIMEOUT = 500;
+const std::time_t SESSION_TIMEOUT = 3600;
+const std::time_t CGI_TIMEOUT = 3;
 const std::string COOKIE_MAX_AGE = "3600";
 
 #endif
