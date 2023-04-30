@@ -13,9 +13,7 @@ Client::Client(const int fd, const TcpServer* tcp_server,
       address_(address),
       http_server_(NULL),
       status_(C200),
-      is_response_ready_(false) {
-  setClientTimeout();
-}
+      is_response_ready_(false) {}
 
 Client::Client(const Client& origin)
     : manager_(origin.manager_),
@@ -97,6 +95,9 @@ void Client::setTimer(std::time_t time) {
 void Client::handleTimeout() {
   if (session_ && session_->getTimeout() < std::time(NULL)) {
     http_server_->destroySession(session_->getID());
+    delete session_;
+    session_ = NULL;
+    std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!";
   }
   throw ConnectionClosedException(fd_);
 }
