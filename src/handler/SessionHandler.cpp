@@ -49,6 +49,7 @@ void SessionHandler::createSession(Client *client, std::string &id) {
   client->getHttpServer()->addSession(id, session);
 
   client->setSession(session);
+  client->setSessionTimeout();
 }
 
 Session::ValueType SessionHandler::parseData(const std::string &data) {

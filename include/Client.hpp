@@ -3,6 +3,7 @@
 
 #include <sys/event.h>
 
+#include <algorithm>
 #include <ctime>
 #include <exception>
 #include <string>
@@ -51,6 +52,12 @@ class Client {
   void setSession(Session* session);
   void setProcess(Process& cgi_process);
 
+  void setClientTimeout(std::time_t time = std::time(NULL));
+  void setSessionTimeout(void);
+  void setAllTimeout(std::time_t time = std::time(NULL));
+  void setTimer(std::time_t time = std::time(NULL));
+  void handleTimeout(void);
+
   void processEvent(const int event_type);
 
   /* request */
@@ -89,6 +96,7 @@ class Client {
   std::string fullUri_;
   std::string response_;
   int status_;
+  std::time_t timeout_;
 
   bool is_response_ready_;
 };

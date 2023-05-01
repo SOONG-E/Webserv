@@ -29,6 +29,7 @@ class HttpServer {
 
   bool isExistSessionId(std::string &id);
   void addSession(std::string &id, Session *session);
+  void destroySession(const std::string &id);
 
  private:
   const int server_id_;

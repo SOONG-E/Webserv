@@ -79,3 +79,5 @@ bool HttpServer::isExistSessionId(std::string& id) {
 void HttpServer::addSession(std::string& id, Session* session) {
   sessions_[id] = session;
 }
+
+void HttpServer::destroySession(const std::string& id) { sessions_.erase(id); }

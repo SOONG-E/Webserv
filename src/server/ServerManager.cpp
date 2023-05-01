@@ -133,7 +133,7 @@ void ServerManager::runServer(void) {
 
   while (true) {
     events = kevent(kq_, &change_event_list[0], change_event_list.size(),
-                    event_list, CAPABLE_EVENT_SIZE, 0);  // timeout 추가할 지
+                    event_list, CAPABLE_EVENT_SIZE, 0);
     if (events == -1) {
       throw std::runtime_error(strerror(errno));
     }
@@ -189,6 +189,8 @@ void ServerManager::createClient(const int client_fd,
                                  const SocketAddress socket_address) {
   Client *new_client = new Client(client_fd, tcp_server, socket_address, this);
   createEvent(client_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new_client);
+  createEvent(client_fd, EVFILT_TIMER, EV_ADD | EV_ONESHOT, NOTE_SECONDS,
+              KEEPALIVE_TIMEOUT, new_client);
   clients_[client_fd] = new_client;
 }
 

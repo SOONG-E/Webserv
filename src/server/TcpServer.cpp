@@ -30,6 +30,14 @@ void TcpServer::setDefaultServer(HttpServer *default_server) {
 std::string TcpServer::getIp(void) const { return ip_; }
 std::string TcpServer::getPort(void) const { return port_; }
 HttpServer *TcpServer::getDefaultServer(void) const { return default_server_; }
+HttpServer *TcpServer::getVirtualServer(const std::string &host) const {
+  VirtualServerType::const_iterator server = virtual_servers_.find(host);
+  if (server == virtual_servers_.end()) {
+    return default_server_;
+  }
+  return (server->second);
+}
+
 TcpServer::VirtualServerType TcpServer::getVirtualServers(void) const {
   return virtual_servers_;
 }

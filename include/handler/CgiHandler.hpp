@@ -28,6 +28,8 @@ class CgiHandler {
   static std::map<std::string, std::string> generateHeader(
       const std::string &headers);
 
+  static void setTimer(Client *client);
+
   static char **generateEnvp(const Client *client);
 
   static void deleteEnvp(char **envp);
